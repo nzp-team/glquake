@@ -830,6 +830,10 @@ void CL_ParseServerMessage (void)
 		case svc_centerprint:
 			SCR_CenterPrint (MSG_ReadString ());
 			break;
+
+		case svc_useprint:
+			SCR_UsePrint (MSG_ReadByte (),MSG_ReadShort (),MSG_ReadByte ());
+			break;
 			
 		case svc_stufftext:
 			Cbuf_AddText (MSG_ReadString ());
