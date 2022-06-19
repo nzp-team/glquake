@@ -406,7 +406,7 @@ void Mod_LoadTextures (lump_t *l)
 					tx->gl_texturenum = loadtextureimage (texname, 0, 0, false, true);			//Diabolickal TGA textures
 					if (tx->gl_texturenum == 0)// did not find a matching TGA...
 					{
-						//data = WAD3_LoadTexture(mt);
+						data = WAD3_LoadTexture(mt);
 						tx->gl_texturenum = GL_LoadTexture32 (mt->name, tx->width, tx->height, (byte *)data, true, false);
 					}
 					texture_mode = GL_LINEAR;
