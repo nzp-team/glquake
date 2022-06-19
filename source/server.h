@@ -246,6 +246,7 @@ qboolean SV_movestep (edict_t *ent, vec3_t move, qboolean relink);
 void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg);
 
 void SV_MoveToGoal (void);
+void SV_MoveToOrigin (void);
 
 void SV_CheckForNewClients (void);
 void SV_RunClients (void);

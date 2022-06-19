@@ -53,6 +53,8 @@ void _VectorCopy (vec3_t in, vec3_t out);
 int VectorCompare (vec3_t v1, vec3_t v2);
 vec_t Length (vec3_t v);
 void CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross);
+float VectorLength (vec3_t v);
+float VecLength2(vec3_t v1, vec3_t v2);
 float VectorNormalize (vec3_t v);		// returns vector length
 void VectorInverse (vec3_t v);
 void VectorScale (vec3_t in, vec_t scale, vec3_t out);

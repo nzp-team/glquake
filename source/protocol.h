@@ -129,6 +129,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define svc_sellscreen		33
 
 #define svc_cutscene		34
+#define svc_weaponfire	    35
+#define svc_hitmark		    36
+#define	svc_skybox		    37	    // [string] skyname
+#define	svc_useprint		38	    // [string] to put in center of the screen
+#define	svc_updatekills		39	    // [string] to put in center of the screen
+#define	svc_limbupdate		40
+#define svc_fog				41		// [byte] start [byte] end [byte] red [byte] green [byte] blue [float] time
+#define	svc_bspdecal        42      // [string] name [byte] decal_size [coords] pos
+#define	svc_achievement     43      // [string] name [byte] decal_size [coords] pos
+#define svc_songegg 		44  	// [string] track name
+#define svc_maxammo 		45
 
 //
 // client to server

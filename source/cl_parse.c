@@ -35,36 +35,45 @@ char *svc_strings[] =
 	"svc_stufftext",		// [string] stuffed into client's console buffer
 						// the string should be \n terminated
 	"svc_setangle",		// [vec3] set the view angle to this absolute value
-	
+
 	"svc_serverinfo",		// [long] version
 						// [string] signon string
 						// [string]..[0]model cache [string]...[0]sounds cache
 						// [string]..[0]item cache
 	"svc_lightstyle",		// [byte] [string]
 	"svc_updatename",		// [byte] [string]
-	"svc_updatefrags",	// [byte] [short]
+	"svc_updatepoints",	// [byte] [short]
 	"svc_clientdata",		// <shortbits + data>
 	"svc_stopsound",		// <see code>
-	"svc_updatecolors",	// [byte] [byte]
+	"",	// [byte] [byte]
 	"svc_particle",		// [vec3] <variable>
 	"svc_damage",			// [byte] impact [byte] blood [vec3] from
-	
+
 	"svc_spawnstatic",
 	"OBSOLETE svc_spawnbinary",
 	"svc_spawnbaseline",
-	
+
 	"svc_temp_entity",		// <variable>
 	"svc_setpause",
 	"svc_signonnum",
 	"svc_centerprint",
-	"svc_killedmonster",
-	"svc_foundsecret",
 	"svc_spawnstaticsound",
 	"svc_intermission",
 	"svc_finale",			// [string] music [string] text
 	"svc_cdtrack",			// [byte] track [byte] looptrack
 	"svc_sellscreen",
-	"svc_cutscene"
+	"svc_cutscene",
+	"svc_weaponfire",
+	"svc_hitmark",
+	"svc_skybox",		   // [string] skyname
+	"svc_useprint",
+	"svc_updatekills",
+	"svc_limbupdate",
+    "svc_fog",    // 41		// [byte] start [byte] end [byte] red [byte] green [byte] blue [float] time
+    "svc_bspdecal", //42     // [string] name [byte] decal_size [coords] pos
+    "svc_achievement", //43
+	"svc_songegg", //44 			[string] track name
+	"svc_maxammo" //45
 };
 
 //=============================================================================
@@ -710,6 +719,31 @@ void CL_ParseStaticSound (void)
 }
 
 
+/*
+===================
+CL_ParseLimbUpdate
+===================
+*/
+void CL_ParseLimbUpdate (void)
+{
+    int limb = MSG_ReadByte();
+    int zombieent = MSG_ReadShort();
+    int limbent = MSG_ReadShort();
+    switch (limb)
+    {
+        case 0://head
+            cl_entities[zombieent].z_head = limbent;
+            break;
+        case 1://larm
+            cl_entities[zombieent].z_larm = limbent;
+            break;
+        case 2://rarm
+            cl_entities[zombieent].z_rarm = limbent;
+            break;
+
+    }
+}
+
 #define SHOWNET(x) if(cl_shownet.value==2)Con_Printf ("%3i:%s\n", msg_readcount-1, x);
 
 /*
@@ -956,6 +990,10 @@ void CL_ParseServerMessage (void)
 
 		case svc_sellscreen:
 			Cmd_ExecuteString ("help", src_command);
+			break;
+
+		case svc_limbupdate:
+			CL_ParseLimbUpdate();
 			break;
 		}
 	}
