@@ -291,7 +291,7 @@ int main (int argc, char **argv)
 	gfxSetDoubleBuffering(GFX_BOTTOM, false);
 	gfxSwapBuffersGpu();
 
-	chdir("sdmc:/3ds/ctrQuake");
+	chdir("sdmc:/3ds/nzportable");
 
 	parms.memsize = 16 * 1024 * 1024;
 	parms.membase = malloc (parms.memsize);

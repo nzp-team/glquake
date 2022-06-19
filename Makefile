@@ -9,16 +9,16 @@ endif
 TOPDIR ?= $(CURDIR)
 include $(DEVKITARM)/3ds_rules
 
-TARGET		:=	ctrQuake
+TARGET		:=	nzportable
 BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data
 INCLUDES	:=	include
 #ROMFS		:=	romfs
 
-APP_AUTHOR 		:= MasterFeizz
-APP_TITLE 		:= ctrQuake
-APP_DESCRIPTION := Port of Quake
+APP_AUTHOR 		:= Naievil
+APP_TITLE 		:= Nazi Zombies Portable
+APP_DESCRIPTION := NZP based on ctrQuake
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -61,6 +61,7 @@ export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
 COMMON_OBJS =	chase.c \
+                                cl_hud.c \
 				cl_demo.c \
 				cl_input.c \
 				cl_main.c \
@@ -102,6 +103,7 @@ COMMON_OBJS =	chase.c \
 				in_null.c \
 				cd_null.c \
 				gl_draw.c \
+                                gl_fog.c \
 				gl_mesh.c \
 				gl_model.c \
 				gl_refrag.c \
