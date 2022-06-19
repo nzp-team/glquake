@@ -505,7 +505,7 @@ void R_DrawAliasModel (entity_t *e)
 
 	// ZOID: never allow players to go totally black
 	i = currententity - cl_entities;
-	if (i >= 1 && i<=cl.maxclients /* && !strcmp (currententity->model->name, "progs/player.mdl") */)
+	if (i >= 1 && i<=cl.maxclients /* && !strcmp (currententity->model->name, "models/player.mdl") */)
 		if (ambientlight < 8)
 			ambientlight = shadelight = 8;
 
@@ -556,7 +556,7 @@ void R_DrawAliasModel (entity_t *e)
 	if (currententity->colormap != vid.colormap && !gl_nocolors.value)
 	{
 		i = currententity - cl_entities;
-		if (i >= 1 && i<=cl.maxclients /* && !strcmp (currententity->model->name, "progs/player.mdl") */)
+		if (i >= 1 && i<=cl.maxclients /* && !strcmp (currententity->model->name, "models/player.mdl") */)
 		    GL_Bind(playertextures - 1 + i);
 	}
 
