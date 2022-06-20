@@ -1351,6 +1351,8 @@ ALIAS MODELS
 ==============================================================================
 */
 
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
 aliashdr_t	*pheader;
 
 stvert_t	stverts[MAXALIASVERTS];
@@ -1655,6 +1657,7 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	if (pheader->numverts <= 0)
 		Sys_Error ("model %s has no vertices", mod->name);
 
+	//Con_Printf("numverts: %d\n", pheader->numverts);
 	if (pheader->numverts > MAXALIASVERTS)
 		Sys_Error ("model %s has too many vertices", mod->name);
 
@@ -1937,7 +1940,7 @@ void Mod_LoadSpriteModel (model_t *mod, void *buffer)
 
 	mod->type = mod_sprite;
 }
-
+#pragma GCC pop_options
 //=============================================================================
 
 /*

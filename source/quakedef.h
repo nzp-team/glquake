@@ -102,8 +102,8 @@ void	VID_UnlockBuffer (void);
 
 #define	ON_EPSILON		0.1			// point on plane side epsilon
 
-#define	MAX_MSGLEN		8000		// max length of a reliable message
-#define	MAX_DATAGRAM	1024		// max length of unreliable message
+#define	MAX_MSGLEN		64000		// max length of a reliable message Crow_Bar. UP for PSP
+#define	MAX_DATAGRAM	8000		// max length of unreliable message Crow_Bar. UP for PSP
 
 //
 // per-level limits

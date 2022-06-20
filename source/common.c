@@ -754,6 +754,9 @@ void *SZ_GetSpace (sizebuf_t *buf, int length)
 	
 	if (buf->cursize + length > buf->maxsize)
 	{
+
+		Con_Printf("buf->cursize: %d, length: %d, buf->maxsize: %d\n", buf->cursize, length, buf->maxsize);
+
 		if (!buf->allowoverflow)
 			Sys_Error ("SZ_GetSpace: overflow without allowoverflow set");
 		
