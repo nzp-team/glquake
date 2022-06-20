@@ -90,7 +90,7 @@ cvar_t		scr_showturtle = {"showturtle","0"};
 cvar_t		scr_showpause = {"showpause","1"};
 cvar_t		scr_printspeed = {"scr_printspeed","8"};
 cvar_t 		scr_showfps = {"scr_showfps", "0"};
-
+cvar_t		scr_loadscreen = {"scr_loadscreen","1", qtrue};
 cvar_t		gl_triplebuffer = {"gl_triplebuffer", "1", true };
 
 extern	cvar_t	crosshair;
@@ -1179,52 +1179,30 @@ void SCR_UpdateScreen (void)
 // do 3D refresh drawing, and then update the screen
 //
 	SCR_SetUpToDrawConsole ();
-	
+
 	V_RenderView ();
 
 	GL_Set2D ();
 
-	//
-	// draw any areas not covered by the refresh
-	//
-	SCR_TileClear ();
+	// naievil -- fixme
+	//Draw_Crosshair ();
 
-	if (scr_drawdialog)
-	{
-		Sbar_Draw ();
-		Draw_FadeScreen ();
-		SCR_DrawNotifyString ();
-		scr_copyeverything = true;
-	}
-	else if (scr_drawloading)
-	{
-		SCR_DrawLoading ();
-		Sbar_Draw ();
-	}
-	else if (cl.intermission == 1 && key_dest == key_game)
-	{
-		Sbar_IntermissionOverlay ();
-	}
-	else if (cl.intermission == 2 && key_dest == key_game)
-	{
-		Sbar_FinaleOverlay ();
-		SCR_CheckDrawCenterString ();
-	}
-	else
-	{
-		if (crosshair.value)
-			Draw_Character (scr_vrect.x + scr_vrect.width/2, scr_vrect.y + scr_vrect.height/2, '+');
-		
-		SCR_DrawRam ();
-		SCR_DrawNet ();
-		SCR_DrawTurtle ();
-		SCR_DrawPause ();
-		SCR_CheckDrawCenterString ();
-		Sbar_Draw ();
-		SCR_DrawFPS ();
-		SCR_DrawConsole ();	
-		M_Draw ();
-	}
+	//muff - to show FPS on screen
+	SCR_DrawFPS ();
+	//SCR_DrawBAT (); //naievil -- fixme
+	SCR_DrawPause ();
+	SCR_CheckDrawCenterString ();
+	SCR_CheckDrawUseString ();
+	//HUD_Draw (); // naievil -- fixme
+	SCR_DrawConsole ();
+	M_Draw ();
+
+	// naievil -- fixme
+	//if(scr_loadscreen.value)
+	//	SCR_DrawLoadScreen();
+
+	// naievil -- fixme
+	//Draw_LoadingFill();
 
 	V_UpdatePalette ();
 

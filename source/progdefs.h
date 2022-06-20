@@ -34,10 +34,8 @@ typedef struct
 	float	coop;
 	float	teamplay;
 	float	serverflags;
-	float	total_secrets;
-	float	total_monsters;
-	float	found_secrets;
-	float	killed_monsters;
+	float	rounds;
+	float	rounds_change;
 	float	parm1;
 	float	parm2;
 	float	parm3;
@@ -69,6 +67,7 @@ typedef struct
 	int	msg_entity;
 	func_t	main;
 	func_t	StartFrame;
+	func_t  EndFrame;
 	func_t	PlayerPreThink;
 	func_t	PlayerPostThink;
 	func_t	ClientKill;
@@ -77,6 +76,9 @@ typedef struct
 	func_t	ClientDisconnect;
 	func_t	SetNewParms;
 	func_t	SetChangeParms;
+	func_t	ParseClientCommand;
+	string_t CMD_STRING;
+	func_t  Soft_Restart;
 } globalvars_t;
 
 typedef struct
@@ -113,10 +115,7 @@ typedef struct
 	string_t	weaponmodel;
 	float	weaponframe;
 	float	currentammo;
-	float	ammo_shells;
-	float	ammo_nails;
-	float	ammo_rockets;
-	float	ammo_cells;
+	float   currentmag;
 	float	items;
 	float	takedamage;
 	int	chain;

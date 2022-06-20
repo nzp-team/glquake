@@ -977,6 +977,8 @@ void ED_LoadFromFile (char *data)
 }
 
 
+func_t	EndFrame;
+
 /*
 ===============
 PR_LoadProgs
@@ -984,6 +986,7 @@ PR_LoadProgs
 */
 void PR_LoadProgs (void)
 {
+	dfunction_t	*f;
 	int		i;
 
 // flush the non-C variable lookup cache
@@ -1057,6 +1060,11 @@ void PR_LoadProgs (void)
 
 	for (i=0 ; i<progs->numglobals ; i++)
 		((int *)pr_globals)[i] = LittleLong (((int *)pr_globals)[i]);
+
+	EndFrame = 0;
+
+	if ((f = ED_FindFunction ("EndFrame")) != NULL)
+		EndFrame = (func_t)(f - pr_functions);
 }
 
 

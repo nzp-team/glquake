@@ -567,16 +567,6 @@ void CL_ParseClientdata (int bits)
 	else
 		cl.stats[STAT_WEAPONFRAME] = 0;
 
-	if (bits & SU_ARMOR)
-		i = MSG_ReadByte ();
-	else
-		i = 0;
-	if (cl.stats[STAT_ARMOR] != i)
-	{
-		cl.stats[STAT_ARMOR] = i;
-		Sbar_Changed ();
-	}
-
 	if (bits & SU_WEAPON)
 		i = MSG_ReadByte ();
 	else
@@ -601,15 +591,20 @@ void CL_ParseClientdata (int bits)
 		Sbar_Changed ();
 	}
 
-	for (i=0 ; i<4 ; i++)
+	i = MSG_ReadByte ();
+	if (cl.stats[STAT_CURRENTMAG] != i)
 	{
-		j = MSG_ReadByte ();
-		if (cl.stats[STAT_SHELLS+i] != j)
-		{
-			cl.stats[STAT_SHELLS+i] = j;
-			Sbar_Changed ();
-		}
+		HUD_Change_time = Sys_FloatTime() + 6;
+		cl.stats[STAT_CURRENTMAG] = i;
 	}
+
+	i = MSG_ReadByte ();
+	if (cl.stats[STAT_ROUNDS] != i)
+		cl.stats[STAT_ROUNDS] = i;
+
+	i = MSG_ReadByte ();
+	if (cl.stats[STAT_ROUNDCHANGE] != i)
+		cl.stats[STAT_ROUNDCHANGE] = i;
 
 	i = MSG_ReadByte ();
 
