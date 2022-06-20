@@ -405,7 +405,9 @@ void Draw_Init (void)
 			draw_chars[i] = 255;	// proper transparent color
 
 	// now turn them into textures
-	char_texture = GL_LoadTexture ("charset", 128, 128, draw_chars, false, true, 1);
+	char_texture = loadtextureimage ("gfx/charset", 0, 0, false, false);
+	if (char_texture == 0)// did not find a matching TGA...
+		Sys_Error ("Could not load charset, make sure you have every folder and file installed properly\nDouble check that all of your files are in their correct places\nAnd that you have installed the game properly.\n");
 
 	start = Hunk_LowMark();
 
