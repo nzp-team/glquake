@@ -714,6 +714,32 @@ void CL_ParseStaticSound (void)
 }
 
 
+extern double Hitmark_Time;
+extern int crosshair_spread;
+extern double crosshair_spread_time;
+double return_time;
+/*
+===================
+CL_ParseWeaponFire
+===================
+*/
+void CL_ParseWeaponFire (void)
+{
+	vec3_t		kick;
+	return_time = (double)6/MSG_ReadLong ();
+	crosshair_spread_time = return_time + sv.time;
+
+	kick[0] = MSG_ReadCoord()/5;
+	kick[1] = MSG_ReadCoord()/5;
+	kick[2] = MSG_ReadCoord()/5;
+
+	if (!(cl.perks & 64)) {
+		cl.gun_kick[0] += kick[0];
+		cl.gun_kick[1] += kick[1];
+		cl.gun_kick[2] += kick[2];
+	}
+}
+
 /*
 ===================
 CL_ParseLimbUpdate
@@ -989,6 +1015,10 @@ void CL_ParseServerMessage (void)
 
 		case svc_sellscreen:
 			Cmd_ExecuteString ("help", src_command);
+			break;
+
+		case svc_weaponfire:
+			CL_ParseWeaponFire();
 			break;
 
 		case svc_limbupdate:

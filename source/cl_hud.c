@@ -1073,8 +1073,10 @@ HUD_Perks
 #define 	P_DEAD 		64
 #define 	P_MULE 		128
 
+#endif
 int perk_order[9];
 int current_perk_order;
+#if 0
 
 void HUD_Perks (void)
 {
@@ -1422,3 +1424,12 @@ void HUD_Draw (void)
 }
 
 #endif
+
+void HUD_Draw (void)
+{
+	// naievil -- just a test hud to draw things, why does this break the physical device build?
+	//char test[256];
+	//sprintf (test,"Weapon: %s", pr_strings+sv_player->v.weaponmodel);
+	//Draw_String (0, 8, test);
+
+}

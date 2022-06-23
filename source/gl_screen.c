@@ -353,7 +353,6 @@ char *GetPerkName (int perk)
 void SCR_UsePrint (int type, int cost, int weapon)
 {
 	//naievil -- fixme
-	/*
     char s[128];
 
     switch (type)
@@ -448,7 +447,6 @@ void SCR_UsePrint (int type, int cost, int weapon)
 
 	strncpy (scr_usestring, va(s), sizeof(scr_usestring)-1);
 	scr_usetime_off = 0.1;
-	*/
 }
 
 
@@ -1193,7 +1191,7 @@ void SCR_UpdateScreen (void)
 	SCR_DrawPause ();
 	SCR_CheckDrawCenterString ();
 	SCR_CheckDrawUseString ();
-	//HUD_Draw (); // naievil -- fixme
+	HUD_Draw (); // naievil -- fixme
 	SCR_DrawConsole ();
 	M_Draw ();
 

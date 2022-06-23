@@ -776,6 +776,258 @@ void Draw_Fill (int x, int y, int w, int h, int c)
 }
 //=============================================================================
 
+byte *StringToRGB (char *s)
+{
+	byte		*col;
+	static	byte	rgb[4];
+
+	Cmd_TokenizeString (s);
+	if (Cmd_Argc() == 3)
+	{
+		rgb[0] = (byte)Q_atoi(Cmd_Argv(0));
+		rgb[1] = (byte)Q_atoi(Cmd_Argv(1));
+		rgb[2] = (byte)Q_atoi(Cmd_Argv(2));
+	}
+	else
+	{
+		col = (byte *)&d_8to24table[(byte)Q_atoi(s)];
+		rgb[0] = col[0];
+		rgb[1] = col[1];
+		rgb[2] = col[2];
+	}
+	rgb[3] = 255;
+
+	return rgb;
+}
+
+extern cvar_t crosshair;
+extern qboolean croshhairmoving;
+//extern cvar_t cl_zoom;
+extern qpic_t *hitmark;
+double Hitmark_Time, crosshair_spread_time;
+float cur_spread;
+float crosshair_offset_step;
+
+int CrossHairWeapon (void)
+{
+    int i;
+	switch(cl.stats[STAT_ACTIVEWEAPON])
+	{
+		case W_COLT:
+		case W_BIATCH:
+			i = 15;
+			break;
+		case W_KAR:
+		case W_ARMAGEDDON:
+			i = 50;
+			break;
+		case W_THOMPSON:
+		case W_GIBS:
+			i = 10;
+			break;
+		case W_357:
+		case W_KILLU:
+			i = 10;
+			break;
+		case W_BAR:
+		case W_WIDOW:
+			i = 10;
+			break;
+		case W_BROWNING:
+		case W_ACCELERATOR:
+			i = 20;
+			break;
+		case W_DB:
+		case W_BORE:
+			i = 25;
+			break;
+		case W_FG:
+		case W_IMPELLER:
+			i = 10;
+			break;
+		case W_GEWEHR:
+		case W_COMPRESSOR:
+			i = 10;
+			break;
+		case W_KAR_SCOPE:
+		case W_HEADCRACKER:
+			i = 50;
+			break;
+		case W_M1:
+		case W_M1000:
+			i = 10;
+			break;
+		case W_M1A1:
+		case W_WIDDER:
+			i = 10;
+			break;
+		case W_MP40:
+		case W_AFTERBURNER:
+			i = 10;
+			break;
+		case W_MG:
+		case W_BARRACUDA:
+			i = 20;
+			break;
+		case W_PANZER:
+		case W_LONGINUS:
+			i = 0;
+			break;
+		case W_PPSH:
+		case W_REAPER:
+			i = 10;
+			break;
+		case W_PTRS:
+		case W_PENETRATOR:
+			i = 50;
+			break;
+		case W_RAY:
+		case W_PORTER:
+			i = 10;
+			break;
+		case W_SAWNOFF:
+		case W_SNUFF:
+			i = 30;
+			break;
+		case W_STG:
+		case W_SPATZ:
+			i = 10;
+			break;
+		case W_TRENCH:
+		case W_GUT:
+			i = 25;
+			break;
+		case W_TYPE:
+		case W_SAMURAI:
+			i = 10;
+			break;
+		case W_MP5:
+			i = 10;
+			break;
+		case W_TESLA:
+			i = 0;
+			break;
+		default:
+			i = 0;
+			break;
+	}
+
+    if (cl.perks & 64)
+        i *= 0.65;
+
+    return i;
+}
+int CrossHairMaxSpread (void)
+{
+	int i;
+	switch(cl.stats[STAT_ACTIVEWEAPON])
+	{
+		case W_COLT:
+		case W_BIATCH:
+			i = 30;
+			break;
+		case W_KAR:
+		case W_ARMAGEDDON:
+			i = 75;
+			break;
+		case W_THOMPSON:
+		case W_GIBS:
+			i = 25;
+			break;
+		case W_357:
+		case W_KILLU:
+			i = 20;
+			break;
+		case W_BAR:
+		case W_WIDOW:
+			i = 35;
+			break;
+		case W_BROWNING:
+		case W_ACCELERATOR:
+			i = 50;
+			break;
+		case W_DB:
+		case W_BORE:
+			i = 25;
+			break;
+		case W_FG:
+		case W_IMPELLER:
+			i = 40;
+			break;
+		case W_GEWEHR:
+		case W_COMPRESSOR:
+			i = 35;
+			break;
+		case W_KAR_SCOPE:
+		case W_HEADCRACKER:
+			i = 75;
+			break;
+		case W_M1:
+		case W_M1000:
+			i = 35;
+			break;
+		case W_M1A1:
+		case W_WIDDER:
+			i = 35;
+			break;
+		case W_MP40:
+		case W_AFTERBURNER:
+			i = 25;
+			break;
+		case W_MG:
+		case W_BARRACUDA:
+			i = 50;
+			break;
+		case W_PANZER:
+		case W_LONGINUS:
+			i = 0;
+			break;
+		case W_PPSH:
+		case W_REAPER:
+			i = 25;
+			break;
+		case W_PTRS:
+		case W_PENETRATOR:
+			i = 75;
+			break;
+		case W_RAY:
+		case W_PORTER:
+			i = 20;
+			break;
+		case W_SAWNOFF:
+		case W_SNUFF:
+			i = 30;
+			break;
+		case W_STG:
+		case W_SPATZ:
+			i = 35;
+			break;
+		case W_TRENCH:
+		case W_GUT:
+			i = 25;
+			break;
+		case W_TYPE:
+		case W_SAMURAI:
+			i = 25;
+			break;
+		case W_MP5:
+			i = 25;
+			break;
+		case W_TESLA:
+			i = 0;
+			break;
+		default:
+			i = 0;
+			break;
+	}
+
+    if (cl.perks & 64)
+        i *= 0.65;
+
+    return i;
+}
+
+
 /*
 ================
 Draw_FadeScreen
