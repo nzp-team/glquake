@@ -36,8 +36,9 @@ qboolean SNDDMA_Init(void)
 {
 	sound_initialized = 0;
 
-  	if(ndspInit() != 0)
+  	if(ndspInit() != 0) {
     	return false;
+  	}
 
     audio_buffer = linearAlloc(BUFFER_SIZE);
 

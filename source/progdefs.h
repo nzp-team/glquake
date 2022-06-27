@@ -116,6 +116,7 @@ typedef struct
 	float	weaponframe;
 	float	currentammo;
 	float   currentmag;
+	float	zoom;
 	float	items;
 	float	takedamage;
 	int	chain;
@@ -160,6 +161,8 @@ typedef struct
 	vec3_t 		ADS_Offset;
 	string_t 	Weapon_Name;
 	string_t 	Weapon_Name_Touch;
+	float 		maxspeed;
+	float		facingenemy;
 } entvars_t;
 
 #define PROGHEADER_CRC 5927

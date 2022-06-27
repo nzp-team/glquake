@@ -56,3 +56,5 @@ extern	int			scr_copyeverything;
 extern qboolean		block_drawing;
 
 void SCR_UpdateWholeScreen (void);
+
+extern cvar_t 	scr_fov;

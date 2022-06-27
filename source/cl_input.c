@@ -46,10 +46,10 @@ state bit 2 is edge triggered on the down to up transition
 */
 
 
-kbutton_t	in_mlook, in_klook;
+kbutton_t	in_klook;//Heffo - mlook cvar
 kbutton_t	in_left, in_right, in_forward, in_back;
 kbutton_t	in_lookup, in_lookdown, in_moveleft, in_moveright;
-kbutton_t	in_strafe, in_speed, in_use, in_jump, in_attack;
+kbutton_t	in_strafe, in_speed, in_use, in_jump, in_attack, in_grenade, in_reload, in_switch, in_knife, in_aim;
 kbutton_t	in_up, in_down;
 
 int			in_impulse;
@@ -114,14 +114,18 @@ void KeyUp (kbutton_t *b)
 	b->state |= 4; 		// impulse up
 }
 
+qboolean croshhairmoving = false;
+
 void IN_KLookDown (void) {KeyDown(&in_klook);}
 void IN_KLookUp (void) {KeyUp(&in_klook);}
+/*
 void IN_MLookDown (void) {KeyDown(&in_mlook);}
 void IN_MLookUp (void) {
 KeyUp(&in_mlook);
 if ( !(in_mlook.state&1) &&  lookspring.value)
 	V_StartPitchDrift();
 }
+*/
 void IN_UpDown(void) {KeyDown(&in_up);}
 void IN_UpUp(void) {KeyUp(&in_up);}
 void IN_DownDown(void) {KeyDown(&in_down);}
@@ -155,6 +159,16 @@ void IN_UseDown (void) {KeyDown(&in_use);}
 void IN_UseUp (void) {KeyUp(&in_use);}
 void IN_JumpDown (void) {KeyDown(&in_jump);}
 void IN_JumpUp (void) {KeyUp(&in_jump);}
+void IN_GrenadeDown (void) {KeyDown(&in_grenade);}
+void IN_GrenadeUp (void) {KeyUp(&in_grenade);}
+void IN_SwitchDown (void) {KeyDown(&in_switch);}
+void IN_SwitchUp (void) {KeyUp(&in_switch);}
+void IN_ReloadDown (void) {KeyDown(&in_reload);}
+void IN_ReloadUp (void) {KeyUp(&in_reload);}
+void IN_KnifeDown (void) {KeyDown(&in_knife);}
+void IN_KnifeUp (void) {KeyUp(&in_knife);}
+void IN_AimDown (void) {KeyDown(&in_aim);}
+void IN_AimUp (void) {KeyUp(&in_aim);}
 
 void IN_Impulse (void) {in_impulse=Q_atoi(Cmd_Argv(1));}
 
@@ -178,26 +192,34 @@ float CL_KeyState (kbutton_t *key)
 	down = key->state & 1;
 	val = 0;
 	
-	if (impulsedown && !impulseup)
+	if (impulsedown && !impulseup) 
+	{
 		if (down)
 			val = 0.5;	// pressed and held this frame
 		else
 			val = 0;	//	I_Error ();
+	}
 	if (impulseup && !impulsedown)
+	{
 		if (down)
 			val = 0;	//	I_Error ();
 		else
 			val = 0;	// released this frame
+	}
 	if (!impulsedown && !impulseup)
+	{
 		if (down)
 			val = 1.0;	// held the entire frame
 		else
 			val = 0;	// up the entire frame
+	}
 	if (impulsedown && impulseup)
+	{
 		if (down)
 			val = 0.75;	// released and re-pressed this frame
 		else
 			val = 0.25;	// pressed and released this frame
+	}
 
 	key->state &= 1;		// clear impulses
 	
@@ -210,9 +232,9 @@ float CL_KeyState (kbutton_t *key)
 //==========================================================================
 
 cvar_t	cl_upspeed = {"cl_upspeed","200"};
-cvar_t	cl_forwardspeed = {"cl_forwardspeed","200", true};
-cvar_t	cl_backspeed = {"cl_backspeed","200", true};
-cvar_t	cl_sidespeed = {"cl_sidespeed","350"};
+float	cl_forwardspeed;
+float	cl_backspeed;
+float	cl_sidespeed;
 
 cvar_t	cl_movespeedkey = {"cl_movespeedkey","2.0"};
 
@@ -221,6 +243,11 @@ cvar_t	cl_pitchspeed = {"cl_pitchspeed","150"};
 
 cvar_t	cl_anglespeedkey = {"cl_anglespeedkey","1.5"};
 
+cvar_t	in_mlook = {"in_mlook", "1", true}; //Heffo - mlook cvar
+cvar_t	in_aimassist = {"in_aimassist", "1", true};
+
+//Shpuld - Porting over lower sens for lower fov
+extern cvar_t scr_fov;
 
 /*
 ================
@@ -229,15 +256,22 @@ CL_AdjustAngles
 Moves the local angle positions
 ================
 */
+extern int original_fov, final_fov;
 void CL_AdjustAngles (void)
 {
 	float	speed;
 	float	up, down;
-	
+
 	if (in_speed.state & 1)
 		speed = host_frametime * cl_anglespeedkey.value;
 	else
 		speed = host_frametime;
+
+	//shpuld begin
+	speed = speed * scr_fov.value/90;
+	//speed = speed*final_fov/original_fov;
+	//shpuld end
+
 
 	if (!(in_strafe.state & 1))
 	{
@@ -251,16 +285,16 @@ void CL_AdjustAngles (void)
 		cl.viewangles[PITCH] -= speed*cl_pitchspeed.value * CL_KeyState (&in_forward);
 		cl.viewangles[PITCH] += speed*cl_pitchspeed.value * CL_KeyState (&in_back);
 	}
-	
+
 	up = CL_KeyState (&in_lookup);
 	down = CL_KeyState(&in_lookdown);
-	
+
 	cl.viewangles[PITCH] -= speed*cl_pitchspeed.value * up;
 	cl.viewangles[PITCH] += speed*cl_pitchspeed.value * down;
 
 	if (up || down)
 		V_StopPitchDrift ();
-		
+
 	if (cl.viewangles[PITCH] > 80)
 		cl.viewangles[PITCH] = 80;
 	if (cl.viewangles[PITCH] < -70)
@@ -270,7 +304,7 @@ void CL_AdjustAngles (void)
 		cl.viewangles[ROLL] = 50;
 	if (cl.viewangles[ROLL] < -50)
 		cl.viewangles[ROLL] = -50;
-		
+
 }
 
 /*
@@ -280,32 +314,50 @@ CL_BaseMove
 Send the intended movement message to the server
 ================
 */
+extern cvar_t waypoint_mode;
+float crosshair_opacity;
 void CL_BaseMove (usercmd_t *cmd)
 {	
-	if (cls.signon != SIGNONS)
+	if (cls.signon != SIGNONS)//BLUBS CHANGED HERE
 		return;
-			
+
 	CL_AdjustAngles ();
-	
+
 	Q_memset (cmd, 0, sizeof(*cmd));
+
+	// Moto - we handle movespeed in QC now.
+	cl_backspeed = cl_forwardspeed = cl_sidespeed = sv_player->v.maxspeed;
+
+	// Throttle side and back speeds
+	cl_sidespeed *= 0.8;
+	cl_backspeed *= 0.7;
 	
+	if (waypoint_mode.value)
+		cl_backspeed = cl_forwardspeed = cl_sidespeed *= 1.5;
+		
 	if (in_strafe.state & 1)
 	{
-		cmd->sidemove += cl_sidespeed.value * CL_KeyState (&in_right);
-		cmd->sidemove -= cl_sidespeed.value * CL_KeyState (&in_left);
+		cmd->sidemove += cl_sidespeed * CL_KeyState (&in_right);
+		cmd->sidemove -= cl_sidespeed * CL_KeyState (&in_left);
 	}
 
-	cmd->sidemove += cl_sidespeed.value * CL_KeyState (&in_moveright);
-	cmd->sidemove -= cl_sidespeed.value * CL_KeyState (&in_moveleft);
+	// crosshair stuff
+	croshhairmoving = true;
+	crosshair_opacity -= 8;
+	if (crosshair_opacity <= 128)
+		crosshair_opacity = 128;
+
+	cmd->sidemove += cl_sidespeed * CL_KeyState (&in_moveright);
+	cmd->sidemove -= cl_sidespeed * CL_KeyState (&in_moveleft);
 
 	cmd->upmove += cl_upspeed.value * CL_KeyState (&in_up);
 	cmd->upmove -= cl_upspeed.value * CL_KeyState (&in_down);
 
 	if (! (in_klook.state & 1) )
-	{	
-		cmd->forwardmove += cl_forwardspeed.value * CL_KeyState (&in_forward);
-		cmd->forwardmove -= cl_backspeed.value * CL_KeyState (&in_back);
-	}	
+	{
+		cmd->forwardmove += cl_forwardspeed * CL_KeyState (&in_forward);
+		cmd->forwardmove -= cl_backspeed * CL_KeyState (&in_back);
+	}
 
 //
 // adjust for speed key
@@ -317,11 +369,131 @@ void CL_BaseMove (usercmd_t *cmd)
 		cmd->upmove *= cl_movespeedkey.value;
 	}
 
-#ifdef QUAKE2
-	cmd->lightlevel = cl.light_level;
-#endif
+	// reset crosshair
+	if (!CL_KeyState (&in_moveright) && !CL_KeyState (&in_moveleft) && !CL_KeyState (&in_forward) && !CL_KeyState (&in_back)) {
+		croshhairmoving = false;
+
+		crosshair_opacity += 22;
+
+		if (crosshair_opacity >= 255)
+			crosshair_opacity = 255;
+	}	
 }
 
+int infront(edict_t *ent1, edict_t *ent2)
+{
+	vec3_t vec;
+	float dot;
+	VectorSubtract(ent2->v.origin,ent1->v.origin,vec);
+	VectorNormalize(vec);
+
+	vec3_t temp_angle,temp_forward,temp_right,temp_up;
+	VectorCopy(cl.viewangles,temp_angle);
+
+	AngleVectors(temp_angle,temp_forward,temp_right,temp_up);
+
+	dot = DotProduct(vec,temp_forward);
+	if(dot > 0.98)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+int EN_Find(int num,char *string)
+{
+	edict_t *ed;
+
+	int e;
+	e = num;
+
+	for(e++; e < sv.num_edicts; e++)
+	{
+		ed = EDICT_NUM(e);
+		if(ed->free)
+			continue;
+		if(!strcmp(pr_strings + ed->v.classname,string))
+		{
+			return e;
+		}
+	}
+	return 0;
+}
+
+void CL_Aim_Snap(void)
+{
+	edict_t *z,*bz,*player;
+	int znum;
+	trace_t trace;
+	float bestDist = 10000;
+	vec3_t distVec, zOrg, pOrg;
+	//32 is v_ofs num
+
+	bz = sv.edicts;
+
+	int vofs = 32;//32 is actual v_ofs num
+	int aimOfs = -10;//30 is top of bbox, 20 is our goal, so -10
+	//Zombie body bbox vert max = 30
+	//20 is the offset of the height of the zombie that we're aiming at, 20 above the origin
+	//Crawler body bbox vert max = -15
+
+	//Equation = origin + bbox vertical offset - 20
+
+	player = EDICT_NUM(cl.viewentity);
+	VectorCopy(player->v.origin,pOrg);
+	pOrg[2] += vofs;
+
+	if (cl.perks & 64)
+    	znum = EN_Find(0,"ai_zombie_head");
+  	else
+    	znum = EN_Find(0,"ai_zombie");
+
+	z = EDICT_NUM(znum);
+	VectorCopy(z->v.origin,zOrg);
+	zOrg[2] += z->v.maxs[2];//Setting to top of zomb ent
+	zOrg[2] += aimOfs;
+
+	while(znum != 0)
+	{
+		if((z->v.health > 0) && infront(player,z))
+		{
+			VectorCopy(z->v.origin,zOrg);
+			zOrg[2] += aimOfs;
+			VectorSubtract(pOrg,zOrg,distVec);
+			if(VectorLength(distVec) < bestDist)
+			{
+				trace = SV_Move (pOrg, vec3_origin, vec3_origin,zOrg, 1, player);
+				if (trace.fraction >= 1)
+				{
+					bestDist = VectorLength(distVec);
+					bz = z;
+				}
+			}
+		}
+		if (cl.perks & 64)
+		  	znum = EN_Find(znum,"ai_zombie_head");
+    	else
+      		znum = EN_Find(znum,"ai_zombie");
+		z = EDICT_NUM(znum);
+	}
+
+	if(bz != sv.edicts)
+	{
+		VectorCopy(bz->v.origin,zOrg);
+		zOrg[2] += bz->v.maxs[2];//Setting to top of bbox
+		zOrg[2] += aimOfs;
+		VectorSubtract(zOrg,pOrg,distVec);
+		VectorNormalize(distVec);
+		vectoangles(distVec,distVec);
+		distVec[0] += (distVec[0]  > 180)? -360 : 0;//Need to bound pitch around 0, from -180, to + 180
+		distVec[0] *= -1;//inverting pitch
+
+		if(distVec[0] < -70 || distVec[0] > 80)
+			return;
+
+		VectorCopy(distVec,cl.viewangles);
+	}
+}
 
 
 /*
@@ -329,6 +501,9 @@ void CL_BaseMove (usercmd_t *cmd)
 CL_SendMove
 ==============
 */
+int zoom_snap;
+float angledelta(float a);
+float deltaPitch,deltaYaw;
 void CL_SendMove (usercmd_t *cmd)
 {
 	int		i;
@@ -341,6 +516,41 @@ void CL_SendMove (usercmd_t *cmd)
 	buf.data = data;
 	
 	cl.cmd = *cmd;
+
+	//==== Aim Assist Code ====
+	if((cl.stats[STAT_ZOOM]==1 || cl.stats[STAT_ZOOM]==2) && ((in_aimassist.value) || (cl.perks & 64)))
+	{
+		if(!zoom_snap)
+		{
+
+			CL_Aim_Snap();
+			zoom_snap = 1;
+		}
+	}
+	else
+		zoom_snap = 0;
+
+	//==== Sniper Scope Swaying ====
+	if(cl.stats[STAT_ZOOM] == 2)
+	{
+		vec3_t vang;
+
+		VectorCopy(cl.viewangles,vang);
+
+		vang[0] -= deltaPitch;
+		vang[1] -= deltaYaw;
+
+		deltaPitch =(cos(cl.time/0.7) + cos(cl.time) + sin(cl.time/1.1)) * 0.5;
+		deltaYaw = (sin(cl.time/0.4) + cos(cl.time/0.56) + sin(cl.time)) * 0.5;
+
+		vang[0] += deltaPitch;
+		vang[1] += deltaYaw;
+		vang[0] = angledelta(vang[0]);
+		vang[1] = angledelta(vang[1]);
+
+		VectorCopy(vang,cl.viewangles);
+		//return 0;
+	}
 
 //
 // send the movement message
@@ -438,11 +648,19 @@ void CL_InitInput (void)
 	Cmd_AddCommand ("-use", IN_UseUp);
 	Cmd_AddCommand ("+jump", IN_JumpDown);
 	Cmd_AddCommand ("-jump", IN_JumpUp);
+	Cmd_AddCommand ("+grenade", IN_GrenadeDown);
+	Cmd_AddCommand ("-grenade", IN_GrenadeUp);
+	Cmd_AddCommand ("+switch", IN_SwitchDown);
+	Cmd_AddCommand ("-switch", IN_SwitchUp);
+	Cmd_AddCommand ("+reload", IN_ReloadDown);
+	Cmd_AddCommand ("-reload", IN_ReloadUp);
+	Cmd_AddCommand ("+knife", IN_KnifeDown);
+	Cmd_AddCommand ("-knife", IN_KnifeUp);
+	Cmd_AddCommand ("+aim", IN_AimDown);
+	Cmd_AddCommand ("-aim", IN_AimUp);
 	Cmd_AddCommand ("impulse", IN_Impulse);
 	Cmd_AddCommand ("+klook", IN_KLookDown);
 	Cmd_AddCommand ("-klook", IN_KLookUp);
-	Cmd_AddCommand ("+mlook", IN_MLookDown);
-	Cmd_AddCommand ("-mlook", IN_MLookUp);
 
 }
 

@@ -125,27 +125,18 @@ void	VID_UnlockBuffer (void);
 #define	STAT_points			1
 #define	STAT_WEAPON			2
 #define	STAT_AMMO			3
+#define	STAT_SECGRENADES	4
 #define	STAT_WEAPONFRAME	5
-#define	STAT_SHELLS			6
-#define	STAT_NAILS			7
-#define	STAT_ROCKETS		8
-#define	STAT_CELLS			9
-#define	STAT_ACTIVEWEAPON	10
-#define	STAT_SECRETS		13		// bumped on client side by svc_foundsecret
-#define	STAT_MONSTERS		14		// bumped by svc_killedmonster
-
-
 #define	STAT_CURRENTMAG		6
 #define	STAT_ZOOM			7
 #define	STAT_WEAPONSKIN		8
+#define	STAT_GRENADES		9
 #define	STAT_ACTIVEWEAPON	10
 #define	STAT_ROUNDS			11
 #define	STAT_ROUNDCHANGE	12
 #define	STAT_X2				13
 #define	STAT_INSTA			14
 #define	STAT_PRIGRENADES	15
-#define	STAT_SECGRENADES	4
-#define	STAT_GRENADES		9
 #define	STAT_WEAPON2		17
 #define	STAT_WEAPON2SKIN	18
 #define	STAT_WEAPON2FRAME	19

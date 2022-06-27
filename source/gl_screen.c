@@ -82,7 +82,7 @@ float		scr_conlines;		// lines of console to display
 float		oldscreensize, oldfov;
 
 cvar_t		scr_viewsize = {"viewsize","100", true};
-cvar_t		scr_fov = {"fov","90"};	// 10 - 170
+cvar_t		scr_fov = {"fov","80", qtrue};	// 10 - 170
 cvar_t		scr_conspeed = {"scr_conspeed","300"};
 cvar_t		scr_centertime = {"scr_centertime","2"};
 cvar_t		scr_showram = {"showram","1"};
@@ -463,6 +463,7 @@ void SCR_DrawUseString (void)
 	l = strlen (scr_usestring);
     x = (vid.width - l*8)/2;
 
+    // naievil -- fixme
     Draw_String (x, y, scr_usestring);
 	Draw_Pic (x + button_pic_x*8, y, GetButtonIcon("+use"));
 }
@@ -1125,6 +1126,47 @@ WARNING: be very careful calling this from elsewhere, because the refresh
 needs almost the entire 256k of stack space!
 ==================
 */
+
+int GetWeaponZoomAmmount (void)
+{
+    switch (cl.stats[STAT_ACTIVEWEAPON])
+    {
+        case W_MP40:
+        case W_357:
+        case W_SAWNOFF:
+        case W_TRENCH:
+        case W_PANZER:
+        case W_RAY:
+        case W_THOMPSON:
+        case W_COLT:
+        case W_PPSH:
+        case W_TYPE:
+        //case W_TESLA:
+            return 5;
+            break;
+        case W_STG:
+        case W_BROWNING:
+            return 10;
+            break;
+        case W_KAR:
+        case W_GEWEHR:
+        case W_M1:
+        case W_M1A1:
+        case W_BAR:
+        case W_FG:
+        case W_KAR_SCOPE:
+        case W_PTRS:
+        //case W_HEADCRACKER:
+        //case W_PENETRATOR:
+            return 20;
+            break;
+        default:
+            return 5;
+            break;
+    }
+}
+float zoomin_time;
+int original_fov;
 void SCR_UpdateScreen (void)
 {
 	static float	oldscr_viewsize;
@@ -1154,20 +1196,84 @@ void SCR_UpdateScreen (void)
 
 
 	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
-	
-	//
+//
 	// determine size of refresh window
 	//
+	if (cl.stats[STAT_ZOOM] == 1)
+	{
+		/*if (zoomin_time == 0 && !original_fov)
+		{
+		    original_fov = scr_fov.value;
+		    zoomin_time = Sys_FloatTime () +  0.01;
+		    Cvar_SetValue ("fov", scr_fov.value - 2.5);
+	
+		}
+		else if (zoomin_time < Sys_FloatTime ())
+		{
+		    int tempfloat = original_fov - GetWeaponZoomAmmount();
+		    if (scr_fov.value > tempfloat)
+		    {
+			zoomin_time = Sys_FloatTime () + 0.01;
+			Cvar_SetValue ("fov", scr_fov.value - 2.5);
+		    }
+				else
+				{
+			Cvar_SetValue ("fov", tempfloat);
+					zoomin_time = 0;
+				}
+		}*/
+		if(!original_fov)
+			original_fov = scr_fov.value;
+		if(scr_fov.value > (GetWeaponZoomAmmount() + 1))//+1 for accounting for floating point inaccurraces
+		{
+			scr_fov.value += ((original_fov - GetWeaponZoomAmmount()) - scr_fov.value) * 0.25;
+			Cvar_SetValue("fov",scr_fov.value);
+		}
+	}
+	else if (cl.stats[STAT_ZOOM] == 2)
+	{
+		Cvar_SetValue ("fov", 30);
+		zoomin_time = 0;
+	}
+	else if (cl.stats[STAT_ZOOM] == 3)
+	{
+		if(!original_fov)
+			original_fov = scr_fov.value;
+		//original_fov = scr_fov.value;
+		scr_fov.value += (original_fov - 10 - scr_fov.value) * 0.3;
+		Cvar_SetValue("fov",scr_fov.value);
+	}
+	else if (cl.stats[STAT_ZOOM] == 0 && original_fov != 0)
+	{
+		/*zoomin_time = Sys_FloatTime () + 0.01;
+		Cvar_SetValue ("fov", scr_fov.value + 2.5);
+		if (scr_fov.value == original_fov)
+		{
+		    zoomin_time = 0;
+		    original_fov = 0;
+		}*/
+		if(scr_fov.value < (original_fov + 1))//+1 for accounting for floating point inaccuracies
+		{
+			scr_fov.value += (original_fov - scr_fov.value) * 0.25;
+			Cvar_SetValue("fov",scr_fov.value);
+		}
+		else
+		{
+			original_fov = 0;
+		}
+	}
+
+
 	if (oldfov != scr_fov.value)
 	{
 		oldfov = scr_fov.value;
-		vid.recalc_refdef = true;
+		vid.recalc_refdef = qtrue;
 	}
 
-	if (oldscreensize != scr_viewsize.value)
+	if (oldscreensize != 120)
 	{
-		oldscreensize = scr_viewsize.value;
-		vid.recalc_refdef = true;
+		oldscreensize = 120;
+		vid.recalc_refdef = qtrue;
 	}
 
 	if (vid.recalc_refdef)

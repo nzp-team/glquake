@@ -32,6 +32,8 @@ cvar_t		gl_max_size = {"gl_max_size", "1024"};
 cvar_t		gl_picmip = {"gl_picmip", "0"};
 
 byte		*draw_chars;				// 8*8 graphic characters
+qpic_t		*sniper_scope;
+
 qpic_t		*draw_disc;
 qpic_t		*draw_backtile;
 
@@ -61,8 +63,11 @@ typedef struct
 {
 	int		texnum;
 	char	identifier[64];
+	int		original_width;
+	int		original_height;
 	int		width, height;
 	qboolean	mipmap;
+	qboolean islmp;
 	int 		checksum;
 
 // Diabolicka TGA
@@ -229,7 +234,7 @@ qpic_t *Draw_PicFromWad (char *name)
 	return p;
 }
 
-
+#if 0
 /*
 ================
 Draw_CachePic
@@ -277,7 +282,71 @@ qpic_t	*Draw_CachePic (char *path)
 
 	return &pic->pic;
 }
+#endif 
 
+/*
+================
+Draw_CachePic
+================
+*/
+qpic_t	*Draw_CachePic (char *path)
+{
+	cachepic_t	*pic;
+	int			i;
+	qpic_t		*dat;
+	glpic_t		*gl;
+	char		str[128];
+
+	strcpy (str, path);
+	for (pic=menu_cachepics, i=0 ; i<menu_numcachepics ; pic++, i++)
+		if (!strcmp (str, pic->name))
+			return &pic->pic;
+
+	if (menu_numcachepics == MAX_CACHED_PICS)
+		Sys_Error ("menu_numcachepics == MAX_CACHED_PICS");
+	menu_numcachepics++;
+	strcpy (pic->name, str);
+
+//
+// load the pic from disk
+//
+
+	int index = loadtextureimage (str, 0, 0, qfalse, qfalse);
+	if(index)
+	{
+		pic->pic.width  = gltextures[index].original_width;
+		pic->pic.height = gltextures[index].original_height;
+
+		gltextures[index].islmp = qfalse;
+		gl = (glpic_t *)pic->pic.data;
+		gl->texnum = index;
+
+		return &pic->pic;
+	}
+
+	dat = (qpic_t *)COM_LoadTempFile (str);
+	if (!dat)
+	{
+		strcat (str, ".lmp");
+		dat = (qpic_t *)COM_LoadTempFile (str);
+		if (!dat)
+		{
+			Con_Printf ("Draw_CachePic: failed to load file %s\n", str);
+			return NULL;
+		}
+	}
+	SwapPic (dat);
+
+
+	pic->pic.width = dat->width;
+	pic->pic.height = dat->height;
+
+	gl = (glpic_t *)pic->pic.data;
+	gl->texnum = GL_LoadPicTexture (dat);
+
+	gltextures[gl->texnum].islmp = qtrue;
+	return &pic->pic;
+}
 
 void Draw_CharToConback (int num, byte *dest)
 {
@@ -489,6 +558,7 @@ void Draw_Init (void)
 	//
 	draw_disc = Draw_PicFromWad ("disc");
 	draw_backtile = Draw_PicFromWad ("backtile");
+	sniper_scope = Draw_CachePic ("gfx/hud/scope");
 }
 
 
@@ -612,6 +682,16 @@ Draw_Pic
 */
 void Draw_Pic (int x, int y, qpic_t *pic)
 {
+	Draw_ColorPic (x, y, pic, 255, 255, 255, 255);
+}
+
+/*
+=============
+Draw_ColorPic
+=============
+*/
+void Draw_ColorPic (int x, int y, qpic_t *pic, float r, float g , float b, float a)
+{
 	byte			*dest, *source;
 	unsigned short	*pusdest;
 	int				v, u;
@@ -620,7 +700,7 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 	if (scrap_dirty)
 		Scrap_Upload ();
 	gl = (glpic_t *)pic->data;
-	glColor4f (1,1,1,1);
+	glColor4f (r/255,g/255,b/255,a/255);
 	GL_Bind (gl->texnum);
 	glBegin (GL_QUADS);
 	glTexCoord2f (gl->sl, gl->tl);
@@ -633,7 +713,6 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 	glVertex2f (x, y+pic->height);
 	glEnd ();
 }
-
 
 /*
 =============
@@ -1025,6 +1104,93 @@ int CrossHairMaxSpread (void)
         i *= 0.65;
 
     return i;
+}
+
+/*
+================
+Draw_Crosshair
+================
+*/
+
+extern float crosshair_opacity;
+void Draw_Crosshair (void)
+{
+	if (cl.stats[STAT_HEALTH] < 20)
+		return;
+
+	if (!crosshair_opacity)
+		crosshair_opacity = 255;
+
+	float col;
+
+	if (sv_player->v.facingenemy == 1) {
+		col = 0;
+	} else {
+		col = 255;
+	}
+
+	// crosshair moving
+	if (crosshair_spread_time > sv.time && crosshair_spread_time)
+    {
+        cur_spread = cur_spread + 10;
+		crosshair_opacity = 128;
+
+		if (cur_spread >= CrossHairMaxSpread())
+			cur_spread = CrossHairMaxSpread();
+    }
+	// crosshair not moving
+    else if (crosshair_spread_time < sv.time && crosshair_spread_time)
+    {
+        cur_spread = cur_spread - 4;
+		crosshair_opacity = 255;
+
+		if (cur_spread <= 0) {
+			cur_spread = 0;
+			crosshair_spread_time = 0;
+		}
+    }
+
+	if (cl.stats[STAT_ACTIVEWEAPON] == W_M2 || cl.stats[STAT_ACTIVEWEAPON] == W_TESLA || cl.stats[STAT_ACTIVEWEAPON] == W_DG3)
+	{
+		Draw_CharacterRGBA((vid.width)/2-4, (vid.height)/2, 'O', 255, col, col, crosshair_opacity);
+	}
+	else if (crosshair.value == 1 && cl.stats[STAT_ZOOM] != 1 && cl.stats[STAT_ZOOM] != 2 && cl.stats[STAT_ACTIVEWEAPON] != W_PANZER)
+    {
+        int x_value, y_value;
+        int crosshair_offset = CrossHairWeapon() + cur_spread;
+		if (CrossHairMaxSpread() < crosshair_offset || croshhairmoving)
+			crosshair_offset = CrossHairMaxSpread();
+
+		if (sv_player->v.view_ofs[2] == 8) {
+			crosshair_offset *= 0.80;
+		} else if (sv_player->v.view_ofs[2] == -10) {
+			crosshair_offset *= 0.65;
+		}
+
+		crosshair_offset_step += (crosshair_offset - crosshair_offset_step) * 0.5;
+
+		x_value = (vid.width - 8)/2 - crosshair_offset_step;
+		y_value = (vid.height - 8)/2;
+		Draw_CharacterRGBA(x_value, y_value, 158, 255, col, col, crosshair_opacity);
+
+		x_value = (vid.width - 8)/2 + crosshair_offset_step;
+		y_value = (vid.height - 8)/2;
+		Draw_CharacterRGBA(x_value, y_value, 158, 255, col, col, crosshair_opacity);
+
+		x_value = (vid.width - 8)/2;
+		y_value = (vid.height - 8)/2 - crosshair_offset_step;
+		Draw_CharacterRGBA(x_value, y_value, 157, 255, col, col, crosshair_opacity);
+
+		x_value = (vid.width - 8)/2;
+		y_value = (vid.height - 8)/2 + crosshair_offset_step;
+		Draw_CharacterRGBA(x_value, y_value, 157, 255, col, col, crosshair_opacity);
+    }
+    else if (crosshair.value && cl.stats[STAT_ZOOM] != 1 && cl.stats[STAT_ZOOM] != 2)
+		Draw_CharacterRGBA((vid.width - 8)/2, (vid.height - 8)/2, '.', 255, col, col, crosshair_opacity);
+	if (cl.stats[STAT_ZOOM] == 2)
+		Draw_Pic (0, 0, sniper_scope);
+   	if (Hitmark_Time > sv.time)
+        Draw_Pic ((vid.width - hitmark->width)/2,(vid.height - hitmark->height)/2, hitmark);
 }
 
 
@@ -2227,7 +2393,7 @@ int loadtextureimage (char* filename, int matchwidth, int matchheight, qboolean 
 {
 	int texnum;
 	byte *data;
-	if (!(data = loadimagepixels (filename, complain, matchwidth, matchheight)))
+	if (!(data = loadimagepixels (filename, complain, matchwidth, matchheight))) 
 		return 0;
 	texnum = GL_LoadTexture (filename, image_width, image_height, data, mipmap, qtrue, 4);
 	free(data);

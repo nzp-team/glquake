@@ -923,6 +923,7 @@ void Host_Init (quakeparms_t *parms)
 #endif	// _WIN32
 		CDAudio_Init ();
 		Sbar_Init ();
+		HUD_Init ();
 		CL_Init ();
 #ifdef _WIN32 // on non win32, mouse comes before video for security reasons
 		IN_Init ();

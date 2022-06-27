@@ -90,7 +90,6 @@ typedef struct
 
 point_change_t point_change[10];
 
-#if 0
 /*
 ===============
 HUD_Init
@@ -146,9 +145,11 @@ void HUD_Init (void)
     fx_blood_ld = Draw_CachePic ("gfx/hud/blood_bl");
     fx_blood_rd = Draw_CachePic ("gfx/hud/blood_br");*/
 
-	Achievement_Init();
+    // naievil -- fixme
+	//Achievement_Init();
 }
 
+#if 0
 /*
 ===============
 HUD_NewMap
@@ -448,7 +449,7 @@ void HUD_Point_Change (void)
 		}
 	}
 }
-
+#endif
 
 /*
 ==================
@@ -468,11 +469,7 @@ void HUD_Blood (void)
     if (alpha <= 0.0)
         return;
     
-	#ifdef PSP_VFPU
-	float modifier = (vfpu_sinf(cl.time * 10) * 20) - 20;//always negative
-	#else
     float modifier = (sin(cl.time * 10) * 20) - 20;//always negative
-	#endif
 
     if(modifier < -35.0)
 	modifier = -35.0;
@@ -489,7 +486,7 @@ void HUD_Blood (void)
     Draw_ColorPic (vid.width - fx_blood_ru->width, 0, fx_blood_ru, 82, 6, 6, alpha);
     Draw_ColorPic (vid.width - fx_blood_ru->width, vid.height - fx_blood_ru->height, fx_blood_rd, 82, 6, 6, alpha);*/
 }
-
+#if 0
 /*
 ===============
 HUD_GetWorldText
@@ -1362,6 +1359,7 @@ void HUD_Weapon (void)
 	x_value = vid.width - 8 - l*8;
 	Draw_String (x_value, y_value, str);
 }
+#endif
 
 /*
 ===============
@@ -1373,9 +1371,8 @@ void HUD_Draw (void)
 	if (scr_con_current == vid.height)
 		return;		// console is full screen
 
-	// naievil -- fixme
-	//if (key_dest == key_menu_pause)
-	//	return;
+	if (key_dest == key_menu_pause)
+		return;
 
 	scr_copyeverything = 1;
 
@@ -1391,45 +1388,34 @@ void HUD_Draw (void)
 		Draw_String (vid.width - 304, 48, "Press reload to make special waypoint");
 		return;
 	}
-
+/*
 	if (cl.stats[STAT_HEALTH] <= 0)
 	{
 		HUD_EndScreen ();
 		return;
 	}
-
-	HUD_Blood();
-	HUD_Rounds();
-	HUD_Perks();
-	HUD_Powerups();
-	HUD_ProgressBar();
-	if ((HUD_Change_time > Sys_FloatTime() || GetLowAmmo(cl.stats[STAT_ACTIVEWEAPON], 1) >= cl.stats[STAT_CURRENTMAG] || GetLowAmmo(cl.stats[STAT_ACTIVEWEAPON], 0) >= cl.stats[STAT_AMMO]) && cl.stats[STAT_HEALTH] >= 20)
-	{ //these elements are only drawn when relevant for few seconds
-		HUD_Ammo();
-		HUD_Grenades();
-		HUD_Weapon();
-		HUD_AmmoString();
-	}
-	HUD_Points();
-	HUD_Point_Change();
-	HUD_Achievement();
-
-	if (domaxammo == true) {
-		if (maxammoopac <= 0) {
-			maxammoopac = 255;
-			maxammoy = 250;
-		}
-		HUD_MaxAmmo();
-	}
-}
-
-#endif
-
-void HUD_Draw (void)
-{
-	// naievil -- just a test hud to draw things, why does this break the physical device build?
-	//char test[256];
-	//sprintf (test,"Weapon: %s", pr_strings+sv_player->v.weaponmodel);
-	//Draw_String (0, 8, test);
-
+*/
+//	HUD_Blood();
+//	HUD_Rounds();
+//	HUD_Perks();
+//	HUD_Powerups();
+//	HUD_ProgressBar();
+//	if ((HUD_Change_time > Sys_FloatTime() || GetLowAmmo(cl.stats[STAT_ACTIVEWEAPON], 1) >= cl.stats[STAT_CURRENTMAG] || GetLowAmmo(cl.stats[STAT_ACTIVEWEAPON], 0) >= cl.stats[STAT_AMMO]) && cl.stats[STAT_HEALTH] >= 20)
+//	{ //these elements are only drawn when relevant for few seconds
+//		HUD_Ammo();
+//		HUD_Grenades();
+//		HUD_Weapon();
+//		HUD_AmmoString();
+//	}
+//	HUD_Points();
+//	HUD_Point_Change();
+//	HUD_Achievement();
+//
+//	if (domaxammo == true) {
+//		if (maxammoopac <= 0) {
+//			maxammoopac = 255;
+//			maxammoy = 250;
+//		}
+//		HUD_MaxAmmo();
+//	}
 }

@@ -689,6 +689,7 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 	MSG_WriteShort (msg, ent->v.health);
 	MSG_WriteByte (msg, ent->v.currentammo);
 	MSG_WriteByte (msg, ent->v.currentmag);
+	MSG_WriteByte (msg, ent->v.zoom);
 
 	MSG_WriteByte (msg, pr_global_struct->rounds);
 	MSG_WriteByte (msg, pr_global_struct->rounds_change);

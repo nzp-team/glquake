@@ -599,6 +599,10 @@ void CL_ParseClientdata (int bits)
 	}
 
 	i = MSG_ReadByte ();
+	if (cl.stats[STAT_ZOOM] != i)
+		cl.stats[STAT_ZOOM] = i;
+
+	i = MSG_ReadByte ();
 	if (cl.stats[STAT_ROUNDS] != i)
 		cl.stats[STAT_ROUNDS] = i;
 
@@ -818,7 +822,7 @@ void CL_ParseServerMessage (void)
 		switch (cmd)
 		{
 		default:
-			Host_Error ("CL_ParseServerMessage: Illegible server message\n");
+			Host_Error ("CL_ParseServerMessage: Illegible server message: cmd = %d\n", cmd);
 			break;
 			
 		case svc_nop:
@@ -965,14 +969,6 @@ void CL_ParseServerMessage (void)
 			CL_SignonReply ();
 			break;
 
-		case svc_killedmonster:
-			cl.stats[STAT_MONSTERS]++;
-			break;
-
-		case svc_foundsecret:
-			cl.stats[STAT_SECRETS]++;
-			break;
-
 		case svc_updatestat:
 			i = MSG_ReadByte ();
 			if (i < 0 || i >= MAX_CL_STATS)
@@ -1015,6 +1011,10 @@ void CL_ParseServerMessage (void)
 
 		case svc_sellscreen:
 			Cmd_ExecuteString ("help", src_command);
+			break;
+
+		case svc_hitmark:
+			Hitmark_Time = sv.time + 0.2;
 			break;
 
 		case svc_weaponfire:
