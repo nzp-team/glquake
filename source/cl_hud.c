@@ -1388,6 +1388,10 @@ void HUD_Draw (void)
 		Draw_String (vid.width - 304, 48, "Press reload to make special waypoint");
 		return;
 	}
+
+	char stuff[1024];
+	sprintf(stuff, "fov: %f", scr_fov.value);
+	Draw_String(0, 32, stuff);
 /*
 	if (cl.stats[STAT_HEALTH] <= 0)
 	{

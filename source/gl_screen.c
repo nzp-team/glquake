@@ -82,7 +82,7 @@ float		scr_conlines;		// lines of console to display
 float		oldscreensize, oldfov;
 
 cvar_t		scr_viewsize = {"viewsize","100", true};
-cvar_t		scr_fov = {"fov","80", qtrue};	// 10 - 170
+cvar_t		scr_fov = {"fov","80"};	// 10 - 170
 cvar_t		scr_conspeed = {"scr_conspeed","300"};
 cvar_t		scr_centertime = {"scr_centertime","2"};
 cvar_t		scr_showram = {"showram","1"};
@@ -499,9 +499,9 @@ float CalcFov (float fov_x, float width, float height)
         if (fov_x < 1 || fov_x > 179)
                 Sys_Error ("Bad fov: %f", fov_x);
 
-        x = width/tan(fov_x/360*M_PI);
+        x = width/tanf(fov_x/360*M_PI);
 
-        a = atan (height/x);
+        a = atanf (height/x);
 
         a = a*360/M_PI;
 
@@ -1196,7 +1196,7 @@ void SCR_UpdateScreen (void)
 
 
 	GL_BeginRendering (&glx, &gly, &glwidth, &glheight);
-//
+	//
 	// determine size of refresh window
 	//
 	if (cl.stats[STAT_ZOOM] == 1)
@@ -1270,9 +1270,9 @@ void SCR_UpdateScreen (void)
 		vid.recalc_refdef = qtrue;
 	}
 
-	if (oldscreensize != 120)
+	if (oldscreensize != scr_viewsize.value)
 	{
-		oldscreensize = 120;
+		oldscreensize = scr_viewsize.value;
 		vid.recalc_refdef = qtrue;
 	}
 

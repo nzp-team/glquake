@@ -570,16 +570,40 @@ void CL_SendMove (usercmd_t *cmd)
 // send button bits
 //
 	bits = 0;
-	
-	if ( in_attack.state & 3 )
+
+	if (in_attack.state & 3 )
 		bits |= 1;
 	in_attack.state &= ~2;
-	
+
 	if (in_jump.state & 3)
 		bits |= 2;
 	in_jump.state &= ~2;
+
+	if (in_grenade.state & 3)
+		bits |= 8;
+	in_grenade.state &= ~2;
+
+	if (in_switch.state & 3)
+		bits |= 16;
+	in_switch.state &= ~2;
+
+	if (in_reload.state & 3)
+		bits |= 32;
+	in_reload.state &= ~2;
+
+	if (in_knife.state & 3)
+		bits |= 64;
+	in_knife.state &= ~2;
 	
-    MSG_WriteByte (&buf, bits);
+	if (in_use.state & 3)
+		bits |= 128;
+	in_use.state &= ~2;
+	
+	if (in_aim.state & 3)
+		bits |= 256;
+	in_aim.state &= ~2; 
+
+    MSG_WriteLong (&buf, bits);
 
     MSG_WriteByte (&buf, in_impulse);
 	in_impulse = 0;

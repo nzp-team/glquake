@@ -760,19 +760,7 @@ void SV_UpdateToReliableMessages (void)
 // check for changes to be sent over the reliable streams
 	for (i=0, host_client = svs.clients ; i<svs.maxclients ; i++, host_client++)
 	{
-		if (host_client->old_frags != host_client->edict->v.frags)
-		{
-			for (j=0, client = svs.clients ; j<svs.maxclients ; j++, client++)
-			{
-				if (!client->active)
-					continue;
-				MSG_WriteByte (&client->message, svc_updatefrags);
-				MSG_WriteByte (&client->message, i);
-				MSG_WriteShort (&client->message, host_client->edict->v.frags);
-			}
 
-			host_client->old_frags = host_client->edict->v.frags;
-		}
 	}
 	
 	for (j=0, client = svs.clients ; j<svs.maxclients ; j++, client++)

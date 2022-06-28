@@ -110,7 +110,8 @@ typedef struct
 	float	nextthink;
 	int	groundentity;
 	float	health;
-	float	frags;
+	float 	points;
+	float	kills;
 	float	weapon;
 	string_t	weaponmodel;
 	float	weaponframe;
@@ -125,6 +126,12 @@ typedef struct
 	float	button0;
 	float	button1;
 	float	button2;
+	float	button3;
+	float	button4;
+	float	button5;
+	float	button6;
+	float	button7;
+	float	button8;
 	float	impulse;
 	float	fixangle;
 	vec3_t	v_angle;
@@ -143,6 +150,9 @@ typedef struct
 	float	ideal_yaw;
 	float	yaw_speed;
 	int	aiment;
+	int	head;
+	int	larm;
+	int	rarm;
 	int	goalentity;
 	float	spawnflags;
 	string_t	target;
@@ -159,6 +169,8 @@ typedef struct
 	string_t	noise2;
 	string_t	noise3;
 	vec3_t 		ADS_Offset;
+	vec3_t 		Flash_Offset;
+	float 		Flash_Size;
 	string_t 	Weapon_Name;
 	string_t 	Weapon_Name_Touch;
 	float 		maxspeed;
