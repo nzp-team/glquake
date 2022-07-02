@@ -796,7 +796,7 @@ R_BlendLightmaps
 ================
 */
 
-void R_BlendLightmaps (void)
+void R_BlendLightmaps (int specialrender)
 {
 	int			i, j;
 	glpoly_t	*p;
@@ -809,7 +809,14 @@ void R_BlendLightmaps (void)
 	glEnable(GL_MODULATE);
 	glColor4f(1,1,1,1);
 	glDepthMask(GL_FALSE);		// don't bother writing Z
-	glBlendFunc (GL_ZERO, GL_SRC_COLOR);
+
+	// naievil -- stuff that starts with '{' is a special render
+	if (!specialrender) {
+		glBlendFunc (GL_ZERO, GL_SRC_COLOR);
+	} else {
+		glBlendFunc (GL_ZERO, GL_DST_ALPHA);
+	}
+
 	glEnable (GL_BLEND);
 	
 	for (i=0 ; i<MAX_LIGHTMAPS ; i++)
@@ -875,11 +882,31 @@ void R_RenderBrushPoly (msurface_t *fa)
 		EmitWaterPolys (fa);
 		return;
 	}
-
+	//Diabolickal start
+	if(!Q_strncmp(fa->texinfo->texture->name,"nodraw",6) || !Q_strncmp(fa->texinfo->texture->name,"NODRAW",6))		//Diabolickal nodraw support
+		return;
+	if (!strncmp(fa->texinfo->texture->name,"{",1))			//Diabolickal Alpha pixel support
+	{
+		glEnable(GL_ALPHA_TEST);
+	}
+	if (strstr(fa->texinfo->texture->name,"light")) // Any texture with light in the name ignore lightmaps
+    {
+		DrawGLPoly (fa->polys);
+		return;
+    }
+	//Diabolickal end
 	if (fa->flags & SURF_UNDERWATER)
 		DrawGLWaterPoly (fa->polys);
 	else
 		DrawGLPoly (fa->polys);
+	
+	//Diabolickal start
+	if (!strncmp(fa->texinfo->texture->name,"{",1))			//Diabolickal Alpha pixel support
+	{
+		glDisable(GL_ALPHA_TEST);
+		//glDisable(GL_BLEND);
+	}
+	//Diabolickal end
 
 	// add the poly to the proper lightmap chain
 
@@ -1262,7 +1289,7 @@ void R_DrawBrushModel (entity_t *e)
 		}
 	}
 
-	R_BlendLightmaps ();
+	R_BlendLightmaps (1);
 
 	glPopMatrix ();
 }
@@ -1429,7 +1456,7 @@ void R_DrawWorld (void)
 
 	DrawTextureChains ();
 
-	R_BlendLightmaps ();
+	R_BlendLightmaps (0);
 
 #ifdef QUAKE2
 	R_DrawSkyBox ();
