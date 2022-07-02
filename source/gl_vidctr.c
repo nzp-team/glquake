@@ -171,8 +171,6 @@ static void Check_Gamma (unsigned char *pal)
 	else
 		vid_gamma = Q_atof(com_argv[i+1]);
 
-	Con_Printf("in check_gamma: %f\n", vid_gamma);
-
 	for (i=0 ; i<768 ; i++)
 	{
 		f = pow ( (pal[i]+1)/256.0 , vid_gamma );

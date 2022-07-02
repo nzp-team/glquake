@@ -23,6 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "winquake.h"
 #endif
 
+achievement_list_t achievement_list[MAX_ACHIEVEMENTS];
+
 void (*vid_menudrawfn)(void);
 void (*vid_menukeyfn)(int key);
 

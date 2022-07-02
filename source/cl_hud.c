@@ -1152,8 +1152,8 @@ void HUD_ProgressBar (void)
 		progressbar = 100 - ((cl.progress_bar-sv.time)*10);
 		if (progressbar >= 100)
 			progressbar = 100;
-		Draw_FillByColor  ((vid.width)/2 - 51, vid.height*0.75 - 1, 102, 5, GU_RGBA(0, 0, 0,100));
-		Draw_FillByColor ((vid.width)/2 - 50, vid.height*0.75, progressbar, 3, GU_RGBA(255, 255, 255,100));
+		Draw_FillByColor  ((vid.width)/2 - 51, vid.height*0.75 - 1, 102, 5, 0, 0, 0,100);
+		Draw_FillByColor ((vid.width)/2 - 50, vid.height*0.75, progressbar, 3, 255, 255, 255,100);
 
 		Draw_String ((vid.width - (88))/2, vid.height*0.75 + 10, "Reviving...");
 	}
@@ -1391,27 +1391,27 @@ void HUD_Draw (void)
 		return;
 	}
 
-//	HUD_Blood();
-//	HUD_Rounds();
-//	HUD_Perks();
-//	HUD_Powerups();
-//	HUD_ProgressBar();
-//	if ((HUD_Change_time > Sys_FloatTime() || GetLowAmmo(cl.stats[STAT_ACTIVEWEAPON], 1) >= cl.stats[STAT_CURRENTMAG] || GetLowAmmo(cl.stats[STAT_ACTIVEWEAPON], 0) >= cl.stats[STAT_AMMO]) && cl.stats[STAT_HEALTH] >= 20)
-//	{ //these elements are only drawn when relevant for few seconds
-//		HUD_Ammo();
-//		HUD_Grenades();
-//		HUD_Weapon();
-//		HUD_AmmoString();
-//	}
-//	HUD_Points();
-//	HUD_Point_Change();
-//	HUD_Achievement();
-//
-//	if (domaxammo == true) {
-//		if (maxammoopac <= 0) {
-//			maxammoopac = 255;
-//			maxammoy = 250;
-//		}
-//		HUD_MaxAmmo();
-//	}
+	HUD_Blood();
+	HUD_Rounds();
+	HUD_Perks();
+	HUD_Powerups();
+	HUD_ProgressBar();
+	if ((HUD_Change_time > Sys_FloatTime() || GetLowAmmo(cl.stats[STAT_ACTIVEWEAPON], 1) >= cl.stats[STAT_CURRENTMAG] || GetLowAmmo(cl.stats[STAT_ACTIVEWEAPON], 0) >= cl.stats[STAT_AMMO]) && cl.stats[STAT_HEALTH] >= 20)
+	{ //these elements are only drawn when relevant for few seconds
+		HUD_Ammo();
+		HUD_Grenades();
+		HUD_Weapon();
+		HUD_AmmoString();
+	}
+	HUD_Points();
+	HUD_Point_Change();
+	HUD_Achievement();
+
+	if (domaxammo == true) {
+		if (maxammoopac <= 0) {
+			maxammoopac = 255;
+			maxammoy = 250;
+		}
+		HUD_MaxAmmo();
+	}
 }

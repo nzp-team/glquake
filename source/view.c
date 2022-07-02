@@ -65,7 +65,7 @@ cvar_t	v_ipitch_level = {"v_ipitch_level", "0.3", false};
 
 cvar_t	v_idlescale = {"v_idlescale", "0", false};
 
-cvar_t	crosshair = {"crosshair", "0", true};
+cvar_t	crosshair = {"crosshair", "1", true};
 
 cvar_t	gl_cshiftpercent = {"gl_cshiftpercent", "100", false}; //naievil -- wtf is this?
 

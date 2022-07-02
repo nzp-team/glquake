@@ -612,6 +612,56 @@ void Draw_Character (int x, int y, int num)
 
 /*
 ================
+Draw_CharacterRGBA
+
+This is the same as Draw_Character, but with RGBA color codes.
+- MotoLegacy
+================
+*/
+extern cvar_t scr_coloredtext;
+void Draw_CharacterRGBA(int x, int y, int num, float r, float g, float b, float a)
+{
+	byte			*dest;
+	byte			*source;
+	unsigned short	*pusdest;
+	int				drawline;	
+	int				row, col;
+	float			frow, fcol, size;
+
+	if (num == 32)
+		return;		// space
+
+	num &= 255;
+	
+	if (y <= -8)
+		return;			// totally off screen
+
+	row = num>>4;
+	col = num&15;
+
+	frow = row*0.0625;
+	fcol = col*0.0625;
+	size = 0.0625;
+
+	Con_Printf("");
+	//glColor4f(r/255, g/255, b/255, a/255);
+
+	GL_Bind (char_texture);
+
+	glBegin (GL_QUADS);
+	glTexCoord2f (fcol, frow);
+	glVertex2f (x, y);
+	glTexCoord2f (fcol + size, frow);
+	glVertex2f (x+8, y);
+	glTexCoord2f (fcol + size, frow + size);
+	glVertex2f (x+8, y+8);
+	glTexCoord2f (fcol, frow + size);
+	glVertex2f (x, y+8);
+	glEnd ();
+}
+
+/*
+================
 Draw_String
 ================
 */
@@ -688,7 +738,60 @@ Draw_Pic
 */
 void Draw_Pic (int x, int y, qpic_t *pic)
 {
-	Draw_ColorPic (x, y, pic, 255, 255, 255, 255);
+	//Draw_ColorPic (x, y, pic, 255, 255, 255, 255);
+
+	byte			*dest, *source;
+	unsigned short	*pusdest;
+	int				v, u;
+	glpic_t			*gl;
+
+
+	if (scrap_dirty)
+		Scrap_Upload ();
+	gl = (glpic_t *)pic->data;
+	glColor4f (1,1,1,1);
+	GL_Bind (gl->texnum);
+	glBegin (GL_QUADS);
+	glTexCoord2f (gl->sl, gl->tl);
+	glVertex2f (x, y);
+	glTexCoord2f (gl->sh, gl->tl);
+	glVertex2f (x+pic->width, y);
+	glTexCoord2f (gl->sh, gl->th);
+	glVertex2f (x+pic->width, y+pic->height);
+	glTexCoord2f (gl->sl, gl->th);
+	glVertex2f (x, y+pic->height);
+	glEnd ();
+}
+
+/*
+=============
+Draw_StretchPic
+=============
+*/
+void Draw_StretchPic (int x, int y, qpic_t *pic, int x_value, int y_value)
+{
+	// naievil -- fixme This does not stretch
+	byte			*dest, *source;
+	unsigned short	*pusdest;
+	int				v, u;
+	glpic_t			*gl;
+
+	if (scrap_dirty)
+		Scrap_Upload ();
+	gl = (glpic_t *)pic->data;
+	glColor4f (1,1,1,1);
+	GL_Bind (gl->texnum);
+	glBegin (GL_QUADS);
+	glTexCoord2f (gl->sl, gl->tl);
+	glVertex2f (x, y);
+	glTexCoord2f (gl->sh, gl->tl);
+	glVertex2f (x+pic->width, y);
+	glTexCoord2f (gl->sh, gl->th);
+	glVertex2f (x+pic->width, y+pic->height);
+	glTexCoord2f (gl->sl, gl->th);
+	glVertex2f (x, y+pic->height);
+	glEnd ();
+
 }
 
 /*
@@ -833,6 +936,18 @@ void Draw_TileClear (int x, int y, int w, int h)
 	glEnd ();
 }
 
+/*
+=============
+Draw_FillByColor
+
+Fills a box of pixels with a single color
+=============
+*/
+void Draw_FillByColor (int x, int y, int w, int h, int r, int g, int b)
+{
+	// naievil -- fixme does not do any color mod
+	Draw_Fill(x, y, w, h, r, g, b);
+}
 
 /*
 =============
@@ -841,12 +956,10 @@ Draw_Fill
 Fills a box of pixels with a single color
 =============
 */
-void Draw_Fill (int x, int y, int w, int h, int c)
+void Draw_Fill (int x, int y, int w, int h, int r, int g, int b)
 {
 	glDisable (GL_TEXTURE_2D);
-	glColor3f (host_basepal[c*3]/255.0,
-		host_basepal[c*3+1]/255.0,
-		host_basepal[c*3+2]/255.0);
+	glColor3f (r/255, g/255, b/255);
 
 	glBegin (GL_QUADS);
 
@@ -1120,8 +1233,8 @@ Draw_Crosshair
 
 extern float crosshair_opacity;
 void Draw_Crosshair (void)
-{
-	if (cl.stats[STAT_HEALTH] < 20)
+{	
+	if (cl.stats[STAT_HEALTH] < 20) 
 		return;
 
 	if (!crosshair_opacity)

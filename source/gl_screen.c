@@ -97,6 +97,7 @@ extern	cvar_t	crosshair;
 
 qboolean	scr_initialized;		// ready to draw
 
+qpic_t      *hitmark;
 qpic_t		*scr_ram;
 qpic_t		*scr_net;
 qpic_t		*scr_turtle;
@@ -463,7 +464,7 @@ void SCR_DrawUseString (void)
 	l = strlen (scr_usestring);
     x = (vid.width - l*8)/2;
 
-    // naievil -- fixme
+    // naievil -- fixme the picture does not show...
     Draw_String (x, y, scr_usestring);
 	Draw_Pic (x + button_pic_x*8, y, GetButtonIcon("+use"));
 }
@@ -653,9 +654,13 @@ void SCR_Init (void)
 	Cmd_AddCommand ("sizeup",SCR_SizeUp_f);
 	Cmd_AddCommand ("sizedown",SCR_SizeDown_f);
 
+	// naievil -- fixme remove this
 	scr_ram = Draw_PicFromWad ("ram");
 	scr_net = Draw_PicFromWad ("net");
 	scr_turtle = Draw_PicFromWad ("turtle");
+
+	hitmark = Draw_CachePic("gfx/hud/hit_marker");
+
 
 	scr_initialized = true;
 }
@@ -1288,7 +1293,7 @@ void SCR_UpdateScreen (void)
 	GL_Set2D ();
 
 	// naievil -- fixme
-	//Draw_Crosshair ();
+	Draw_Crosshair ();
 
 	//muff - to show FPS on screen
 	SCR_DrawFPS ();
