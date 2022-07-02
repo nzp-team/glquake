@@ -58,7 +58,7 @@ void SV_SetIdealPitch (void)
 	float	z[MAX_FORWARD];
 	int		i, j;
 	int		step, dir, steps;
-
+	
 	if (!((int)sv_player->v.flags & FL_ONGROUND))
 		return;
 		

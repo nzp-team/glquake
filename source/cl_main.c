@@ -36,11 +36,14 @@ cvar_t	cl_nolerp = {"cl_nolerp","0"};
 cvar_t	lookspring = {"lookspring","0", true};
 cvar_t	lookstrafe = {"lookstrafe","0", true};
 cvar_t	sensitivity = {"sensitivity","3", true};
+cvar_t	in_tolerance = {"tolerance","0.25", true};
+cvar_t	in_acceleration = {"acceleration","1.0", true};
+cvar_t	in_analog_strafe = {"in_analog_strafe", "0", true};
 
-cvar_t	m_pitch = {"m_pitch","0.022", true};
-cvar_t	m_yaw = {"m_yaw","0.022", true};
-cvar_t	m_forward = {"m_forward","1", true};
-cvar_t	m_side = {"m_side","0.8", true};
+cvar_t	m_pitch = {"m_pitch","-0.22", true};
+cvar_t	m_yaw = {"m_yaw","0", true};
+cvar_t	m_forward = {"m_forward","0", true};
+cvar_t	m_side = {"m_side","0", true};
 
 
 client_static_t	cls;
@@ -741,11 +744,14 @@ void CL_Init (void)
 	Cvar_RegisterVariable (&lookspring);
 	Cvar_RegisterVariable (&lookstrafe);
 	Cvar_RegisterVariable (&sensitivity);
+	Cvar_RegisterVariable (&in_tolerance);
+	Cvar_RegisterVariable (&in_acceleration);
 
 	Cvar_RegisterVariable (&m_pitch);
 	Cvar_RegisterVariable (&m_yaw);
 	Cvar_RegisterVariable (&m_forward);
 	Cvar_RegisterVariable (&m_side);
+	Cvar_RegisterVariable (&in_mlook);
 
 //	Cvar_RegisterVariable (&cl_autofire);
 	

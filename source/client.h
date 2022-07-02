@@ -268,11 +268,16 @@ extern	cvar_t	cl_pitchdriftspeed;
 extern	cvar_t	lookspring;
 extern	cvar_t	lookstrafe;
 extern	cvar_t	sensitivity;
+extern	cvar_t	in_tolerance;
+extern	cvar_t	in_acceleration;
+extern 	cvar_t 	in_aimassist;
+extern 	cvar_t	in_analog_strafe;
 
 extern	cvar_t	m_pitch;
 extern	cvar_t	m_yaw;
 extern	cvar_t	m_forward;
 extern	cvar_t	m_side;
+extern 	cvar_t 	in_mlook;
 
 
 #define	MAX_TEMP_ENTITIES	64			// lightning bolts, etc

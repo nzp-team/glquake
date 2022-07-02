@@ -221,8 +221,8 @@ void Sys_DefaultConfig(void)
 	Cbuf_AddText ("bind RTRIGGER +attack\n");
 	Cbuf_AddText ("bind PADUP \"impulse 10\"\n");
 	Cbuf_AddText ("bind PADDOWN \"impulse 12\"\n");
-	Cbuf_AddText ("lookstrafe \"1.000000\"\n");
-	Cbuf_AddText ("lookspring \"0.000000\"\n");
+	//Cbuf_AddText ("lookstrafe \"1.000000\"\n");
+	//Cbuf_AddText ("lookspring \"0.000000\"\n");
 }
 
 void Sys_SetKeys(u32 keys, u32 state){
