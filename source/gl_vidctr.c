@@ -171,6 +171,8 @@ static void Check_Gamma (unsigned char *pal)
 	else
 		vid_gamma = Q_atof(com_argv[i+1]);
 
+	Con_Printf("in check_gamma: %f\n", vid_gamma);
+
 	for (i=0 ; i<768 ; i++)
 	{
 		f = pow ( (pal[i]+1)/256.0 , vid_gamma );
@@ -184,7 +186,7 @@ static void Check_Gamma (unsigned char *pal)
 
 	memcpy (pal, palette, sizeof(palette));
 
-	Build_Gamma_Table ();		//Diabolickal HLBSP
+	BuildGammaTable (vid_gamma);		//Diabolickal HLBSP
 }
 
 void	VID_Init (unsigned char *palette)

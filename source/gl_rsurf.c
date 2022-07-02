@@ -803,8 +803,9 @@ void R_BlendLightmaps (int specialrender)
 	float		*v;
 	glRect_t	*theRect;
 
-	if (r_fullbright.value)
+	if (r_fullbright.value) {
 		return;
+	} 
 
 	glEnable(GL_MODULATE);
 	glColor4f(1,1,1,1);

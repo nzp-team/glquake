@@ -338,29 +338,27 @@ cshift_t	cshift_water = { {130,80,50}, 128 };
 cshift_t	cshift_slime = { {0,25,5}, 150 };
 cshift_t	cshift_lava = { {255,80,0}, 150 };
 
-cvar_t		v_gamma = {"gamma", "2", true};
+cvar_t		v_gamma = {"gamma", "1.0", true};
 
 byte		gammatable[256];	// palette is sent through this
 
-#ifdef	GLQUAKE
 byte		ramps[3][256];
 float		v_blend[4];		// rgba 0.0 - 1.0
-#endif	// GLQUAKE
 
 void BuildGammaTable (float g)
 {
 	int		i, inf;
-	
+
 	if (g == 1.0)
 	{
 		for (i=0 ; i<256 ; i++)
 			gammatable[i] = i;
 		return;
 	}
-	
+
 	for (i=0 ; i<256 ; i++)
 	{
-		inf = 255 * pow ( (i+0.5)/255.5 , g ) + 0.5;
+		inf = 255 * powf ( (i+0.5f)/255.5f , g ) + 0.5;
 		if (inf < 0)
 			inf = 0;
 		if (inf > 255)
@@ -569,13 +567,13 @@ void V_CalcBlend (void)
 	b = 0;
 	a = 0;
 
-	for (j=0 ; j<NUM_CSHIFTS ; j++)	
+	for (j=0 ; j<NUM_CSHIFTS ; j++)
 	{
-		if (!gl_cshiftpercent.value)
+		if (!gl_polyblend.value) {
 			continue;
+		}
 
-		a2 = ((cl.cshifts[j].percent * gl_cshiftpercent.value) / 100.0) / 255.0;
-
+		a2 = cl.cshifts[j].percent / 255.0;
 //		a2 = cl.cshifts[j].percent/255.0;
 		if (!a2)
 			continue;
@@ -612,10 +610,10 @@ void V_UpdatePalette (void)
 	int		ir, ig, ib;
 	qboolean force;
 
-	//V_CalcPowerupCshift ();
-	
+	//V_HealthCshift ();
+
 	new = false;
-	
+
 	for (i=0 ; i<NUM_CSHIFTS ; i++)
 	{
 		if (cl.cshifts[i].percent != cl.prev_cshifts[i].percent)
@@ -667,21 +665,21 @@ void V_UpdatePalette (void)
 
 	basepal = host_basepal;
 	newpal = pal;
-	
+
 	for (i=0 ; i<256 ; i++)
 	{
 		ir = basepal[0];
 		ig = basepal[1];
 		ib = basepal[2];
 		basepal += 3;
-		
+
 		newpal[0] = ramps[0][ir];
 		newpal[1] = ramps[1][ig];
 		newpal[2] = ramps[2][ib];
 		newpal += 3;
 	}
 
-	VID_ShiftPalette (pal);	
+	VID_ShiftPalette (pal);
 }
 
 
@@ -1735,8 +1733,8 @@ void V_Init (void)
 	Cvar_RegisterVariable (&v_kickroll);
 	Cvar_RegisterVariable (&v_kickpitch);	
 	
-	BuildGammaTable (1.0);	// no gamma yet
 	Cvar_RegisterVariable (&v_gamma);
+	BuildGammaTable (v_gamma.value);	// no gamma yet
 }
 
 
