@@ -57,7 +57,7 @@ keyname_t keynames[] =
 	#ifdef _3DS
 	{"TAB", K_TAB},
 	{"START", K_ENTER},
-	{"SELECT", K_ESCAPE},
+	{"SELECT", K_SELECT},
 	{"SPACE", K_SPACE},
 	{"BACKSPACE", K_BACKSPACE},
 	{"PADUP", K_UPARROW},
@@ -697,6 +697,7 @@ void Key_Event (int key, qboolean down)
 			M_Keydown (key);
 			break;
 		case key_game:
+			break;
 		case key_console:
 			M_ToggleMenu_f ();
 			break;

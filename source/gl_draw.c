@@ -625,6 +625,12 @@ void Draw_String (int x, int y, char *str)
 	}
 }
 
+void Draw_ColoredString(int x, int y, char *text, float r, float g, float b, float a, int scale) 
+{
+	// naievil -- fixme, incomplete lol
+	Draw_String(x, y, text);
+}
+
 /*
 ================
 Draw_DebugChar

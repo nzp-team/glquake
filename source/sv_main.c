@@ -573,31 +573,16 @@ SV_WriteClientdataToMessage
 
 ==================
 */
+/*
+==================
+SV_WriteClientdataToMessage
+
+==================
+*/
 void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 {
 	int		bits;
 	int		i;
-	edict_t	*other;
-	int		items;
-#ifndef QUAKE2
-	eval_t	*val;
-#endif
-
-//
-// send a damage message
-//
-	if (ent->v.dmg_take || ent->v.dmg_save)
-	{
-		other = PROG_TO_EDICT(ent->v.dmg_inflictor);
-		MSG_WriteByte (msg, svc_damage);
-		MSG_WriteByte (msg, ent->v.dmg_save);
-		MSG_WriteByte (msg, ent->v.dmg_take);
-		for (i=0 ; i<3 ; i++)
-			MSG_WriteCoord (msg, other->v.origin[i] + 0.5*(other->v.mins[i] + other->v.maxs[i]));
-	
-		ent->v.dmg_take = 0;
-		ent->v.dmg_save = 0;
-	}
 
 //
 // send the current viewpos offset from the view entity
@@ -614,34 +599,22 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 	}
 
 	bits = 0;
-	
+
 	if (ent->v.view_ofs[2] != DEFAULT_VIEWHEIGHT)
 		bits |= SU_VIEWHEIGHT;
-		
+
 	if (ent->v.idealpitch)
 		bits |= SU_IDEALPITCH;
 
-// stuff the sigil bits into the high bits of items for sbar, or else
-// mix in items2
-#ifdef QUAKE2
-	items = (int)ent->v.items | ((int)ent->v.items2 << 23);
-#else
-	val = GetEdictFieldValue(ent, "items2");
+	if (ent->v.perks)
+		bits |= SU_PERKS;
 
-	if (val)
-		items = (int)ent->v.items | ((int)val->_float << 23);
-	else
-		items = (int)ent->v.items | ((int)pr_global_struct->serverflags << 28);
-#endif
-
-	bits |= SU_ITEMS;
-	
 	if ( (int)ent->v.flags & FL_ONGROUND)
 		bits |= SU_ONGROUND;
-	
+
 	if ( ent->v.waterlevel >= 2)
 		bits |= SU_INWATER;
-	
+
 	for (i=0 ; i<3 ; i++)
 	{
 		if (ent->v.punchangle[i])
@@ -649,15 +622,28 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 		if (ent->v.velocity[i])
 			bits |= (SU_VELOCITY1<<i);
 	}
-	
+
 	if (ent->v.weaponframe)
 		bits |= SU_WEAPONFRAME;
 
-	if (ent->v.armorvalue)
-		bits |= SU_ARMOR;
+	if (ent->v.weaponskin)
+		bits |= SU_WEAPONSKIN;
 
-//	if (ent->v.weapon)
+	if (ent->v.weapon)
 		bits |= SU_WEAPON;
+
+	//if (ent->v.perks)
+	//	bits |= SU_PERKS;
+
+	if (ent->v.primary_grenades)
+		bits |= SU_PRIGRENADES;
+
+	//Think this is out of range of a short
+	//if (ent->v.secondary_grenades)
+	//	bits |= SU_SECGRENADES;
+
+	if (ent->v.grenades)
+		bits |= SU_GRENADES;
 
 // send the data
 
@@ -670,6 +656,9 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 	if (bits & SU_IDEALPITCH)
 		MSG_WriteChar (msg, ent->v.idealpitch);
 
+	if (bits & SU_PERKS)
+		MSG_WriteLong (msg, ent->v.perks);
+
 	for (i=0 ; i<3 ; i++)
 	{
 		if (bits & (SU_PUNCH1<<i))
@@ -678,37 +667,34 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 			MSG_WriteChar (msg, ent->v.velocity[i]/16);
 	}
 
-// [always sent]	if (bits & SU_ITEMS)
-	MSG_WriteLong (msg, items);
 
 	if (bits & SU_WEAPONFRAME)
 		MSG_WriteByte (msg, ent->v.weaponframe);
+	if (bits & SU_WEAPONSKIN)
+		MSG_WriteByte (msg, ent->v.weaponskin);
 	if (bits & SU_WEAPON)
 		MSG_WriteByte (msg, SV_ModelIndex(pr_strings+ent->v.weaponmodel));
-	
+
+	if (bits & SU_GRENADES)
+		MSG_WriteLong (msg, ent->v.grenades);
+
+	MSG_WriteShort (msg, ent->v.primary_grenades);
+	MSG_WriteShort (msg, ent->v.secondary_grenades);
 	MSG_WriteShort (msg, ent->v.health);
-	MSG_WriteByte (msg, ent->v.currentammo);
+	MSG_WriteShort (msg, ent->v.currentammo);
 	MSG_WriteByte (msg, ent->v.currentmag);
 	MSG_WriteByte (msg, ent->v.zoom);
 
+	MSG_WriteByte (msg, ent->v.weapon);
 	MSG_WriteByte (msg, pr_global_struct->rounds);
 	MSG_WriteByte (msg, pr_global_struct->rounds_change);
-
-	if (standard_quake)
-	{
-		MSG_WriteByte (msg, ent->v.weapon);
-	}
-	else
-	{
-		for(i=0;i<32;i++)
-		{
-			if ( ((int)ent->v.weapon) & (1<<i) )
-			{
-				MSG_WriteByte (msg, i);
-				break;
-			}
-		}
-	}
+	MSG_WriteByte (msg, ent->v.x2_icon);
+	MSG_WriteByte (msg, ent->v.insta_icon);
+	MSG_WriteByte (msg, ent->v.progress_bar);
+	MSG_WriteByte (msg, SV_ModelIndex(pr_strings+ent->v.weapon2model));
+	MSG_WriteByte (msg, ent->v.weapon2skin);
+	MSG_WriteByte (msg, ent->v.weapon2frame);
+	MSG_WriteByte (msg, ent->v.currentmag2);
 }
 
 /*

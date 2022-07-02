@@ -421,7 +421,6 @@ if (bits&(1<<i))
 	{
 		if (i > cl.maxclients)
 			Sys_Error ("i >= cl.maxclients");
-		ent->colormap = cl.scores[i-1].translations;
 	}
 
 #ifdef GLQUAKE
@@ -520,10 +519,12 @@ CL_ParseClientdata
 Server information pertaining to this client only
 ==================
 */
+extern int perk_order[9];
+extern int current_perk_order;
 void CL_ParseClientdata (int bits)
 {
-	int		i, j;
-	
+	int		i, s;
+
 	if (bits & SU_VIEWHEIGHT)
 		cl.viewheight = MSG_ReadChar ();
 	else
@@ -533,7 +534,196 @@ void CL_ParseClientdata (int bits)
 		cl.idealpitch = MSG_ReadChar ();
 	else
 		cl.idealpitch = 0;
-	
+
+
+	if (bits & SU_PERKS)
+		i = MSG_ReadLong ();
+	else
+		i = 0;
+	if (cl.perks != i)
+	{
+		if (i & 1 && !(cl.perks & 1))
+		{
+			perk_order[current_perk_order] = 1;
+			current_perk_order++;
+		}
+		if (i & 2 && !(cl.perks & 2))
+		{
+			perk_order[current_perk_order] = 2;
+			current_perk_order++;
+		}
+		if (i & 4 && !(cl.perks & 4))
+		{
+			perk_order[current_perk_order] = 4;
+			current_perk_order++;
+		}
+		if (i & 8 && !(cl.perks & 8))
+		{
+			perk_order[current_perk_order] = 8;
+			current_perk_order++;
+		}
+		if (i & 16 && !(cl.perks & 16))
+		{
+			perk_order[current_perk_order] = 16;
+			current_perk_order++;
+		}
+		if (i & 32 && !(cl.perks & 32))
+		{
+			perk_order[current_perk_order] = 32;
+			current_perk_order++;
+		}
+		if (i & 64 && !(cl.perks & 64))
+		{
+			perk_order[current_perk_order] = 64;
+			current_perk_order++;
+		}
+		if (i & 128 && !(cl.perks & 128))
+		{
+			perk_order[current_perk_order] = 128;
+			current_perk_order++;
+		}
+		if (cl.perks & 1 && !(i & 1))
+		{
+			for (s = 0; s < 9; s++)
+			{
+				if (perk_order[s] == 1)
+				{
+					perk_order[s] = 0;
+					while (perk_order[s+1])
+					{
+						perk_order[s] = perk_order[s+1];
+						perk_order[s+1] = 0;
+					}
+					break;
+				}
+			}
+			current_perk_order--;
+		}
+		if (cl.perks & 2 && !(i & 2))
+		{
+			for (s = 0; s < 9; s++)
+			{
+				if (perk_order[s] == 2)
+				{
+					perk_order[s] = 0;
+					while (perk_order[s+1])
+					{
+						perk_order[s] = perk_order[s+1];
+						perk_order[s+1] = 0;
+					}
+					break;
+				}
+			}
+			current_perk_order--;
+		}
+		if (cl.perks & 4 && !(i & 4))
+		{
+			for (s = 0; s < 9; s++)
+			{
+				if (perk_order[s] == 4)
+				{
+					perk_order[s] = 0;
+					while (perk_order[s+1])
+					{
+						perk_order[s] = perk_order[s+1];
+						perk_order[s+1] = 0;
+					}
+					break;
+				}
+			}
+			current_perk_order--;
+		}
+		if (cl.perks & 8 && !(i & 8))
+		{
+			for (s = 0; s < 9; s++)
+			{
+				if (perk_order[s] == 8)
+				{
+					perk_order[s] = 0;
+					while (perk_order[s+1])
+					{
+						perk_order[s] = perk_order[s+1];
+						perk_order[s+1] = 0;
+					}
+					break;
+				}
+			}
+			current_perk_order--;
+		}
+		if (cl.perks & 16 && !(i & 16))
+		{
+			for (s = 0; s < 9; s++)
+			{
+				if (perk_order[s] == 16)
+				{
+					perk_order[s] = 0;
+					while (perk_order[s+1])
+					{
+						perk_order[s] = perk_order[s+1];
+						perk_order[s+1] = 0;
+					}
+					break;
+				}
+			}
+			current_perk_order--;
+		}
+		if (cl.perks & 32 && !(i & 32))
+		{
+			for (s = 0; s < 9; s++)
+			{
+				if (perk_order[s] == 32)
+				{
+					perk_order[s] = 0;
+					while (perk_order[s+1])
+					{
+						perk_order[s] = perk_order[s+1];
+						perk_order[s+1] = 0;
+					}
+					break;
+				}
+			}
+			current_perk_order--;
+		}
+		if (cl.perks & 64 && !(i & 64))
+		{
+			for (s = 0; s < 9; s++)
+			{
+				if (perk_order[s] == 64)
+				{
+					perk_order[s] = 0;
+					while (perk_order[s+1])
+					{
+						perk_order[s] = perk_order[s+1];
+						perk_order[s+1] = 0;
+					}
+					break;
+				}
+			}
+			current_perk_order--;
+		}
+		if (cl.perks & 128 && !(i & 128))
+		{
+			for (s = 0; s < 9; s++)
+			{
+				if (perk_order[s] == 128)
+				{
+					perk_order[s] = 0;
+					while (perk_order[s+1])
+					{
+						perk_order[s] = perk_order[s+1];
+						perk_order[s+1] = 0;
+					}
+					break;
+				}
+			}
+			current_perk_order--;
+		}
+		cl.perks = i;
+	}
+
+	cl.onground = (bits & SU_ONGROUND) != 0;
+	cl.inwater = (bits & SU_INWATER) != 0;
+
 	VectorCopy (cl.mvelocity[0], cl.mvelocity[1]);
 	for (i=0 ; i<3 ; i++)
 	{
@@ -547,48 +737,61 @@ void CL_ParseClientdata (int bits)
 			cl.mvelocity[0][i] = 0;
 	}
 
-// [always sent]	if (bits & SU_ITEMS)
-		i = MSG_ReadLong ();
-
-	if (cl.items != i)
-	{	// set flash times
-		Sbar_Changed ();
-		for (j=0 ; j<32 ; j++)
-			if ( (i & (1<<j)) && !(cl.items & (1<<j)))
-				cl.item_gettime[j] = cl.time;
-		cl.items = i;
-	}
-		
-	cl.onground = (bits & SU_ONGROUND) != 0;
-	cl.inwater = (bits & SU_INWATER) != 0;
-
 	if (bits & SU_WEAPONFRAME)
 		cl.stats[STAT_WEAPONFRAME] = MSG_ReadByte ();
 	else
 		cl.stats[STAT_WEAPONFRAME] = 0;
 
+	if (bits & SU_WEAPONSKIN)
+		cl.stats[STAT_WEAPONSKIN] = MSG_ReadByte ();
+	else
+		cl.stats[STAT_WEAPONSKIN] = 0;
+
+
 	if (bits & SU_WEAPON)
 		i = MSG_ReadByte ();
 	else
 		i = 0;
+
 	if (cl.stats[STAT_WEAPON] != i)
-	{
 		cl.stats[STAT_WEAPON] = i;
-		Sbar_Changed ();
-	}
-	
-	i = MSG_ReadShort ();
-	if (cl.stats[STAT_HEALTH] != i)
+
+
+	if (bits & SU_GRENADES)
+		i = MSG_ReadLong ();
+	else
+		i = 0;
+
+	if (cl.stats[STAT_GRENADES] != i)
 	{
-		cl.stats[STAT_HEALTH] = i;
-		Sbar_Changed ();
+		HUD_Change_time = Sys_FloatTime() + 6;
+		cl.stats[STAT_GRENADES] = i;
 	}
 
-	i = MSG_ReadByte ();
+	i = MSG_ReadShort ();
+	if (cl.stats[STAT_PRIGRENADES] != i)
+	{
+		HUD_Change_time = Sys_FloatTime() + 6;
+		cl.stats[STAT_PRIGRENADES] = i;
+	}
+
+
+	i = MSG_ReadShort ();
+	if (cl.stats[STAT_SECGRENADES] != i)
+	{
+		HUD_Change_time = Sys_FloatTime() + 6;
+		cl.stats[STAT_SECGRENADES] = i;
+	}
+
+	i = MSG_ReadShort ();
+	if (cl.stats[STAT_HEALTH] != i)
+		cl.stats[STAT_HEALTH] = i;
+
+	i = MSG_ReadShort ();
 	if (cl.stats[STAT_AMMO] != i)
 	{
+		HUD_Change_time = Sys_FloatTime() + 6;
 		cl.stats[STAT_AMMO] = i;
-		Sbar_Changed ();
 	}
 
 	i = MSG_ReadByte ();
@@ -603,6 +806,13 @@ void CL_ParseClientdata (int bits)
 		cl.stats[STAT_ZOOM] = i;
 
 	i = MSG_ReadByte ();
+	if (cl.stats[STAT_ACTIVEWEAPON] != i)
+	{
+		HUD_Change_time = Sys_FloatTime() + 6;
+		cl.stats[STAT_ACTIVEWEAPON] = i;
+	}
+
+	i = MSG_ReadByte ();
 	if (cl.stats[STAT_ROUNDS] != i)
 		cl.stats[STAT_ROUNDS] = i;
 
@@ -611,61 +821,32 @@ void CL_ParseClientdata (int bits)
 		cl.stats[STAT_ROUNDCHANGE] = i;
 
 	i = MSG_ReadByte ();
+	if (cl.stats[STAT_X2] != i)
+		cl.stats[STAT_X2] = i;
 
-	if (standard_quake)
-	{
-		if (cl.stats[STAT_ACTIVEWEAPON] != i)
-		{
-			cl.stats[STAT_ACTIVEWEAPON] = i;
-			Sbar_Changed ();
-		}
-	}
-	else
-	{
-		if (cl.stats[STAT_ACTIVEWEAPON] != (1<<i))
-		{
-			cl.stats[STAT_ACTIVEWEAPON] = (1<<i);
-			Sbar_Changed ();
-		}
-	}
-}
+	i = MSG_ReadByte ();
+	if (cl.stats[STAT_INSTA] != i)
+		cl.stats[STAT_INSTA] = i;
 
-/*
-=====================
-CL_NewTranslation
-=====================
-*/
-void CL_NewTranslation (int slot)
-{
-	int		i, j;
-	int		top, bottom;
-	byte	*dest, *source;
-	
-	if (slot > cl.maxclients)
-		Sys_Error ("CL_NewTranslation: slot > cl.maxclients");
-	dest = cl.scores[slot].translations;
-	source = vid.colormap;
-	memcpy (dest, vid.colormap, sizeof(cl.scores[slot].translations));
-	top = cl.scores[slot].colors & 0xf0;
-	bottom = (cl.scores[slot].colors &15)<<4;
-#ifdef GLQUAKE
-	R_TranslatePlayerSkin (slot);
-#endif
+	i = MSG_ReadByte ();
+	if (cl.progress_bar != i)
+		cl.progress_bar = i;
 
-	for (i=0 ; i<VID_GRADES ; i++, dest += 256, source+=256)
-	{
-		if (top < 128)	// the artists made some backwards ranges.  sigh.
-			memcpy (dest + TOP_RANGE, source + top, 16);
-		else
-			for (j=0 ; j<16 ; j++)
-				dest[TOP_RANGE+j] = source[top+15-j];
-				
-		if (bottom < 128)
-			memcpy (dest + BOTTOM_RANGE, source + bottom, 16);
-		else
-			for (j=0 ; j<16 ; j++)
-				dest[BOTTOM_RANGE+j] = source[bottom+15-j];		
-	}
+	i = MSG_ReadByte ();
+	if (cl.stats[STAT_WEAPON2] != i)
+		cl.stats[STAT_WEAPON2] = i;
+
+	i = MSG_ReadByte ();
+	if (cl.stats[STAT_WEAPON2SKIN] != i)
+		cl.stats[STAT_WEAPON2SKIN] = i;
+
+	i = MSG_ReadByte ();
+	if (cl.stats[STAT_WEAPON2FRAME] != i)
+		cl.stats[STAT_WEAPON2FRAME] = i;
+
+	i = MSG_ReadByte ();
+	if (cl.stats[STAT_CURRENTMAG2] != i)
+		cl.stats[STAT_CURRENTMAG2] = i;
 }
 
 /*
@@ -912,7 +1093,7 @@ void CL_ParseServerMessage (void)
 			i = MSG_ReadByte ();
 			if (i >= cl.maxclients)
 				Host_Error ("CL_ParseServerMessage: svc_updatefrags > MAX_SCOREBOARD");
-			cl.scores[i].frags = MSG_ReadShort ();
+			MSG_ReadShort ();
 			break;			
 
 		case svc_updatecolors:
@@ -920,8 +1101,7 @@ void CL_ParseServerMessage (void)
 			i = MSG_ReadByte ();
 			if (i >= cl.maxclients)
 				Host_Error ("CL_ParseServerMessage: svc_updatecolors > MAX_SCOREBOARD");
-			cl.scores[i].colors = MSG_ReadByte ();
-			CL_NewTranslation (i);
+			MSG_ReadByte ();
 			break;
 			
 		case svc_particle:

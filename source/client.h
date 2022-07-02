@@ -42,9 +42,10 @@ typedef struct
 {
 	char	name[MAX_SCOREBOARDNAME];
 	float	entertime;
-	int		frags;
-	int		colors;			// two 4 bit fields
-	byte	translations[VID_GRADES*256];
+	int		points;
+	int		maxpoints;
+	int		kills;
+	int		headshots;
 } scoreboard_t;
 
 typedef struct
@@ -158,7 +159,7 @@ typedef struct
 // information for local display
 	int			stats[MAX_CL_STATS];	// health, etc
 	int			perks;			// Perk icons.
-	int			items;			// inventory bit flags
+	int			progress_bar;			// Perk icons.
 	float	item_gettime[32];	// cl.time of aquiring item, for blinking
 	float		faceanimtime;	// use anim frame if cl.time < this
 

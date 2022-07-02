@@ -212,6 +212,7 @@ void Sys_Sleep (void)
 
 void Sys_DefaultConfig(void)
 {
+	// naievil -- fixme I didn't do this
 	Cbuf_AddText ("bind ABUTTON +right\n");
 	Cbuf_AddText ("bind BBUTTON +lookdown\n");
 	Cbuf_AddText ("bind XBUTTON +lookup\n");
@@ -226,7 +227,7 @@ void Sys_DefaultConfig(void)
 
 void Sys_SetKeys(u32 keys, u32 state){
 	if( keys & KEY_SELECT)
-		Key_Event(K_ESCAPE, state);
+		Key_Event(K_SELECT, state);
 	if( keys & KEY_START)
 		Key_Event(K_ENTER, state);
 	if( keys & KEY_DUP)

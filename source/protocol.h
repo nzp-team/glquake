@@ -49,13 +49,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	SU_VELOCITY1	(1<<5)
 #define	SU_VELOCITY2	(1<<6)
 #define	SU_VELOCITY3	(1<<7)
-//define	SU_AIMENT		(1<<8)  AVAILABLE BIT
-#define	SU_ITEMS		(1<<9)
+#define	SU_WEAPONSKIN	(1<<7)
+#define	SU_PERKS		(1<<9)
 #define	SU_ONGROUND		(1<<10)		// no data follows, the bit is it
 #define	SU_INWATER		(1<<11)		// no data follows, the bit is it
 #define	SU_WEAPONFRAME	(1<<12)
-#define	SU_ARMOR		(1<<13)
 #define	SU_WEAPON		(1<<14)
+#define	SU_PRIGRENADES	(1<<15)
+#define	SU_SECGRENADES	(1<<16)
+#define	SU_GRENADES		(1<<13)
 
 // a sound with no channel is a local only sound
 #define	SND_VOLUME		(1<<0)		// a byte

@@ -115,6 +115,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define K_MWHEELUP		239
 #define K_MWHEELDOWN	240
 
+// naievil -- this is for using the select button for a game key, which is important
+#define K_SELECT 		241
+
 
 
 typedef enum {key_game, key_console, key_message, key_menu, key_menu_pause} keydest_t;

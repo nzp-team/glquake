@@ -149,7 +149,6 @@ void HUD_Init (void)
 	//Achievement_Init();
 }
 
-#if 0
 /*
 ===============
 HUD_NewMap
@@ -302,7 +301,6 @@ void HUD_EndScreen (void)
 
 }
 
-
 //=============================================================================
 
   //=============================================================================//
@@ -449,7 +447,6 @@ void HUD_Point_Change (void)
 		}
 	}
 }
-#endif
 
 /*
 ==================
@@ -486,7 +483,7 @@ void HUD_Blood (void)
     Draw_ColorPic (vid.width - fx_blood_ru->width, 0, fx_blood_ru, 82, 6, 6, alpha);
     Draw_ColorPic (vid.width - fx_blood_ru->width, vid.height - fx_blood_ru->height, fx_blood_rd, 82, 6, 6, alpha);*/
 }
-#if 0
+
 /*
 ===============
 HUD_GetWorldText
@@ -1070,10 +1067,8 @@ HUD_Perks
 #define 	P_DEAD 		64
 #define 	P_MULE 		128
 
-#endif
 int perk_order[9];
 int current_perk_order;
-#if 0
 
 void HUD_Perks (void)
 {
@@ -1179,6 +1174,7 @@ char		achievement_text[MAX_QPATH];
 double		achievement_time;
 float smallsec;
 int ach_pic;
+
 void HUD_Achievement (void)
 {
 
@@ -1359,7 +1355,6 @@ void HUD_Weapon (void)
 	x_value = vid.width - 8 - l*8;
 	Draw_String (x_value, y_value, str);
 }
-#endif
 
 /*
 ===============
@@ -1389,16 +1384,13 @@ void HUD_Draw (void)
 		return;
 	}
 
-	char stuff[1024];
-	sprintf(stuff, "fov: %f", scr_fov.value);
-	Draw_String(0, 32, stuff);
-/*
+
 	if (cl.stats[STAT_HEALTH] <= 0)
 	{
 		HUD_EndScreen ();
 		return;
 	}
-*/
+
 //	HUD_Blood();
 //	HUD_Rounds();
 //	HUD_Perks();
