@@ -1263,10 +1263,6 @@ void SCR_UpdateScreen (void)
 		}
 	}
 
-	// naievil -- FIXME: the scr_fov is really bugged and only works with integer values
-	// this should have a weird workaround
-	//Con_Printf("Original fov: %d\tscr_fov: %f\tzoom: %d\n", original_fov, scr_fov.value, cl.stats[STAT_ZOOM]);
-
 	if (oldfov != scr_fov.value)
 	{
 		oldfov = scr_fov.value;
