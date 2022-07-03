@@ -1328,12 +1328,12 @@ void Host_Spawn_f (void)
 		MSG_WriteByte (&host_client->message, svc_updatename);
 		MSG_WriteByte (&host_client->message, i);
 		MSG_WriteString (&host_client->message, client->name);
-		MSG_WriteByte (&host_client->message, svc_updatefrags);
+		MSG_WriteByte (&host_client->message, svc_updatepoints);
 		MSG_WriteByte (&host_client->message, i);
-		MSG_WriteShort (&host_client->message, client->old_frags);
-		MSG_WriteByte (&host_client->message, svc_updatecolors);
+		MSG_WriteLong (&host_client->message, client->old_points);
+		MSG_WriteByte (&host_client->message, svc_updatekills);
 		MSG_WriteByte (&host_client->message, i);
-		MSG_WriteByte (&host_client->message, client->colors);
+		MSG_WriteShort (&host_client->message, client->old_kills);
 	}
 	
 // send all current light styles

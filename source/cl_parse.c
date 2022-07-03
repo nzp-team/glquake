@@ -952,11 +952,7 @@ void CL_ParseLimbUpdate (void)
 
 #define SHOWNET(x) if(cl_shownet.value==2)Con_Printf ("%3i:%s\n", msg_readcount-1, x);
 
-/*
-=====================
-CL_ParseServerMessage
-=====================
-*/
+
 void CL_ParseServerMessage (void)
 {
 	int			cmd;
@@ -1087,14 +1083,6 @@ void CL_ParseServerMessage (void)
 				Host_Error ("CL_ParseServerMessage: svc_updatename > MAX_SCOREBOARD");
 			strcpy (cl.scores[i].name, MSG_ReadString ());
 			break;
-			
-		case svc_updatefrags:
-			Sbar_Changed ();
-			i = MSG_ReadByte ();
-			if (i >= cl.maxclients)
-				Host_Error ("CL_ParseServerMessage: svc_updatefrags > MAX_SCOREBOARD");
-			MSG_ReadShort ();
-			break;			
 
 		case svc_updatecolors:
 			Sbar_Changed ();
@@ -1203,6 +1191,21 @@ void CL_ParseServerMessage (void)
 
 		case svc_limbupdate:
 			CL_ParseLimbUpdate();
+			break;
+
+		case svc_updatepoints:
+			i = MSG_ReadByte ();
+			if (i >= cl.maxclients)
+				Host_Error ("CL_ParseServerMessage: svc_updatepoints > MAX_SCOREBOARD");
+			cl.scores[i].points = MSG_ReadLong ();
+
+			break;
+
+		case svc_updatekills:
+			i = MSG_ReadByte ();
+			if (i >= cl.maxclients)
+				Host_Error ("CL_ParseServerMessage: svc_updatekills > MAX_SCOREBOARD");
+			cl.scores[i].kills = MSG_ReadShort ();
 			break;
 		}
 	}

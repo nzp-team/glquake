@@ -101,7 +101,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 						// [string]...[0]sounds cache
 #define	svc_lightstyle		12	// [byte] [string]
 #define	svc_updatename		13	// [byte] [string]
-#define	svc_updatefrags		14	// [byte] [short]
+#define	svc_updatepoints		14	// [byte] [short]
+
 #define	svc_clientdata		15	// <shortbits + data>
 #define	svc_stopsound		16	// <see code>
 #define	svc_updatecolors	17	// [byte] [byte]
