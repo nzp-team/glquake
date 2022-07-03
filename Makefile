@@ -29,7 +29,7 @@ CFLAGS	:=	-g -Wall -O3 -mword-relocations \
 			-fomit-frame-pointer -ffunction-sections \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE)  -D__3DS__ -DGLQUAKE
+CFLAGS	+=	$(INCLUDE) -DARM11 -D_3DS -DGLQUAKE
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11
 
