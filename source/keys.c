@@ -56,7 +56,7 @@ keyname_t keynames[] =
 {
 	#ifdef _3DS
 	{"TAB", K_TAB},
-	{"START", K_ENTER},
+	{"START", K_ESCAPE},
 	{"SELECT", K_SELECT},
 	{"SPACE", K_SPACE},
 	{"BACKSPACE", K_BACKSPACE},

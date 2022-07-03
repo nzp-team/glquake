@@ -281,6 +281,7 @@ void Sys_LowFPPrecision (void)
 
 //=============================================================================
 
+bool game_running;
 int main (int argc, char **argv)
 {
 	static float time, oldtime;
@@ -308,7 +309,8 @@ int main (int argc, char **argv)
 
 	oldtime = Sys_FloatTime();
 
-	while (aptMainLoop())
+	game_running = true;
+	while (aptMainLoop() && game_running)
 	{
 		time = Sys_FloatTime();
 		Host_Frame (time - oldtime);
