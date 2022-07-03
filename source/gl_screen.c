@@ -765,46 +765,6 @@ void SCR_DrawNet (void)
 	Draw_Pic (scr_vrect.x+64, scr_vrect.y, scr_net);
 }
 
-/*
-==============
-DrawPause
-==============
-*/
-void SCR_DrawPause (void)
-{
-	qpic_t	*pic;
-
-	if (!scr_showpause.value)		// turn off for screenshots
-		return;
-
-	if (!cl.paused)
-		return;
-
-	pic = Draw_CachePic ("gfx/pause.lmp");
-	Draw_Pic ( (vid.width - pic->width)/2, 
-		(vid.height - 48 - pic->height)/2, pic);
-}
-
-
-
-/*
-==============
-SCR_DrawLoading
-==============
-*/
-void SCR_DrawLoading (void)
-{
-	qpic_t	*pic;
-
-	if (!scr_drawloading)
-		return;
-		
-	pic = Draw_CachePic ("gfx/loading.lmp");
-	Draw_Pic ( (vid.width - pic->width)/2, 
-		(vid.height - 48 - pic->height)/2, pic);
-}
-
-
 
 //=============================================================================
 
@@ -1297,8 +1257,6 @@ void SCR_UpdateScreen (void)
 
 	//muff - to show FPS on screen
 	SCR_DrawFPS ();
-	//SCR_DrawBAT (); //naievil -- fixme
-	SCR_DrawPause ();
 	SCR_CheckDrawCenterString ();
 	SCR_CheckDrawUseString ();
 	HUD_Draw (); // naievil -- fixme
