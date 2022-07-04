@@ -1368,10 +1368,10 @@ void GL_MipMap8Bit (byte *in, int width, int height)
 GL_Upload32
 ===============
 */
-void GL_Upload32 (byte *data, int width, int height,  qboolean mipmap, qboolean alpha)
+void GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, qboolean alpha)
 {
 	int			samples;
-	static unsigned int scaled[1024*512];	// [512*256];
+static	unsigned	scaled[1024*512];	// [512*256];
 	int			scaled_width, scaled_height;
 
 	for (scaled_width = 1 ; scaled_width < width ; scaled_width<<=1)
@@ -1403,9 +1403,8 @@ void GL_Upload32 (byte *data, int width, int height,  qboolean mipmap, qboolean 
 		}
 		memcpy (scaled, data, width*height*4);
 	}
-	else {
-		GL_ResampleTexture ((unsigned *)data, width, height, scaled, scaled_width, scaled_height);
-	}
+	else
+		GL_ResampleTexture (data, width, height, scaled, scaled_width, scaled_height);
 
 	glTexImage2D (GL_TEXTURE_2D, 0, samples, scaled_width, scaled_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaled);
 	if (mipmap)
@@ -1427,7 +1426,6 @@ void GL_Upload32 (byte *data, int width, int height,  qboolean mipmap, qboolean 
 		}
 	}
 done: ;
-
 
 	if (mipmap)
 	{
@@ -1573,7 +1571,7 @@ static	unsigned	trans[640*480];		// FIXME, temporary
  		GL_Upload8_EXT (data, width, height, mipmap, alpha);
  		return;
 	}
-	GL_Upload32 ((byte *)trans, width, height, mipmap, alpha);
+	GL_Upload32 (trans, width, height, mipmap, alpha);
 }
 
 //Diabolickal TGA Begin
@@ -1588,7 +1586,6 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 	lhcsum = 0;
 	s = width*height*bytesperpixel;
 
-	int ret_texnum = texture_extension_number;
 	for (i = 0;i < 256;i++) lhcsumtable[i] = i + 1;
 	for (i = 0;i < s;i++) lhcsum += (lhcsumtable[data[i] & 255]++);
 	// see if the texture is allready present
@@ -1600,8 +1597,8 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 			{
 				if (lhcsum != glt->lhcsum || width != glt->width || height != glt->height)
 				{
-					Con_Printf("GL_LoadTexture: cache mismatch\n");
-					Con_Printf("lhcsum: %d - %d\twidth: %d - %d\theight: %d - %d\n", lhcsum, glt->lhcsum, width, glt->width, height, glt->height);
+					Con_DPrintf("GL_LoadTexture: cache mismatch\n");
+					Con_DPrintf("lhcsum: %d - %d\twidth: %d - %d\theight: %d - %d\n", lhcsum, glt->lhcsum, width, glt->width, height, glt->height);
 					goto GL_LoadTexture_setup;
 				}
 				return glt->texnum;
@@ -1613,7 +1610,6 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 	glt = &gltextures[numgltextures];
 	numgltextures++;
 	glt->texnum = texture_extension_number;
-	ret_texnum = texture_extension_number;
 	texture_extension_number++;
 
 	strcpy (gltextures[glt->texnum].identifier, identifier);
@@ -1622,7 +1618,7 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 
 	// naievil -- why do we have this twice lol
 	gltextures[glt->texnum].checksum = lhcsum;
-	gltextures[glt->texnum].lhcsum = lhcsum;
+	//gltextures[glt->texnum].lhcsum = lhcsum;
 
 	gltextures[glt->texnum].width = width;
 	gltextures[glt->texnum].height = height;
@@ -1638,14 +1634,14 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 			GL_Upload8 (data, width, height, mipmap, alpha);
 		}
 		else if (bytesperpixel == 4) {
-			GL_Upload32 (data, width, height, mipmap, true);
+			GL_Upload32 ((unsigned*)data, width, height, mipmap, true);
 		}
 		else {
 			Sys_Error("GL_LoadTexture: unknown bytesperpixel\n");
 		}
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	}
-	return ret_texnum;
+	return glt->texnum;
 }
 
 //Diabolickal TGA End
@@ -1701,7 +1697,7 @@ int GL_LoadTexture32 (char *identifier, int width, int height, byte *data, qbool
 		data[4 * i + 2] = gammatable[data[4 * i + 2]];
 	}
 
-	GL_Upload32 (data, width, height, mipmap, alpha);
+	GL_Upload32 ((unsigned *)data, width, height, mipmap, alpha);
 
 	texture_extension_number++;
 
