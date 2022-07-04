@@ -90,7 +90,7 @@ cvar_t		scr_showturtle = {"showturtle","0"};
 cvar_t		scr_showpause = {"showpause","1"};
 cvar_t		scr_printspeed = {"scr_printspeed","8"};
 cvar_t 		scr_showfps = {"scr_showfps", "0"};
-cvar_t		scr_loadscreen = {"scr_loadscreen","1", qtrue};
+cvar_t		scr_loadscreen = {"scr_loadscreen","1"};
 cvar_t		gl_triplebuffer = {"gl_triplebuffer", "1", true };
 
 extern	cvar_t	crosshair;
@@ -98,11 +98,17 @@ extern	cvar_t	crosshair;
 qboolean	scr_initialized;		// ready to draw
 
 qpic_t      *hitmark;
-qpic_t		*scr_ram;
-qpic_t		*scr_net;
-qpic_t		*scr_turtle;
+qpic_t 		*lscreen;
 
 int			scr_fullupdate;
+
+int			loadingScreen;
+int			ShowBlslogo;
+
+qboolean 	loadscreeninit;
+
+char* 		loadname2;
+char* 		loadnamespec;
 
 int			clearconsole;
 int			clearnotify;
@@ -235,10 +241,10 @@ Press somthing printing
 char		scr_usestring[1024];
 float		scr_usetime_off = 0.0f;
 int			button_pic_x;
-extern qpic_t 		*b_circle;
-extern qpic_t 		*b_square;
-extern qpic_t 		*b_cross;
-extern qpic_t 		*b_triangle;
+extern qpic_t 		*b_abutton;
+extern qpic_t 		*b_bbutton;
+extern qpic_t 		*b_ybutton;
+extern qpic_t 		*b_xbutton;
 extern qpic_t 		*b_left;
 extern qpic_t 		*b_right;
 extern qpic_t 		*b_up;
@@ -247,7 +253,8 @@ extern qpic_t 		*b_lt;
 extern qpic_t 		*b_rt;
 extern qpic_t 		*b_start;
 extern qpic_t 		*b_select;
-extern qpic_t 		*b_home;
+extern qpic_t		*b_zlt;
+extern qpic_t 		*b_zrt;
 
 /*
 ==============
@@ -272,33 +279,35 @@ qpic_t *GetButtonIcon (char *buttonname)
 		if (!strncmp (b, buttonname, l) )
 		{
 			// naievil -- need to fix these
-			if (!strcmp(Key_KeynumToString(j), "UPARROW"))
+			if (!strcmp(Key_KeynumToString(j), "PADUP"))
 				return b_up;
-			else if (!strcmp(Key_KeynumToString(j), "DOWNARROW"))
+			else if (!strcmp(Key_KeynumToString(j), "PADDOWN"))
 				return b_down;
-			else if (!strcmp(Key_KeynumToString(j), "LEFTARROW"))
+			else if (!strcmp(Key_KeynumToString(j), "PADLEFT"))
 				return b_left;
-			else if (!strcmp(Key_KeynumToString(j), "RIGHTARROW"))
+			else if (!strcmp(Key_KeynumToString(j), "PADRIGHT"))
 				return b_right;
 			else if (!strcmp(Key_KeynumToString(j), "SELECT"))
 				return b_select;
-			else if (!strcmp(Key_KeynumToString(j), "HOME"))
-				return b_home;
-			else if (!strcmp(Key_KeynumToString(j), "TRIANGLE"))
-				return b_triangle;
-			else if (!strcmp(Key_KeynumToString(j), "CIRCLE"))
-				return b_circle;
-			else if (!strcmp(Key_KeynumToString(j), "CROSS"))
-				return b_cross;
-			else if (!strcmp(Key_KeynumToString(j), "SQUARE"))
-				return b_square;
+			else if (!strcmp(Key_KeynumToString(j), "ABUTTON"))
+				return b_abutton;
+			else if (!strcmp(Key_KeynumToString(j), "BBUTTON"))
+				return b_bbutton;
+			else if (!strcmp(Key_KeynumToString(j), "XBUTTON"))
+				return b_xbutton;
+			else if (!strcmp(Key_KeynumToString(j), "YBUTTON"))
+				return b_ybutton;
 			else if (!strcmp(Key_KeynumToString(j), "LTRIGGER"))
 				return b_lt;
 			else if (!strcmp(Key_KeynumToString(j), "RTRIGGER"))
 				return b_rt;
+			else if (!strcmp(Key_KeynumToString(j), "ZLTRIGGER"))
+				return b_zlt;
+			else if (!strcmp(Key_KeynumToString(j), "ZRTRIGGER"))
+				return b_zrt;
 		}
 	}
-	return b_cross;
+	return b_abutton;
 }
 
 char *GetUseButtonL ()
@@ -461,13 +470,13 @@ void SCR_DrawUseString (void)
 		return;
 // the finale prints the characters one at a time
 
-	y = vid.height*0.70;
+	y = vid.height*0.65;
 	l = strlen (scr_usestring);
     x = (vid.width - l*8)/2;
 
     // naievil -- fixme the picture does not show...
     Draw_String (x, y, scr_usestring);
-	Draw_Pic (x + button_pic_x*8, y, GetButtonIcon("+use"));
+	Draw_Pic (x + button_pic_x*8, y - 4, GetButtonIcon("+use"));
 }
 
 void SCR_CheckDrawUseString (void)
@@ -645,6 +654,7 @@ void SCR_Init (void)
 	Cvar_RegisterVariable (&scr_centertime);
 	Cvar_RegisterVariable (&scr_printspeed);
 	Cvar_RegisterVariable (&scr_showfps);
+	Cvar_RegisterVariable (&scr_loadscreen);
 
 	Cvar_RegisterVariable (&gl_triplebuffer);
 
@@ -654,11 +664,6 @@ void SCR_Init (void)
 	Cmd_AddCommand ("screenshot",SCR_ScreenShot_f);
 	Cmd_AddCommand ("sizeup",SCR_SizeUp_f);
 	Cmd_AddCommand ("sizedown",SCR_SizeDown_f);
-
-	// naievil -- fixme remove this
-	scr_ram = Draw_PicFromWad ("ram");
-	scr_net = Draw_PicFromWad ("net");
-	scr_turtle = Draw_PicFromWad ("turtle");
 
 	hitmark = Draw_CachePic("gfx/hud/hit_marker");
 
@@ -710,64 +715,283 @@ void SCR_DrawFPS (void)
 	}
 }
 
-/*
-==============
-SCR_DrawRam
-==============
-*/
-void SCR_DrawRam (void)
-{
-	if (!scr_showram.value)
-		return;
-
-	if (!r_cache_thrash)
-		return;
-
-	Draw_Pic (scr_vrect.x+32, scr_vrect.y, scr_ram);
-}
-
-/*
-==============
-SCR_DrawTurtle
-==============
-*/
-void SCR_DrawTurtle (void)
-{
-	static int	count;
-	
-	if (!scr_showturtle.value)
-		return;
-
-	if (host_frametime < 0.1)
-	{
-		count = 0;
-		return;
-	}
-
-	count++;
-	if (count < 3)
-		return;
-
-	Draw_Pic (scr_vrect.x, scr_vrect.y, scr_turtle);
-}
-
-/*
-==============
-SCR_DrawNet
-==============
-*/
-void SCR_DrawNet (void)
-{
-	if (realtime - cl.last_received_message < 0.3)
-		return;
-	if (cls.demoplayback)
-		return;
-
-	Draw_Pic (scr_vrect.x+64, scr_vrect.y, scr_net);
-}
-
 
 //=============================================================================
+
+/*
+==============
+SCR_DrawLoading
+==============
+*/
+void SCR_DrawLoading (void)
+{
+	qpic_t	*pic;
+
+	if (!scr_drawloading)
+		return;
+
+	pic = Draw_CachePic ("gfx/loading.lmp");
+	Draw_Pic ( (vid.width - pic->width)/2,
+		(vid.height - 48 - pic->height)/2, pic);
+}
+
+int Random_Int (int max_int)
+{
+	float	f;
+	f = (rand ()&0x7fff) / ((float)0x7fff) * max_int;
+	if (f > 0)
+		return (int)(f + 0.5) + 1;
+	else
+		return (int)(f - 0.5) + 1;
+}
+/*
+==============
+SCR_DrawLoadScreen
+==============
+*/
+
+/*
+	Creds to the following people from the 2020
+	Loading Screen Hint Submission/Contest:
+
+	* BCDeshiG
+	* Derped_Crusader
+	* Aidan
+	* yasen
+	* greg
+	* Asher
+	* Bernerd
+	* Omar Alejandro
+	* TheSmashers
+*/
+double loadingtimechange;
+int loadingdot;
+int loadingtextwidth;
+char *lodinglinetext;
+qpic_t *awoo;
+char *ReturnLoadingtex (void)
+{
+    int StringNum = Random_Int(55);
+    switch(StringNum)
+    {
+        case 1:
+			return  "Released in 1996, Quake is now over 25 years old!";
+            break;
+        case 2:
+            return  "Use the Kar98-k to be the hero we want you to be!";
+            break;
+        case 3:
+            return  "There is a huge number of modern engines based on Quake!";
+            break;
+        case 4:
+            return  "Development for NZ:P officially began on September 27, 2009";
+            break;
+        case 5:
+            return  "NZ:P was first released on December 25, 2010!";
+            break;
+        case 6:
+            return  "The 1.1 release of NZ:P has over 90,000 downloads!";
+            break;
+        case 7:
+            return  "NZ:P has been downloaded over 400,000 times!";
+            break;
+        case 8:
+            return  "The original NZP was made mainly by 3 guys around the world.";
+            break;
+        case 9:
+            return  "Blubswillrule: known as \"blubs\", is from the USA.";
+            break;
+        case 10:
+            return  "Jukki is from Finland.";
+            break;
+        case 11:
+            return  "Ju[s]tice, or \"tom\" is from Lithuania.";
+            break;
+        case 12:
+            return  "This game is the reason that we have bad sleeping habits!";
+            break;
+        case 13:
+            return  "We had a lot of fun making this game.";
+            break;
+        case 14:
+            return  "Did you know you can make your own Custom Map?";
+            break;
+        case 15:
+            return  "Try Retro Mode, it's in the Graphics Settings!";
+            break;
+        case 16:
+			return  "Tired of the base maps? Make your own or try some online!";
+            break;
+        case 17:
+            return  "Slay zombies & be grateful.";
+            break;
+        case 18:
+            return  "Custom maps, CUSTOM MAPS!";
+            break;
+        case 19:
+            return  "Go outside & build a snowman!";
+            break;
+        case 20:
+            return  "Please surround yourself with zombies!";
+            break;
+        case 21:
+            return  "Don't play for too long, or zombies will eat you.";
+            break;
+        case 22:
+            return  "That was epic... EPIC FOR THE WIIIN!"; //why
+            break;
+        case 23:
+            return  "Citra is an awesome 3DS emulator!";
+            break;
+        case 24:
+            return  "You dead yet?";
+            break;
+        case 25:
+            return  "Now 21% cooler!";
+            break;
+        case 26:
+            return  "your lg is nothink on the lan"; //what
+            break;
+        case 27:
+            return  "I'm not your chaotic on dm6!"; 
+            break;
+        case 28:
+            return  "Shoot zombies to kill them. Or knife them. You choose.";
+            break;
+        case 29:
+            return 	"How many people forgot to Compile today?";
+            break;
+        case 30:
+            return  "ggnore";
+            break;
+        case 31:
+            return  "Have you tried NZ:P on PC or NX?";
+            break;
+        case 32:
+            return  "Submerge your device in water for godmode!";
+            break;
+        case 33:
+            return  "10/10/10 was a good day.";
+            break;
+        case 34:
+            return  "Also check out \"No Bugs Allowed\" for the PSP!";
+            break;
+        case 35:
+            return 	"MotoLegacy, or \"Ian\", is from the USA.";
+            break;
+        case 36:
+            return  "Zombies don't like bullets.";
+            break;
+        case 37:
+            return  "Thanks for being an awesome fan!";
+            break;
+		case 38:
+			return 	"Removed Herobrine";
+			break;
+		case 39:
+			return 	"Pack-a-Punch the Kar98k to get to round infinity.";
+			break;
+		case 40:
+			return 	"I feel like I'm being gaslit.";
+			break;
+		case 41:
+			return 	"Heads up! You will die if you are killed!";
+			break;
+		case 42:
+			return 	"Zombies legally can't kill you if you say no!";
+			break;
+		case 43:
+			return 	"Please help me find the meaning of   . Thanks.";
+			break;
+		case 44:
+			return  "NZ:P Discord is ONLY for Thomas the Tank Engine Roleplay!";
+			break;
+		case 45:
+			return 	"Get rid of the 21% cooler tip, it's an MLP reference.";
+			break;
+		case 46:
+			return 	"You're playing on a 3DS!";
+			break;
+		case 47:
+			return 	"Don't leak the beta!";
+			break;
+		case 48:
+			return  "Jugger-Nog increases your health!";
+			break;
+		case 49:
+			return  "greg was here";
+			break;
+		case 50:
+			return  "Where the hell is the Mystery Box?!";
+			break;
+		case 51:
+			return  "Zombies like getting shot.. I think.";
+			break;
+		case 52:
+			return  "pro tip: aiming helps";
+			break;
+		case 53:
+			return  "If a Nazi Zombie bites you, are you a Nazi, or a Zombie?";
+			break;
+		case 54:
+			return  "Play some Custom Maps!";
+			break;
+    }
+    return "wut wut";
+}
+qboolean load_screen_exists;
+void SCR_DrawLoadScreen (void)
+{
+
+	if (developer.value) {
+		return;
+	}
+	if (!con_forcedup) {
+	    return;
+	}
+
+	if (loadingScreen) {
+		if (!loadscreeninit) {
+			load_screen_exists = qfalse;
+
+			char* lpath;
+			lpath = (char*)Z_Malloc(sizeof(char)*32);
+			strcpy(lpath, "gfx/lscreen/");
+			strcat(lpath, loadname2);
+
+			lscreen = Draw_CachePic(lpath);
+			awoo = Draw_CachePic("gfx/menu/awoo");
+
+			if (lscreen != NULL)
+				load_screen_exists = qtrue;
+
+			loadscreeninit = qtrue;
+		}
+
+		if (load_screen_exists == qtrue)
+			Draw_Pic(scr_vrect.x, scr_vrect.y, lscreen);
+
+		Draw_FillByColor(0, 0, 480, 24, 0, 0, 0, 150);
+		Draw_FillByColor(0, 248, 480, 24, 0, 0, 0, 150);
+
+		Draw_ColoredString(2, 4, loadnamespec, 255, 255, 0, 255, 2);
+	}
+
+	if (loadingtimechange < Sys_FloatTime ())
+	{
+        lodinglinetext = ReturnLoadingtex();
+		loadingtextwidth = strlen(lodinglinetext)*8;
+        loadingtimechange = Sys_FloatTime () + 5;
+	}
+
+	if (key_dest == key_game) {
+		Draw_ColoredString(vid.width/2 - loadingtextwidth/2, 225, lodinglinetext, 255, 255, 255, 255, 1);
+
+		if (strcmp(lodinglinetext, "Please help me find the meaning of   . Thanks.") == 0) {
+			Draw_Pic(280, 225, awoo);
+		}
+	}
+}
 
 
 /*
@@ -1253,20 +1477,20 @@ void SCR_UpdateScreen (void)
 
 	GL_Set2D ();
 
-	// naievil -- fixme
 	Draw_Crosshair ();
 
 	//muff - to show FPS on screen
 	SCR_DrawFPS ();
 	SCR_CheckDrawCenterString ();
 	SCR_CheckDrawUseString ();
-	HUD_Draw (); // naievil -- fixme
+	HUD_Draw ();
 	SCR_DrawConsole ();
 	M_Draw ();
 
 	// naievil -- fixme
-	//if(scr_loadscreen.value)
-	//	SCR_DrawLoadScreen();
+	if(scr_loadscreen.value) {
+		SCR_DrawLoadScreen();
+	}
 
 	// naievil -- fixme
 	//Draw_LoadingFill();

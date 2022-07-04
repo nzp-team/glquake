@@ -1371,7 +1371,7 @@ GL_Upload32
 void GL_Upload32 (byte *data, int width, int height,  qboolean mipmap, qboolean alpha)
 {
 	int			samples;
-	unsigned int scaled[1024*512];	// [512*256];
+	static unsigned int scaled[1024*512];	// [512*256];
 	int			scaled_width, scaled_height;
 
 	for (scaled_width = 1 ; scaled_width < width ; scaled_width<<=1)
@@ -1393,17 +1393,6 @@ void GL_Upload32 (byte *data, int width, int height,  qboolean mipmap, qboolean 
 	samples = alpha ? gl_alpha_format : gl_solid_format;
 
 	texels += scaled_width * scaled_height;
-/*
-	Con_Printf("GL_Upload32 width: %d height: %d\n", width, height);
-		for (int rr = 0; rr < height; rr++) {
-			for (int cc = 0; cc < height; cc++) {
-				int rowcolindex = ((rr * height)*4) + cc*4;
-				//Con_Printf("rowcolindex: %d\n", rowcolindex);
-				Con_Printf("%d %d %d %d\n", data[rowcolindex], data[rowcolindex + 1], data[rowcolindex + 2], data[rowcolindex + 3]);
-			}
-			Con_Printf("\n");
-		}
-*/
 
 	if (scaled_width == width && scaled_height == height)
 	{
@@ -1612,6 +1601,7 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 				if (lhcsum != glt->lhcsum || width != glt->width || height != glt->height)
 				{
 					Con_Printf("GL_LoadTexture: cache mismatch\n");
+					Con_Printf("lhcsum: %d - %d\twidth: %d - %d\theight: %d - %d\n", lhcsum, glt->lhcsum, width, glt->width, height, glt->height);
 					goto GL_LoadTexture_setup;
 				}
 				return glt->texnum;
@@ -1630,7 +1620,9 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 
 	GL_LoadTexture_setup:
 
+	// naievil -- why do we have this twice lol
 	gltextures[glt->texnum].checksum = lhcsum;
+	gltextures[glt->texnum].lhcsum = lhcsum;
 
 	gltextures[glt->texnum].width = width;
 	gltextures[glt->texnum].height = height;

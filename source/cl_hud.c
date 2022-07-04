@@ -38,19 +38,20 @@ qpic_t		*fragpic;
 qpic_t		*bettypic;
 
 
-qpic_t 		*b_circle;
-qpic_t 		*b_square;
-qpic_t 		*b_cross;
-qpic_t 		*b_triangle;
+qpic_t 		*b_abutton;
+qpic_t 		*b_bbutton;
+qpic_t 		*b_xbutton;
+qpic_t 		*b_ybutton;
 qpic_t 		*b_left;
 qpic_t 		*b_right;
 qpic_t 		*b_up;
 qpic_t 		*b_down;
 qpic_t 		*b_lt;
 qpic_t 		*b_rt;
+qpic_t 		*b_zlt;
+qpic_t 		*b_zrt;
 qpic_t 		*b_start;
 qpic_t 		*b_select;
-qpic_t 		*b_home;
 
 qpic_t      *fx_blood_lu;
 qpic_t      *fx_blood_ru;
@@ -124,20 +125,20 @@ void HUD_Init (void)
 	fragpic = Draw_CachePic ("gfx/hud/frag");
 	bettypic = Draw_CachePic ("gfx/hud/betty");
 
-	b_circle = Draw_CachePic ("gfx/butticons/circle");
-	b_square = Draw_CachePic ("gfx/butticons/square");
-	b_cross = Draw_CachePic ("gfx/butticons/cross");
-	b_triangle = Draw_CachePic ("gfx/butticons/triangle");
-	b_left = Draw_CachePic ("gfx/butticons/left");
-	b_right = Draw_CachePic ("gfx/butticons/right");
-	b_up = Draw_CachePic ("gfx/butticons/up");
-	b_down = Draw_CachePic ("gfx/butticons/down");
-	b_lt = Draw_CachePic ("gfx/butticons/lt");
-	b_rt = Draw_CachePic ("gfx/butticons/rt");
-	b_start = Draw_CachePic ("gfx/butticons/start");
-	b_select = Draw_CachePic ("gfx/butticons/select");
-	b_home = Draw_CachePic ("gfx/butticons/home");
-
+	b_abutton = Draw_CachePic ("gfx/butticons/facebt_a");
+	b_bbutton = Draw_CachePic ("gfx/butticons/facebt_b");
+	b_ybutton = Draw_CachePic ("gfx/butticons/facebt_y");
+	b_xbutton = Draw_CachePic ("gfx/butticons/facebt_x");
+	b_left = Draw_CachePic ("gfx/butticons/dir_left");
+	b_right = Draw_CachePic ("gfx/butticons/dir_right");
+	b_up = Draw_CachePic ("gfx/butticons/dir_up");
+	b_down = Draw_CachePic ("gfx/butticons/dir_down");
+	b_lt = Draw_CachePic ("gfx/butticons/shldr_l");
+	b_rt = Draw_CachePic ("gfx/butticons/shldr_r");
+	b_zlt = Draw_CachePic ("gfx/butticons/shldr_zl");
+	b_zrt = Draw_CachePic ("gfx/butticons/shldr_zr");
+	b_start = Draw_CachePic ("gfx/butticons/func_sta");
+	b_select = Draw_CachePic ("gfx/butticons/func_sel");
 
     fx_blood_lu = Draw_CachePic ("gfx/hud/blood");
     /*fx_blood_lu = Draw_CachePic ("gfx/hud/blood_tl");
@@ -531,15 +532,15 @@ void HUD_WorldText(int alpha)
 
 		if (!strcmp("location", key)) // search for location key
 		{
-			Draw_ColoredString(4, vid.height/2 + 50, value, 255, 255, 255, alpha, 1);
+			Draw_ColoredString(4, vid.height/2 + 42, value, 255, 255, 255, alpha, 1);
 		}
 		if (!strcmp("date", key)) // search for date key
 		{
-			Draw_ColoredString(4, vid.height/2 + 60, value, 255, 255, 255, alpha, 1);
+			Draw_ColoredString(4, vid.height/2 + 52, value, 255, 255, 255, alpha, 1);
 		}
 		if (!strcmp("person", key)) // search for person key
 		{
-			Draw_ColoredString(4, vid.height/2 + 70, value, 255, 255, 255, alpha, 1);
+			Draw_ColoredString(4, vid.height/2 + 62, value, 255, 255, 255, alpha, 1);
 		}
 	}
 }
@@ -615,7 +616,7 @@ void HUD_Rounds (void)
 		Draw_ColoredString(vid.width/2 - (strlen("Round")*8)/2, 80, "Round", 255, 0, 0, value, 2);
 
 		HUD_WorldText(value2);
-		Draw_ColoredString(4, vid.height/2 + 40, "'Nazi Zombies'", 255, 255, 255, value2, 1);
+		Draw_ColoredString(4, vid.height/2 + 32, "'Nazi Zombies'", 255, 255, 255, value2, 1);
 		
 		value -= cl.time * 0.4;
 		value2 += cl.time * 0.4;
@@ -629,7 +630,7 @@ void HUD_Rounds (void)
 	// Hold world text for a few seconds
 	else if (textstate == 2) {
 		HUD_WorldText(255);
-		Draw_ColoredString(4, vid.height/2 + 40, "'Nazi Zombies'", 255, 255, 255, 255, 1);
+		Draw_ColoredString(4, vid.height/2 + 32, "'Nazi Zombies'", 255, 255, 255, 255, 1);
 
 		value2 += cl.time * 0.4;
 
@@ -641,7 +642,7 @@ void HUD_Rounds (void)
 	// Fade worldtext out, finally.
 	else if (textstate == 3) {
 		HUD_WorldText(value2);
-		Draw_ColoredString(4, vid.height/2 + 40, "'Nazi Zombies'", 255, 255, 255, value2, 1);
+		Draw_ColoredString(4, vid.height/2 + 32, "'Nazi Zombies'", 255, 255, 255, value2, 1);
 
 		value2 -= cl.time * 0.4;
 

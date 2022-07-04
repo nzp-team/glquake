@@ -23,6 +23,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "winquake.h"
 #endif
 
+extern int loadingScreen;
+extern char* loadname2;
+extern char* loadnamespec;
+extern qboolean loadscreeninit;
+
 achievement_list_t achievement_list[MAX_ACHIEVEMENTS];
 
 void (*vid_menudrawfn)(void);
@@ -161,9 +166,10 @@ void M_ToggleMenu_f (void)
 {
 	m_entersound = true;
 
-	if (key_dest == key_menu)
+	// naievil -- fixme don't have pause yet
+	if (key_dest == key_menu /*|| key_dest == key_menu_pause*/)
 	{
-		if (m_state != m_main)
+		if (m_state != m_main /*&& m_state != m_paused_menu*/)
 		{
 			M_Menu_Main_f ();
 			return;
@@ -175,6 +181,12 @@ void M_ToggleMenu_f (void)
 	if (key_dest == key_console)
 	{
 		Con_ToggleConsole_f ();
+	}
+	else if (sv.active && (svs.maxclients > 1 || key_dest == key_game))
+	{
+		Con_Printf("Draw pause here\n");
+		// naievil -- fixme
+		//M_Paused_Menu_f();
 	}
 	else
 	{
@@ -322,18 +334,36 @@ void M_SinglePlayer_Key (int key)
 		switch (m_singleplayer_cursor)
 		{
 		case 0:
-			Cbuf_AddText ("map ndu\n");
 			key_dest = key_game;
+			if (sv.active)
+				Cbuf_AddText ("disconnect\n");
+			Cbuf_AddText ("maxplayers 1\n");
+			Cbuf_AddText ("map ndu\n");
+			loadingScreen = 1;
+			loadname2 = "ndu";
+			loadnamespec = "Nacht der Untoten";
 			break;
 
 		case 1:
-			Cbuf_AddText ("map warehouse\n");
 			key_dest = key_game;
+			if (sv.active)
+				Cbuf_AddText ("disconnect\n");
+			Cbuf_AddText ("maxplayers 1\n");
+			Cbuf_AddText ("map warehouse\n");
+			loadingScreen = 1;
+			loadname2 = "warehouse";
+			loadnamespec = "Warehouse";
 			break;
 
 		case 2:
-			Cbuf_AddText ("map christmas_special\n");
 			key_dest = key_game;
+			if (sv.active)
+				Cbuf_AddText ("disconnect\n");
+			Cbuf_AddText ("maxplayers 1\n");
+			Cbuf_AddText ("map christmas_special\n");
+			loadingScreen = 1;
+			loadname2 = "christmas_special";
+			loadnamespec = "Christmas Special";
 			break;
 
 		case 3:
