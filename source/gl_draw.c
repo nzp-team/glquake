@@ -517,11 +517,12 @@ void Draw_CharacterRGBA(int x, int y, int num, float r, float g, float b, float 
 	fcol = col*0.0625;
 	size = 0.0625;
 
-	//glColor4f(r/255, g/255, b/255, a/255);
-
 	GL_Bind (char_texture);
 
 	glEnable(GL_ALPHA_TEST);
+	glColor4f(r/255, g/255, b/255, a/255);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glBegin (GL_QUADS);
 	glTexCoord2f (fcol, frow);
 	glVertex2f (x, y);
@@ -542,18 +543,17 @@ Draw_String
 */
 void Draw_String (int x, int y, char *str)
 {
+	Draw_ColoredString(x, y, str, 255, 255, 255, 255, 1); 
+}
+
+void Draw_ColoredString(int x, int y, char *str, float r, float g, float b, float a, int scale) 
+{
 	while (*str)
 	{
-		Draw_Character (x, y, *str);
+		Draw_CharacterRGBA (x, y, *str, r, g, b, a);
 		str++;
 		x += 8;
 	}
-}
-
-void Draw_ColoredString(int x, int y, char *text, float r, float g, float b, float a, int scale) 
-{
-	// naievil -- fixme, incomplete lol
-	Draw_String(x, y, text);
 }
 
 /*
@@ -576,37 +576,7 @@ Draw_AlphaPic
 */
 void Draw_AlphaPic (int x, int y, qpic_t *pic, float alpha)
 {
-	// naievil -- fixme do the right thing (see Draw_Pic)
-	Draw_Pic(x, y, pic);
-
-	/*byte			*dest, *source;
-	unsigned short	*pusdest;
-	int				v, u;
-	glpic_t			*gl;
-
-	if (scrap_dirty)
-		Scrap_Upload ();
-	gl = (glpic_t *)pic->data;
-	glDisable(GL_ALPHA_TEST);
-	glEnable (GL_BLEND);
-//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//	glCullFace(GL_FRONT);
-	glColor4f (1,1,1,alpha);
-	GL_Bind (gl->texnum);
-	glBegin (GL_QUADS);
-	glTexCoord2f (gl->sl, gl->tl);
-	glVertex2f (x, y);
-	glTexCoord2f (gl->sh, gl->tl);
-	glVertex2f (x+pic->width, y);
-	glTexCoord2f (gl->sh, gl->th);
-	glVertex2f (x+pic->width, y+pic->height);
-	glTexCoord2f (gl->sl, gl->th);
-	glVertex2f (x, y+pic->height);
-	glEnd ();
-	glColor4f (1,1,1,1);
-	glEnable(GL_ALPHA_TEST);
-	glDisable (GL_BLEND);
-	*/
+	Draw_ColorPic(x, y, pic, 255, 255, 255, alpha);
 }
 
 
@@ -616,6 +586,16 @@ Draw_Pic
 =============
 */
 void Draw_Pic (int x, int y, qpic_t *pic)
+{
+	Draw_ColorPic(x, y, pic, 255, 255, 255, 255);
+}
+
+/*
+=============
+Draw_StretchPic
+=============
+*/
+void Draw_StretchPic (int x, int y, qpic_t *pic, int x_value, int y_value)
 {
 	glpic_t			*gl;
 
@@ -632,52 +612,14 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 	glTexCoord2f (0, 0);
 	glVertex2f (x, y);
 	glTexCoord2f (1, 0);
-	glVertex2f (x+pic->width, y);
+	glVertex2f (x+x_value, y);
 	glTexCoord2f (1, 1);
-	glVertex2f (x+pic->width, y+pic->height);
+	glVertex2f (x+x_value, y+y_value);
 	glTexCoord2f (0, 1);
-	glVertex2f (x, y+pic->height);
+	glVertex2f (x, y+y_value);
 	glEnd ();
 
 	glColor4f(1,1,1,1);
-
-}
-
-/*
-=============
-Draw_StretchPic
-=============
-*/
-void Draw_StretchPic (int x, int y, qpic_t *pic, int x_value, int y_value)
-{
-
-	// naievil -- fixme This does not stretch
-	/*
-	byte			*dest, *source;
-	unsigned short	*pusdest;
-	int				v, u;
-	glpic_t			*gl;
-
-	if (scrap_dirty)
-		Scrap_Upload ();
-	gl = (glpic_t *)pic->data;
-	glColor4f (1,1,1,1);
-	GL_Bind (gl->texnum);
-	glBegin (GL_QUADS);
-	glTexCoord2f (gl->sl, gl->tl);
-	glVertex2f (x, y);
-	glTexCoord2f (gl->sh, gl->tl);
-	glVertex2f (x+pic->width, y);
-	glTexCoord2f (gl->sh, gl->th);
-	glVertex2f (x+pic->width, y+pic->height);
-	glTexCoord2f (gl->sl, gl->th);
-	glVertex2f (x, y+pic->height);
-	glEnd ();
-	*/
-
-	// naievil -- fixme do the right thing (see Draw_Pic)
-	Draw_Pic(x, y, pic);
-
 }
 
 /*
@@ -687,31 +629,32 @@ Draw_ColorPic
 */
 void Draw_ColorPic (int x, int y, qpic_t *pic, float r, float g , float b, float a)
 {
-	/*
-	byte			*dest, *source;
-	unsigned short	*pusdest;
-	int				v, u;
 	glpic_t			*gl;
 
 	if (scrap_dirty)
 		Scrap_Upload ();
 	gl = (glpic_t *)pic->data;
-	glColor4f (r/255,g/255,b/255,a/255);
+
+	glEnable(GL_ALPHA_TEST);
+	glEnable(GL_BLEND);
+	glColor4f(r/255.0,g/255.0,b/255.0,a/255.0);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	GL_Bind (gl->texnum);
+
 	glBegin (GL_QUADS);
-	glTexCoord2f (gl->sl, gl->tl);
+	glTexCoord2f (0, 0);
 	glVertex2f (x, y);
-	glTexCoord2f (gl->sh, gl->tl);
+	glTexCoord2f (1, 0);
 	glVertex2f (x+pic->width, y);
-	glTexCoord2f (gl->sh, gl->th);
+	glTexCoord2f (1, 1);
 	glVertex2f (x+pic->width, y+pic->height);
-	glTexCoord2f (gl->sl, gl->th);
+	glTexCoord2f (0, 1);
 	glVertex2f (x, y+pic->height);
 	glEnd ();
-	*/
 
-	// naievil -- fixme do the right thing (see Draw_Pic)
-	Draw_Pic(x, y, pic);
+	glDisable(GL_BLEND);
+	glColor4f(1,1,1,1);
 }
 
 /*
@@ -825,7 +768,6 @@ Fills a box of pixels with a single color
 */
 void Draw_FillByColor (int x, int y, int w, int h, int r, int g, int b)
 {
-	// naievil -- fixme does not do any color mod
 	Draw_Fill(x, y, w, h, r, g, b);
 }
 

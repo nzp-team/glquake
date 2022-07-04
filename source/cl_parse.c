@@ -320,7 +320,8 @@ void CL_ParseServerInfo (void)
 	R_NewMap ();
 
 	Hunk_Check ();		// make sure nothing is hurt
-	
+	HUD_NewMap ();
+
 	noclip_anglehack = false;		// noclip is turned off at start	
 }
 

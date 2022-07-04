@@ -271,6 +271,7 @@ qpic_t *GetButtonIcon (char *buttonname)
 			continue;
 		if (!strncmp (b, buttonname, l) )
 		{
+			// naievil -- need to fix these
 			if (!strcmp(Key_KeynumToString(j), "UPARROW"))
 				return b_up;
 			else if (!strcmp(Key_KeynumToString(j), "DOWNARROW"))
