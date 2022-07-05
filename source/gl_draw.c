@@ -1607,14 +1607,13 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 	}
 
 	// whoever at id or threewave must've been half asleep...
+	GL_LoadTexture_setup:
 	glt = &gltextures[numgltextures];
 	numgltextures++;
 	glt->texnum = texture_extension_number;
 	texture_extension_number++;
-
 	strcpy (gltextures[glt->texnum].identifier, identifier);
 
-	GL_LoadTexture_setup:
 
 	// naievil -- why do we have this twice lol
 	gltextures[glt->texnum].checksum = lhcsum;
