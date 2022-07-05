@@ -331,7 +331,7 @@ void HUD_Parse_Point_Change (int points, int negative, int x_start, int y_start)
 	point_change[i].negative = negative;
 
 	f = HUD_itoa (points, str);
-	point_change[i].x = x_start - 10.0 - 8.0*f;
+	point_change[i].x = x_start + 10.0 + 8.0*f;
 	point_change[i].y = y_start;
 	point_change[i].move_x = 1.0;
 	point_change[i].move_y = ((rand ()&0x7fff) / ((float)0x7fff)) - 0.5;
@@ -353,8 +353,8 @@ void HUD_Points (void)
 	l = scoreboardlines;
 
 
-    x = vid.width - sb_moneyback->width;
-    y = vid.height - 16 - fragpic->height - 4 - 16 - sb_moneyback->height;
+    x = 5;
+    y = 179;
 	for (i=0 ; i<l ; i++)
 	{
 		k = pointsort[i];
@@ -395,15 +395,16 @@ void HUD_Points (void)
 			}
 		}
 		Draw_Pic (x, y, sb_moneyback);
-		xplus = HUD_itoa (f, str);
-		Draw_String (vid.width - (xplus*8) - 16, y + 3, va("%i", current_points));
+		xplus = strlen(va("%i", current_points))*8;
+
+		Draw_String (((64 - xplus)/2)+5, y + 3, va("%i", current_points));
 
 		if (old_points != f)
 		{
 			if (f > old_points)
-				HUD_Parse_Point_Change(f - old_points, 0, vid.width - (xplus*8) - 16, y + 3);
+				HUD_Parse_Point_Change(f - old_points, 0, ((64 - xplus)/2)+5, y + 3);
 			else
-				HUD_Parse_Point_Change(old_points - f, 1, vid.width - (xplus*8) - 16, y + 3);
+				HUD_Parse_Point_Change(old_points - f, 1, ((64 - xplus)/2)+5, y + 3);
 
 			old_points = f;
 		}
@@ -434,7 +435,7 @@ void HUD_Point_Change (void)
 			else
 				Draw_ColoredString (point_change[i].x, point_change[i].y, va ("+%i", point_change[i].points), 255, 255, 0, 255, 1);
 			point_change[i].y = point_change[i].y + point_change[i].move_y;
-			point_change[i].x = point_change[i].x - point_change[i].move_x;
+			point_change[i].x = point_change[i].x + point_change[i].move_x;
 			if (point_change[i].alive_time && point_change[i].alive_time < Sys_FloatTime())
 			{
 				point_change[i].points = 0;

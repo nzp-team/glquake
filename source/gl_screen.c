@@ -372,6 +372,7 @@ void SCR_UsePrint (int type, int cost, int weapon)
 	{
 		case 0://clear
 			strcpy(s, "");
+			strcpy(c, "");
 			break;
 		case 1://door
 			strcpy(s, va("Hold %s to open Door\n", GetUseButtonL()));
@@ -395,6 +396,7 @@ void SCR_UsePrint (int type, int cost, int weapon)
 			break;
 		case 5://window
 			strcpy(s, va("Hold %s to Rebuild Barrier\n", GetUseButtonL()));
+			strcpy(c, "");
 			button_pic_x = 5;
 			break;
 		case 6://box
@@ -404,10 +406,12 @@ void SCR_UsePrint (int type, int cost, int weapon)
 			break;
 		case 7://box take
 			strcpy(s, va("Press %s to take Weapon\n", GetUseButtonL()));
+			strcpy(c, "");
 			button_pic_x = 6;
 			break;
 		case 8://power
 			strcpy(s, "The Power must be Activated first\n");
+			strcpy(c, "");
 			button_pic_x = 100;
 			break;
 		case 9://perk
@@ -417,6 +421,7 @@ void SCR_UsePrint (int type, int cost, int weapon)
 			break;
 		case 10://turn on power
 			strcpy(s, va("Hold %s to Turn On the Power\n", GetUseButtonL()));
+			strcpy(c, "");
 			button_pic_x = 5;
 			break;
 		case 11://turn on trap
@@ -431,10 +436,12 @@ void SCR_UsePrint (int type, int cost, int weapon)
 			break;
 		case 13://revive
 			strcpy(s, va("Hold %s to Fix your Code.. :)\n", GetUseButtonL()));
+			strcpy(c, "");
 			button_pic_x = 5;
 			break;
 		case 14://use teleporter (free)
 			strcpy(s, va("Hold %s to use Teleporter\n", GetUseButtonL()));
+			strcpy(c, "");
 			button_pic_x = 5;
 			break;
 		case 15://use teleporter (cost)
@@ -444,18 +451,22 @@ void SCR_UsePrint (int type, int cost, int weapon)
 			break;
 		case 16://tp cooldown
 			strcpy(s, "Teleporter is cooling down\n");
+			strcpy(c, "");
 			button_pic_x = 100;
 			break;
 		case 17://link
 			strcpy(s, va("Hold %s to initiate link to pad\n", GetUseButtonL()));
+			strcpy(c, "");
 			button_pic_x = 5;
 			break;
 		case 18://no link
 			strcpy(s, "Link not active\n");
+			strcpy(c, "");
 			button_pic_x = 100;
 			break;
 		case 19://finish link
 			strcpy(s, va("Hold %s to link pad with core\n", GetUseButtonL()));
+			strcpy(c, "");
 			button_pic_x = 5;
 			break;
 		case 20://buyable ending
