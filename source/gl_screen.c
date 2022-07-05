@@ -764,6 +764,9 @@ SCR_DrawLoadScreen
 	* Omar Alejandro
 	* TheSmashers
 */
+
+// 50 character limit
+
 double loadingtimechange;
 int loadingdot;
 int loadingtextwidth;
@@ -775,28 +778,28 @@ char *ReturnLoadingtex (void)
     switch(StringNum)
     {
         case 1:
-			return  "Released in 1996, Quake is now over 25 years old!";
+			return  "Released in 1996, Quake is over 25 years old!";
             break;
         case 2:
             return  "Use the Kar98-k to be the hero we want you to be!";
             break;
         case 3:
-            return  "There is a huge number of modern engines based on Quake!";
+            return  "Lots of modern engines are based on Quake!";
             break;
         case 4:
-            return  "Development for NZ:P officially began on September 27, 2009";
+            return  "NZ:P began development on September 27 2009!";
             break;
         case 5:
             return  "NZ:P was first released on December 25, 2010!";
             break;
         case 6:
-            return  "The 1.1 release of NZ:P has over 90,000 downloads!";
+            return  "NZ:P Beta 1.1 has over 300,000 downloads!";
             break;
         case 7:
-            return  "NZ:P has been downloaded over 400,000 times!";
+            return  "NZ:P has been downloaded over 500,000 times!";
             break;
         case 8:
-            return  "The original NZP was made mainly by 3 guys around the world.";
+            return  "NZ:P was made mainly by 3 guys around the world!";
             break;
         case 9:
             return  "Blubswillrule: known as \"blubs\", is from the USA.";
@@ -808,19 +811,19 @@ char *ReturnLoadingtex (void)
             return  "Ju[s]tice, or \"tom\" is from Lithuania.";
             break;
         case 12:
-            return  "This game is the reason that we have bad sleeping habits!";
+            return  "This game has given us bad sleeping habits!";
             break;
         case 13:
-            return  "We had a lot of fun making this game.";
+            return  "We had a lot of fun making this game!";
             break;
         case 14:
-            return  "Did you know you can make your own Custom Map?";
+            return  "Pro Tip: you can make your own custom map!";
             break;
         case 15:
             return  "Try Retro Mode, it's in the Graphics Settings!";
             break;
         case 16:
-			return  "Tired of the base maps? Make your own or try some online!";
+			return  "Tired of our maps? Make your own or download some!";
             break;
         case 17:
             return  "Slay zombies & be grateful.";
@@ -841,7 +844,7 @@ char *ReturnLoadingtex (void)
             return  "That was epic... EPIC FOR THE WIIIN!"; //why
             break;
         case 23:
-            return  "Citra is an awesome 3DS emulator!";
+            return  "Mikeage and Citra are awesome 3DS emulators!";
             break;
         case 24:
             return  "You dead yet?";
@@ -850,13 +853,13 @@ char *ReturnLoadingtex (void)
             return  "Now 21% cooler!";
             break;
         case 26:
-            return  "your lg is nothink on the lan"; //what
+            return  "your lg is nothink on the lan!"; //what
             break;
         case 27:
             return  "I'm not your chaotic on dm6!"; 
             break;
         case 28:
-            return  "Shoot zombies to kill them. Or knife them. You choose.";
+            return  "Shoot or knife zombies to kill them, up to you!";
             break;
         case 29:
             return 	"How many people forgot to Compile today?";
@@ -874,7 +877,7 @@ char *ReturnLoadingtex (void)
             return  "10/10/10 was a good day.";
             break;
         case 34:
-            return  "Also check out \"No Bugs Allowed\" for the PSP!";
+            return  "Also check out \"Halo Revamped\" for 3DS!";
             break;
         case 35:
             return 	"MotoLegacy, or \"Ian\", is from the USA.";
@@ -904,10 +907,10 @@ char *ReturnLoadingtex (void)
 			return 	"Please help me find the meaning of   . Thanks.";
 			break;
 		case 44:
-			return  "NZ:P Discord is ONLY for Thomas the Tank Engine Roleplay!";
+			return  "Discord is ONLY for Thomas the Tank Engine RP!";
 			break;
 		case 45:
-			return 	"Get rid of the 21% cooler tip, it's an MLP reference.";
+			return 	"\"Get rid of the 21% tip, it's an MLP reference.\"";
 			break;
 		case 46:
 			return 	"You're playing on a 3DS!";
@@ -931,7 +934,7 @@ char *ReturnLoadingtex (void)
 			return  "pro tip: aiming helps";
 			break;
 		case 53:
-			return  "If a Nazi Zombie bites you, are you a Nazi, or a Zombie?";
+			return  "\"my mom gave me plunger money\"";
 			break;
 		case 54:
 			return  "Play some Custom Maps!";
