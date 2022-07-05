@@ -90,8 +90,9 @@ void GL_BeginRendering (int *x, int *y, int *width, int *height)
 
 void GL_EndRendering (void)
 {
-	glFinish();
-	pglSwapBuffers(); 
+	// naievil -- this requies the new version of picagl to be used properly
+	//glFinish();
+	pglSwapBuffersEx(1,0); 
 }
 
 void	VID_SetPalette (unsigned char *palette)
