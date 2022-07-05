@@ -238,7 +238,8 @@ Press somthing printing
 ===============================================================================
 */
 
-char		scr_usestring[1024];
+char		scr_usestring[64];
+char 		scr_usestring2[64];
 float		scr_usetime_off = 0.0f;
 int			button_pic_x;
 extern qpic_t 		*b_abutton;
@@ -365,6 +366,7 @@ void SCR_UsePrint (int type, int cost, int weapon)
 {
 	//naievil -- fixme
     char s[128];
+	char c[128];
 
     switch (type)
 	{
@@ -372,19 +374,23 @@ void SCR_UsePrint (int type, int cost, int weapon)
 			strcpy(s, "");
 			break;
 		case 1://door
-			strcpy(s, va("Hold %s to open Door [Cost:%i]\n", GetUseButtonL(), cost));
+			strcpy(s, va("Hold %s to open Door\n", GetUseButtonL()));
+			strcpy(c, va("[Cost: %i]\n", cost));
 			button_pic_x = 5;
 			break;
 		case 2://debris
-			strcpy(s, va("Hold %s to remove Debris [Cost:%i]\n", GetUseButtonL(), cost));
+			strcpy(s, va("Hold %s to remove Debris\n", GetUseButtonL()));
+			strcpy(c, va("[Cost: %i]\n", cost));
 			button_pic_x = 5;
 			break;
 		case 3://ammo
-			strcpy(s, va("Hold %s to buy Ammo for %s [Cost:%i]\n", GetUseButtonL(), pr_strings+sv_player->v.Weapon_Name_Touch, cost));
+			strcpy(s, va("Hold %s to buy Ammo for %s\n", GetUseButtonL(), pr_strings+sv_player->v.Weapon_Name_Touch));
+			strcpy(c, va("[Cost: %i]\n", cost));
 			button_pic_x = 5;
 			break;
 		case 4://weapon
-			strcpy(s, va("Hold %s to buy %s [Cost:%i]\n", GetUseButtonL(), pr_strings+sv_player->v.Weapon_Name_Touch, cost));
+			strcpy(s, va("Hold %s to buy %s\n", GetUseButtonL(), pr_strings+sv_player->v.Weapon_Name_Touch));
+			strcpy(c, va("[Cost: %i]\n", cost));
 			button_pic_x = 5;
 			break;
 		case 5://window
@@ -392,7 +398,8 @@ void SCR_UsePrint (int type, int cost, int weapon)
 			button_pic_x = 5;
 			break;
 		case 6://box
-			strcpy(s, va("Hold %s to buy a Random Weapon [cost:%i]\n", GetUseButtonL(), cost));
+			strcpy(s, va("Hold %s to buy a Random Weapon\n", GetUseButtonL()));
+			strcpy(c, va("[Cost: %i]\n", cost));
 			button_pic_x = 5;
 			break;
 		case 7://box take
@@ -404,7 +411,8 @@ void SCR_UsePrint (int type, int cost, int weapon)
 			button_pic_x = 100;
 			break;
 		case 9://perk
-			strcpy(s, va("Hold %s to buy %s [Cost:%i]\n", GetUseButtonL(), GetPerkName(weapon), cost));
+			strcpy(s, va("Hold %s to buy %s\n", GetUseButtonL(), GetPerkName(weapon)));
+			strcpy(c, va("[Cost: %i]\n", cost));
 			button_pic_x = 5;
 			break;
 		case 10://turn on power
@@ -412,11 +420,13 @@ void SCR_UsePrint (int type, int cost, int weapon)
 			button_pic_x = 5;
 			break;
 		case 11://turn on trap
-			strcpy(s, va("Hold %s to Activate the Trap [Cost:%i]\n", GetUseButtonL(), cost));
+			strcpy(s, va("Hold %s to Activate the Trap\n", GetUseButtonL()));
+			strcpy(c, va("[Cost: %i]\n", cost));
 			button_pic_x = 5;
 			break;
 		case 12://PAP
-			strcpy(s, va("Hold %s to Pack-a-Punch [Cost:%i]\n", GetUseButtonL(), cost));
+			strcpy(s, va("Hold %s to Pack-a-Punch\n", GetUseButtonL()));
+			strcpy(c, va("[Cost: %i]\n", cost));
 			button_pic_x = 5;
 			break;
 		case 13://revive
@@ -428,7 +438,8 @@ void SCR_UsePrint (int type, int cost, int weapon)
 			button_pic_x = 5;
 			break;
 		case 15://use teleporter (cost)
-			strcpy(s, va("Hold %s to use Teleporter [Cost:%i]\n", GetUseButtonL(), cost));
+			strcpy(s, va("Hold %s to use Teleporter\n", GetUseButtonL()));
+			strcpy(c, va("[Cost: %i]\n", cost));
 			button_pic_x = 5;
 			break;
 		case 16://tp cooldown
@@ -448,7 +459,8 @@ void SCR_UsePrint (int type, int cost, int weapon)
 			button_pic_x = 5;
 			break;
 		case 20://buyable ending
-			strcpy(s, va("Hold %s to End the Game [Cost:%i]\n", GetUseButtonL(), cost));
+			strcpy(s, va("Hold %s to End the Game\n", GetUseButtonL()));
+			strcpy(c, va("[Cost: %i]\n", cost));
 			button_pic_x = 5;
 			break;
 		default:
@@ -457,25 +469,29 @@ void SCR_UsePrint (int type, int cost, int weapon)
 	}
 
 	strncpy (scr_usestring, va(s), sizeof(scr_usestring)-1);
+	strncpy (scr_usestring2, va(c), sizeof(scr_usestring2)-1);
 	scr_usetime_off = 0.1;
 }
 
 
 void SCR_DrawUseString (void)
 {
-	int		l;
-	int		x, y;
+	int		l, l2;
+	int		x, x2, y;
 
 	if (cl.stats[STAT_HEALTH] < 0)
 		return;
 // the finale prints the characters one at a time
 
-	y = vid.height*0.65;
+	y = 160;
 	l = strlen (scr_usestring);
     x = (vid.width - l*8)/2;
 
-    // naievil -- fixme the picture does not show...
+	l2 = strlen (scr_usestring2);
+	x2 = (vid.width - l2*8)/2;
+
     Draw_String (x, y, scr_usestring);
+	Draw_String (x2, y + 10, scr_usestring2);
 	Draw_Pic (x + button_pic_x*8, y - 4, GetButtonIcon("+use"));
 }
 
