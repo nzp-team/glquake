@@ -247,4 +247,17 @@ extern qboolean gl_mtexable;
 void GL_DisableMultitexture(void);
 void GL_EnableMultitexture(void);
 
+//johnfitz -- fog functions called from outside gl_fog.c
+void Fog_ParseServerMessage (void);
+float *Fog_GetColor (void);
+float Fog_GetDensity (void);
+void Fog_EnableGFog (void);
+void Fog_DisableGFog (void);
+void Fog_StartAdditive (void);
+void Fog_StopAdditive (void);
+void Fog_SetupFrame (void);
+void Fog_NewMap (void);
+void Fog_Init (void);
+void Fog_SetupState (void);
+
 qboolean VID_Is8bit(void);

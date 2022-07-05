@@ -231,6 +231,8 @@ void R_DrawSpriteModel (entity_t *e)
 		right = vright;
 	}
 
+	Fog_DisableGFog ();
+
 	glColor3f (1,1,1);
 
 	GL_DisableMultitexture();
@@ -263,6 +265,8 @@ void R_DrawSpriteModel (entity_t *e)
 	glEnd ();
 
 	glDisable (GL_ALPHA_TEST);
+
+	Fog_EnableGFog ();
 }
 
 /*
@@ -967,6 +971,8 @@ void R_SetupFrame (void)
 // don't allow cheats in multiplayer
 	if (cl.maxclients > 1)
 		Cvar_Set ("r_fullbright", "0");
+
+	Fog_SetupFrame (); //johnfitz
 
 	R_AnimateLight ();
 

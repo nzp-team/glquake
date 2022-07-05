@@ -213,6 +213,7 @@ void R_Init (void)
 
 	R_InitParticles ();
 	R_InitParticleTexture ();
+	Fog_Init ();
 
 #ifdef GLTEST
 	Test_Init ();
@@ -397,6 +398,7 @@ void R_NewMap (void)
 	R_ClearParticles ();
 
 	GL_BuildLightmaps ();
+	Fog_NewMap (); // johnfitz -- global fog in worldspawn
 
 	// identify sky texture
 	skytexturenum = -1;

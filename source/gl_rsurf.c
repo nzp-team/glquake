@@ -1372,6 +1372,8 @@ void R_DrawWorld (void)
 #ifdef QUAKE2
 	R_DrawSkyBox ();
 #endif
+
+	Fog_EnableGFog ();
 }
 
 
