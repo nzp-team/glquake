@@ -27,6 +27,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
+#define CLAMP(_minval, x, _maxval) ({           \
+    const __typeof(x) x_ = (x);                 \
+    const __typeof(_minval) valmin_ = (_minval);\
+    const __typeof(_maxval) valmax_ = (_maxval);\
+    (void)(&x_ == &valmin_);                    \
+    (void)(&x_ == &valmax_);                    \
+    (x_ < valmin_) ? valmin_ :                  \
+    (x_ > valmax_) ? valmax_ : x_;              \
+})
+
 #if !defined BYTE_DEFINED
 typedef unsigned char 		byte;
 #define BYTE_DEFINED 1

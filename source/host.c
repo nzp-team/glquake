@@ -56,6 +56,7 @@ byte		*host_colormap;
 
 cvar_t	host_framerate = {"host_framerate","0"};	// set for slow motion
 cvar_t	host_speeds = {"host_speeds","0"};			// set for running times
+cvar_t 	host_maxfps = {"host_maxfps", "72"};
 
 cvar_t	sys_ticrate = {"sys_ticrate","0.05"};
 cvar_t	serverprofile = {"serverprofile","0"};
@@ -81,6 +82,16 @@ cvar_t	pausable = {"pausable","1"};
 
 cvar_t	temp1 = {"temp1","0"};
 
+/*
+================
+Max_Fps_f -- ericw
+================
+*/
+static void Max_Fps_f (cvar_t *var)
+{
+	if (var->value > 72)
+		Con_Warning ("host_maxfps above 72 breaks physics.\n");
+}
 
 /*
 ================
@@ -212,6 +223,7 @@ void Host_InitLocal (void)
 	
 	Cvar_RegisterVariable (&host_framerate);
 	Cvar_RegisterVariable (&host_speeds);
+	Cvar_RegisterVariable (&host_maxfps);
 
 	Cvar_RegisterVariable (&sys_ticrate);
 	Cvar_RegisterVariable (&serverprofile);
@@ -520,10 +532,15 @@ Returns false if the time is too short to run a frame
 */
 qboolean Host_FilterTime (float time)
 {
+	float maxfps; //johnfitz
+
 	realtime += time;
 
-	if (!cls.timedemo && realtime - oldrealtime < 1.0/72.0)
+	//johnfitz -- max fps cvar
+	maxfps = CLAMP (10.f, host_maxfps.value, 1000.f);
+	if (!cls.timedemo && realtime - oldrealtime < 1.0/maxfps)
 		return false;		// framerate is too high
+	//johnfitz
 
 	host_frametime = realtime - oldrealtime;
 	oldrealtime = realtime;
