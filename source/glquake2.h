@@ -189,6 +189,8 @@ extern	cvar_t	r_fullbright;
 extern	cvar_t	r_lightmap;
 extern	cvar_t	r_shadows;
 extern	cvar_t	r_dynamic;
+extern cvar_t 	r_lerpmodels;
+extern cvar_t 	r_lerpmove;
 
 extern	cvar_t	gl_clear;
 extern	cvar_t	gl_cull;

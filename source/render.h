@@ -35,6 +35,13 @@ typedef struct efrag_s
 	struct efrag_s		*entnext;
 } efrag_t;
 
+//johnfitz -- for lerping
+#define LERP_MOVESTEP	(1<<0) //this is a MOVETYPE_STEP entity, enable movement lerp
+#define LERP_RESETANIM	(1<<1) //disable anim lerping until next anim frame
+#define LERP_RESETANIM2	(1<<2) //set this and previous flag to disable anim lerping for two anim frames
+#define LERP_RESETMOVE	(1<<3) //disable movement lerping until next origin/angles change
+#define LERP_FINISH		(1<<4) //use lerpfinish time from server update instead of assuming interval of 0.1
+//johnfitz
 
 typedef struct entity_s
 {
@@ -67,6 +74,20 @@ typedef struct entity_s
 	struct mnode_s			*topnode;		// for bmodels, first world node
 											//  that splits bmodel, or NULL if
 											//  not split
+
+	byte					lerpflags;		//johnfitz -- lerping
+	float					lerpstart;		//johnfitz -- animation lerping
+	float					lerptime;		//johnfitz -- animation lerping
+	float					lerpfinish;		//johnfitz -- lerping -- server sent us a more accurate interval, use it instead of 0.1
+	short					previouspose;	//johnfitz -- animation lerping
+	short					currentpose;	//johnfitz -- animation lerping
+//	short					futurepose;		//johnfitz -- animation lerping
+	float					movelerpstart;	//johnfitz -- transform lerping
+	vec3_t					previousorigin;	//johnfitz -- transform lerping
+	vec3_t					currentorigin;	//johnfitz -- transform lerping
+	vec3_t					previousangles;	//johnfitz -- transform lerping
+	vec3_t					currentangles;	//johnfitz -- transform lerping
+
 
     int                     z_head;
     int                     z_larm;
