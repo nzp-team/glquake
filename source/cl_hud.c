@@ -1133,11 +1133,26 @@ HUD_Powerups
 */
 void HUD_Powerups (void)
 {
+	int count;
 
-	if(cl.stats[STAT_X2])
-		Draw_StretchPic ((vid.width/2) - 30,0, x2pic, 28, 28);
-	if(cl.stats[STAT_INSTA])
-		Draw_StretchPic ((vid.width/2) + 2,0, instapic, 28, 28);
+	// horrible way to offset check :)))))))))))))))))) :DDDDDDDD XOXO
+
+	if (cl.stats[STAT_X2])
+		count++;
+
+	if (cl.stats[STAT_INSTA])
+		count++;
+
+	// both are avail draw fixed order
+	if (count == 2) {
+		Draw_StretchPic((vid.width/2) - 27, 240 - 29, x2pic, 26, 26);
+		Draw_StretchPic((vid.width/2) + 3, 240 - 29, instapic, 26, 26);
+	} else {
+		if (cl.stats[STAT_X2])
+			Draw_StretchPic((vid.width/2) - 13, 240 - 29, x2pic, 26, 26);
+		if(cl.stats[STAT_INSTA])
+			Draw_StretchPic ((vid.width/2) - 13, 240 - 29, instapic, 28, 28);
+	}
 }
 
 /*
@@ -1249,43 +1264,29 @@ int IsDualWeapon(int weapon)
 
 void HUD_Ammo (void)
 {
-	char str[12];
-    int xplus;
-	char *magstring;
+	char* magstring;
+	int reslen;
 
-	y_value = vid.height - 16;
+	reslen = strlen(va("/%i", cl.stats[STAT_AMMO]));
 
-	magstring = va("%i", cl.stats[STAT_CURRENTMAG]);
-
-	xplus = HUD_itoa(cl.stats[STAT_CURRENTMAG], str);
-
+	//
 	// Magazine
-	if (GetLowAmmo(cl.stats[STAT_ACTIVEWEAPON], 1) >= cl.stats[STAT_CURRENTMAG])
-		Draw_ColoredString(vid.width - 42 - (xplus*8), y_value, magstring, 255, 0, 0, 255, 1);
-	else
-		Draw_ColoredString(vid.width - 42 - (xplus*8), y_value, magstring, 255, 255, 255, 255, 1);
-
-	// Second mag for dual weps
-	if (IsDualWeapon(cl.stats[STAT_ACTIVEWEAPON])) {
-		magstring = va("%i", cl.stats[STAT_CURRENTMAG2]);
-		xplus = HUD_itoa(cl.stats[STAT_CURRENTMAG2], str);
-
-		if (GetLowAmmo(cl.stats[STAT_ACTIVEWEAPON], 1) >= cl.stats[STAT_CURRENTMAG2])
-			Draw_ColoredString(vid.width - 56 - (xplus*8), y_value, magstring, 255, 0, 0, 255, 1);
-		else
-			Draw_ColoredString(vid.width - 56 - (xplus*8), y_value, magstring, 255, 255, 255, 255, 1);
+	//
+	magstring = va("%i", cl.stats[STAT_CURRENTMAG]);
+	if (GetLowAmmo(cl.stats[STAT_ACTIVEWEAPON], 1) >= cl.stats[STAT_CURRENTMAG]) {
+		Draw_ColoredString((355-(reslen*8)) - strlen(magstring)*8, 218, magstring, 255, 0, 0, 255, 1);
+	} else {
+		Draw_ColoredString((355-(reslen*8)) - strlen(magstring)*8, 218, magstring, 255, 255, 255, 255, 1);
 	}
 
-	// Reserve ammo
-	if (GetLowAmmo(cl.stats[STAT_ACTIVEWEAPON], 0) >= cl.stats[STAT_AMMO])
-	{
-		Draw_ColoredString (vid.width - 42, y_value, "/", 255, 0, 0, 255, 1);
-		Draw_ColoredString (vid.width - 34, y_value, va ("%i",cl.stats[STAT_AMMO]), 255, 0, 0, 255, 1);
-	}
-	else
-	{
-		Draw_ColoredString (vid.width - 42, y_value, "/", 255, 255, 255, 255, 1);
-		Draw_ColoredString (vid.width - 34, y_value, va ("%i",cl.stats[STAT_AMMO]), 255, 255, 255, 255, 1);
+	//
+	// Reserve Ammo
+	//
+	magstring = va("/%i", cl.stats[STAT_AMMO]);
+	if (GetLowAmmo(cl.stats[STAT_ACTIVEWEAPON], 0) >= cl.stats[STAT_AMMO]) {
+		Draw_ColoredString(355 - strlen(magstring)*8, 218, magstring, 255, 0, 0, 255, 1);
+	} else {
+		Draw_ColoredString(355 - strlen(magstring)*8, 218, magstring, 255, 255, 255, 255, 1);
 	}
 }
 
@@ -1299,12 +1300,17 @@ void HUD_AmmoString (void)
 {
 	if (GetLowAmmo(cl.stats[STAT_ACTIVEWEAPON], 1) >= cl.stats[STAT_CURRENTMAG])
 	{
+		int x;
+
 		if (0 < cl.stats[STAT_AMMO] && cl.stats[STAT_CURRENTMAG] >= 0) {
-			Draw_ColoredString ((vid.width)/2, (vid.height)/2 + 40, "Reload", 255, 255, 255, 255, 1);
+			x = (vid.width - strlen("Reload")*8)/2;
+			Draw_ColoredString (x, 140, "Reload", 255, 255, 255, 255, 1);
 		} else if (0 < cl.stats[STAT_CURRENTMAG]) {
-			Draw_ColoredString ((vid.width)/2, (vid.height)/2 + 40, "LOW AMMO", 255, 255, 0, 255, 1);
+			x = (vid.width - strlen("LOW AMMO")*8)/2;
+			Draw_ColoredString (x, 140, "LOW AMMO", 255, 255, 0, 255, 1);
 		} else {
-			Draw_ColoredString ((vid.width)/2, (vid.height)/2 + 40, "NO AMMO", 255, 0, 0, 255, 1);
+			x = (vid.width - strlen("NO AMMO")*8)/2;
+			Draw_ColoredString (x, 140, "NO AMMO", 255, 0, 0, 255, 1);
 		}
 	}
 }
@@ -1319,23 +1325,21 @@ HUD_Grenades
 
 void HUD_Grenades (void)
 {
-	if (cl.stats[STAT_GRENADES])
-	{
-		x_value = vid.width - 50;
-		y_value = vid.height - 16 - fragpic->height - 4;
-	}
+	Draw_StretchPic (356, 205, fragpic, 22, 22);
 	if (cl.stats[STAT_GRENADES] & UI_FRAG)
 	{
-		Draw_StretchPic (x_value, y_value, fragpic, 22, 22);
 		if (cl.stats[STAT_PRIGRENADES] <= 0)
-			Draw_ColoredString (x_value + 12, y_value + 12, va ("%i",cl.stats[STAT_PRIGRENADES]), 255, 0, 0, 255, 1);
+			Draw_ColoredString (356 + 12, 205 + 16, va ("%i",cl.stats[STAT_PRIGRENADES]), 255, 0, 0, 255, 1);
 		else
-			Draw_String (x_value + 12, y_value + 12, va ("%i",cl.stats[STAT_PRIGRENADES]));
+			Draw_String (356 + 12, 205 + 16, va ("%i",cl.stats[STAT_PRIGRENADES]));
 	}
+	Draw_StretchPic (356 + 20, 205, bettypic, 22, 22);
 	if (cl.stats[STAT_GRENADES] & UI_BETTY)
 	{
-		Draw_StretchPic (x_value - fragpic->width - 5, y_value, bettypic, 22, 22);
-		Draw_String (x_value - fragpic->width + 7, y_value + 12, va ("%i",cl.stats[STAT_SECGRENADES]));
+		if (cl.stats[STAT_PRIGRENADES] <= 0)
+			Draw_ColoredString (356 + 20 + 12, 205 + 16, va ("%i",cl.stats[STAT_SECGRENADES]), 255, 0, 0, 255, 1);
+		else
+			Draw_String (356 + 20 + 12, 205 + 16, va ("%i",cl.stats[STAT_SECGRENADES]));
 	}
 }
 
@@ -1349,12 +1353,12 @@ void HUD_Weapon (void)
 	char str[32];
 	float l;
 	x_value = vid.width;
-	y_value = vid.height - 16 - fragpic->height - 4 - 16;
+	y_value = 205;
 
 	strcpy(str, pr_strings+sv_player->v.Weapon_Name);
 	l = strlen(str);
 
-	x_value = vid.width - 8 - l*8;
+	x_value = 355 - l*8;
 	Draw_String (x_value, y_value, str);
 }
 

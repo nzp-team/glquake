@@ -497,7 +497,7 @@ This is the same as Draw_Character, but with RGBA color codes.
 ================
 */
 extern cvar_t scr_coloredtext;
-void Draw_CharacterRGBA(int x, int y, int num, float r, float g, float b, float a)
+void Draw_CharacterRGBA(int x, int y, int num, float r, float g, float b, float a, int scale)
 {
 	int				row, col;
 	float			frow, fcol, size;
@@ -515,7 +515,7 @@ void Draw_CharacterRGBA(int x, int y, int num, float r, float g, float b, float 
 
 	frow = row*0.0625;
 	fcol = col*0.0625;
-	size = 0.0625;
+	size = 0.0625*(float)scale;
 
 	GL_Bind (char_texture);
 
@@ -526,12 +526,12 @@ void Draw_CharacterRGBA(int x, int y, int num, float r, float g, float b, float 
 	glBegin (GL_QUADS);
 	glTexCoord2f (fcol, frow);
 	glVertex2f (x, y);
-	glTexCoord2f (fcol + size, frow);
-	glVertex2f (x+8, y);
-	glTexCoord2f (fcol + size, frow + size);
-	glVertex2f (x+8, y+8);
-	glTexCoord2f (fcol, frow + size);
-	glVertex2f (x, y+8);
+	glTexCoord2f (fcol + (float)(size/(float)scale), frow);
+	glVertex2f (x+(8*(scale)), y);
+	glTexCoord2f (fcol + (float)(size/(float)scale), frow + (float)(size/(float)scale));
+	glVertex2f (x+(8*(scale)), y+(8*(scale)));
+	glTexCoord2f (fcol, frow + (float)(size/(float)scale));
+	glVertex2f (x, y+(8*(scale)));
 	glEnd ();
 	glDisable(GL_ALPHA_TEST);
 }
@@ -550,9 +550,9 @@ void Draw_ColoredString(int x, int y, char *str, float r, float g, float b, floa
 {
 	while (*str)
 	{
-		Draw_CharacterRGBA (x, y, *str, r, g, b, a);
+		Draw_CharacterRGBA (x, y, *str, r, g, b, a, scale);
 		str++;
-		x += 8;
+		x += 8*scale;
 	}
 }
 
@@ -1093,7 +1093,7 @@ void Draw_Crosshair (void)
 
 	if (cl.stats[STAT_ACTIVEWEAPON] == W_M2 || cl.stats[STAT_ACTIVEWEAPON] == W_TESLA || cl.stats[STAT_ACTIVEWEAPON] == W_DG3)
 	{
-		Draw_CharacterRGBA((vid.width)/2-4, (vid.height)/2, 'O', 255, col, col, crosshair_opacity);
+		Draw_CharacterRGBA((vid.width)/2-4, (vid.height)/2, 'O', 255, col, col, crosshair_opacity, 1);
 	}
 	else if (crosshair.value == 1 && cl.stats[STAT_ZOOM] != 1 && cl.stats[STAT_ZOOM] != 2 && cl.stats[STAT_ACTIVEWEAPON] != W_PANZER)
     {
@@ -1112,22 +1112,22 @@ void Draw_Crosshair (void)
 
 		x_value = (vid.width - 8)/2 - crosshair_offset_step;
 		y_value = (vid.height - 8)/2;
-		Draw_CharacterRGBA(x_value, y_value, 158, 255, col, col, crosshair_opacity);
+		Draw_CharacterRGBA(x_value, y_value, 158, 255, col, col, crosshair_opacity, 1);
 
 		x_value = (vid.width - 8)/2 + crosshair_offset_step;
 		y_value = (vid.height - 8)/2;
-		Draw_CharacterRGBA(x_value, y_value, 158, 255, col, col, crosshair_opacity);
+		Draw_CharacterRGBA(x_value, y_value, 158, 255, col, col, crosshair_opacity, 1);
 
 		x_value = (vid.width - 8)/2;
 		y_value = (vid.height - 8)/2 - crosshair_offset_step;
-		Draw_CharacterRGBA(x_value, y_value, 157, 255, col, col, crosshair_opacity);
+		Draw_CharacterRGBA(x_value, y_value, 157, 255, col, col, crosshair_opacity, 1);
 
 		x_value = (vid.width - 8)/2;
 		y_value = (vid.height - 8)/2 + crosshair_offset_step;
-		Draw_CharacterRGBA(x_value, y_value, 157, 255, col, col, crosshair_opacity);
+		Draw_CharacterRGBA(x_value, y_value, 157, 255, col, col, crosshair_opacity, 1);
     }
     else if (crosshair.value && cl.stats[STAT_ZOOM] != 1 && cl.stats[STAT_ZOOM] != 2)
-		Draw_CharacterRGBA((vid.width - 8)/2, (vid.height - 8)/2, '.', 255, col, col, crosshair_opacity);
+		Draw_CharacterRGBA((vid.width - 8)/2, (vid.height - 8)/2, '.', 255, col, col, crosshair_opacity, 1);
 	if (cl.stats[STAT_ZOOM] == 2)
 		Draw_Pic (0, 0, sniper_scope);
    	if (Hitmark_Time > sv.time)
