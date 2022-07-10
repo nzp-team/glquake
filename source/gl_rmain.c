@@ -112,6 +112,7 @@ typedef struct {
 //johnfitz
 
 extern	cvar_t	gl_ztrick;
+extern 	cvar_t 	scr_fov_viewmodel;
 
 /*
 =================
@@ -697,8 +698,17 @@ void R_DrawAliasModel (entity_t *e)
 // double size of eyes, since they are really hard to see in gl
 		glScalef (paliashdr->scale[0]*2, paliashdr->scale[1]*2, paliashdr->scale[2]*2);
 	} else {
-		glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
-		glScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+
+		// Special handling of view model to keep FOV from altering look.  Pretty good.  Not perfect but rather close.
+		if (e == &cl.viewent && scr_fov_viewmodel.value) {
+			float scale = 1.0f / tan (DEG2RAD (scr_fov.value / 2.0f)) * scr_fov_viewmodel.value / 90.0f;
+			glTranslatef (paliashdr->scale_origin[0] * scale, paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
+			glScalef (paliashdr->scale[0] * scale, paliashdr->scale[1], paliashdr->scale[2]);
+		} else {
+			glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
+			glScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+		}
+		
 	}
 
 	anim = (int)(cl.time*10) & 3;
