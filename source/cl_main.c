@@ -49,6 +49,10 @@ cvar_t	m_side = {"m_side","0", true};
 client_static_t	cls;
 client_state_t	cl;
 // FIXME: put these on hunk?
+
+modelindex_t		cl_modelindex[NUM_MODELINDEX]; 
+char				*cl_modelnames[NUM_MODELINDEX];
+												   
 efrag_t			cl_efrags[MAX_EFRAGS];
 entity_t		cl_entities[MAX_EDICTS];
 entity_t		cl_static_entities[MAX_STATIC_ENTITIES];
@@ -360,6 +364,35 @@ dlight_t *CL_AllocDlight (int key)
 	return dl;
 }
 
+void CL_NewDlight (int key, vec3_t origin, float radius, float time, int type)
+{
+	dlight_t	*dl;
+
+	dl = CL_AllocDlight (key);
+	VectorCopy (origin, dl->origin);
+	dl->radius = radius;
+	dl->die = cl.time + time;
+	dl->type = type;
+
+}
+
+dlighttype_t SetDlightColor (float f, dlighttype_t def, qboolean random)
+{
+	dlighttype_t	colors[NUM_DLIGHTTYPES-4] = {lt_red, lt_blue, lt_redblue, lt_green};
+
+	if ((int)f == 1)
+		return lt_red;
+	else if ((int)f == 2)
+		return lt_blue;
+	else if ((int)f == 3)
+		return lt_redblue;
+	else if ((int)f == 4)
+		return lt_green;
+	else if (((int)f == NUM_DLIGHTTYPES - 3) && random)
+		return colors[rand()%(NUM_DLIGHTTYPES-4)];
+	else
+		return def;
+}
 
 /*
 ===============
@@ -404,7 +437,7 @@ float	CL_LerpPoint (void)
 	
 	if (!f || cl_nolerp.value || cls.timedemo || sv.active)
 	{
-		cl.time = cl.mtime[0];
+		cl.ctime = cl.time = cl.mtime[0];
 		return 1;
 	}
 		
@@ -413,14 +446,14 @@ float	CL_LerpPoint (void)
 		cl.mtime[1] = cl.mtime[0] - 0.1;
 		f = 0.1;
 	}
-	frac = (cl.time - cl.mtime[1]) / f;
+	frac = (cl.ctime - cl.mtime[1]) / f;
 //Con_Printf ("frac: %f\n",frac);
 	if (frac < 0)
 	{
 		if (frac < -0.01)
 		{
 SetPal(1);
-			cl.time = cl.mtime[1];
+			cl.ctime = cl.time = cl.mtime[1];
 //				Con_Printf ("low frac\n");
 		}
 		frac = 0;
@@ -430,7 +463,7 @@ SetPal(1);
 		if (frac > 1.01)
 		{
 SetPal(2);
-			cl.time = cl.mtime[0];
+			cl.ctime = cl.time = cl.mtime[0];
 //				Con_Printf ("high frac\n");
 		}
 		frac = 1;
@@ -541,42 +574,66 @@ void CL_RelinkEntities (void)
 
 		if (ent->effects & EF_BRIGHTFIELD)
 			R_EntityParticles (ent);
-#ifdef QUAKE2
+
 		if (ent->effects & EF_DARKFIELD)
 			R_DarkFieldParticles (ent);
-#endif
+
 		if (ent->effects & EF_MUZZLEFLASH)
 		{
-			vec3_t		fv, rv, uv;
+			if (i == cl.viewentity && qmb_initialized && r_part_muzzleflash.value)
+			{
+				vec3_t		start, smokeorg, v_forward, v_right, v_up;
+				vec3_t tempangles;
+				float forward_offset, up_offset, right_offset;
 
-			dl = CL_AllocDlight (i);
-			VectorCopy (ent->origin,  dl->origin);
-			dl->origin[2] += 16;
-			AngleVectors (ent->angles, fv, rv, uv);
-			 
-			VectorMA (dl->origin, 18, fv, dl->origin);
-			dl->radius = 200 + (rand()&31);
-			dl->minlight = 32;
-			dl->die = cl.time + 0.1;
+				VectorAdd(cl.viewangles,CWeaponRot,tempangles);
+				VectorAdd(tempangles,cl.gun_kick,tempangles);
+
+
+				AngleVectors (tempangles, v_forward, v_right, v_up);
+				VectorCopy (cl_entities[cl.viewentity].origin, smokeorg);
+				smokeorg[2] += 32;
+				VectorCopy(smokeorg,start);
+
+				right_offset	 = sv_player->v.Flash_Offset[0];
+				up_offset		 = sv_player->v.Flash_Offset[1];
+				forward_offset 	 = sv_player->v.Flash_Offset[2];
+				
+				right_offset	= right_offset/1000;
+				up_offset		= up_offset/1000;
+				forward_offset  = forward_offset/1000;
+				
+				VectorMA (start, forward_offset, v_forward ,smokeorg);
+				VectorMA (smokeorg, up_offset, v_up ,smokeorg);
+				VectorMA (smokeorg, right_offset, v_right ,smokeorg);
+				VectorAdd(smokeorg,CWeaponOffset,smokeorg);
+
+				if (sv_player->v.weapon != W_RAY && sv_player->v.weapon != W_PORTER) {
+					QMB_MuzzleFlash (smokeorg);
+				} else {
+					QMB_RayFlash(smokeorg, sv_player->v.weapon);
+				}
+			}
 		}
-		if (ent->effects & EF_BRIGHTLIGHT)
-		{			
-			dl = CL_AllocDlight (i);
-			VectorCopy (ent->origin,  dl->origin);
-			dl->origin[2] += 16;
-			dl->radius = 400 + (rand()&31);
-			dl->die = cl.time + 0.001;
+
+		if (ent->modelindex != cl_modelindex[mi_player] && ent->model->modhint != MOD_PLAYER)
+		{
+			if (ent->effects & EF_BRIGHTLIGHT)
+			{
+				vec3_t	tmp;
+
+				dl = CL_AllocDlight (i);
+				VectorCopy (ent->origin, tmp);
+				tmp[2] += 16;
+				dl->color[0] = 1;
+                dl->color[1] = 0.8;
+                dl->color[2] = 0.5;
+				CL_NewDlight (i, tmp, 400 + (rand() & 31), 0.1, lt_default);
+			}
 		}
-		if (ent->effects & EF_DIMLIGHT)
-		{			
-			dl = CL_AllocDlight (i);
-			VectorCopy (ent->origin,  dl->origin);
-			dl->radius = 200 + (rand()&31);
-			dl->die = cl.time + 0.001;
-		}
-#ifdef QUAKE2
+
 		if (ent->effects & EF_DARKLIGHT)
-		{			
+		{
 			dl = CL_AllocDlight (i);
 			VectorCopy (ent->origin,  dl->origin);
 			dl->radius = 200.0 + (rand()&31);
@@ -584,34 +641,174 @@ void CL_RelinkEntities (void)
 			dl->dark = true;
 		}
 		if (ent->effects & EF_LIGHT)
-		{			
+		{
 			dl = CL_AllocDlight (i);
 			VectorCopy (ent->origin,  dl->origin);
 			dl->radius = 200;
 			dl->die = cl.time + 0.001;
 		}
-#endif
 
-		if (ent->model->flags & EF_GIB)
-			R_RocketTrail (oldorg, ent->origin, 2);
-		else if (ent->model->flags & EF_ZOMGIB)
-			R_RocketTrail (oldorg, ent->origin, 4);
-		else if (ent->model->flags & EF_TRACER)
-			R_RocketTrail (oldorg, ent->origin, 3);
-		else if (ent->model->flags & EF_TRACER2)
-			R_RocketTrail (oldorg, ent->origin, 5);
-		else if (ent->model->flags & EF_ROCKET)
+		if (ent->effects & EF_BLUELIGHT)
 		{
-			R_RocketTrail (oldorg, ent->origin, 0);
+			dl = CL_AllocDlight (i);
+			VectorCopy (ent->origin,  dl->origin);
+			dl->die = cl.time + 0.001;
+			dl->radius = 100;
+			dl->color[0] = 0.25;
+			dl->color[1] = 0.25;
+			dl->color[2] = 2;
+		}
+
+		if (ent->effects & EF_REDLIGHT)
+		{
+			dl = CL_AllocDlight (i);
+			VectorCopy (ent->origin,  dl->origin);
+			dl->die = cl.time + 0.001;
+			dl->radius = 100;
+			dl->color[0] = 2;
+			dl->color[1] = 0.25;
+			dl->color[2] = 0.25;
+		}
+
+		if (ent->effects & EF_ORANGELIGHT)
+		{
+			dl = CL_AllocDlight (i);
+			VectorCopy (ent->origin,  dl->origin);
+			dl->die = cl.time + 0.001;
+			dl->radius = 100;
+			dl->color[0] = 2;
+			dl->color[1] = 1;
+			dl->color[2] = 0;
+		}
+
+		if (ent->effects & EF_GREENLIGHT)
+		{
+			dl = CL_AllocDlight (i);
+			VectorCopy (ent->origin,  dl->origin);
+			dl->die = cl.time + 0.001;
+			dl->radius = 100;
+			dl->color[0] = 0.25;
+			dl->color[1] = 2;
+			dl->color[2] = 0.25;
+		}
+		if (ent->effects & EF_ORANGELIGHT)
+		{
+			dl = CL_AllocDlight (i);
+			VectorCopy (ent->origin,  dl->origin);
+			dl->die = cl.time + 0.001;
+			dl->radius = 100;
+			dl->color[0] = 2;
+			dl->color[1] = 1;
+			dl->color[2] = 0;
+		}
+
+		if (ent->effects & EF_GREENLIGHT)
+		{
+			dl = CL_AllocDlight (i);
+			VectorCopy (ent->origin,  dl->origin);
+			dl->die = cl.time + 0.001;
+			dl->radius = 100;
+			dl->color[0] = 0.25;
+			dl->color[1] = 2;
+			dl->color[2] = 0.25;
+		}
+		
+		if (ent->effects & EF_PURPLELIGHT)
+		{
+			dl = CL_AllocDlight (i);
+			VectorCopy (ent->origin,  dl->origin);
+			dl->die = cl.time + 0.001;
+			dl->radius = 100;
+			dl->color[0] = 2;
+			dl->color[1] = 0.25;
+			dl->color[2] = 2;
+		}
+
+		if (ent->effects & EF_RAYGREEN)
+		{
+			R_RocketTrail (oldorg, ent->origin, 12);
 			dl = CL_AllocDlight (i);
 			VectorCopy (ent->origin, dl->origin);
-			dl->radius = 200;
+			dl->radius = 25;
 			dl->die = cl.time + 0.01;
+	        dl->color[0] = 0;
+			dl->color[1] = 255;
+			dl->color[2] = 0;
+	        dl->type = SetDlightColor (2, lt_rocket, true);
 		}
-		else if (ent->model->flags & EF_GRENADE)
-			R_RocketTrail (oldorg, ent->origin, 1);
-		else if (ent->model->flags & EF_TRACER3)
-			R_RocketTrail (oldorg, ent->origin, 6);
+
+		if (ent->effects & EF_RAYRED)
+		{
+			R_RocketTrail (oldorg, ent->origin, 13);
+			dl = CL_AllocDlight (i);
+			VectorCopy (ent->origin, dl->origin);
+			dl->radius = 25;
+			dl->die = cl.time + 0.01;
+	        dl->color[0] = 255;
+			dl->color[1] = 0;
+			dl->color[2] = 0;
+	        dl->type = SetDlightColor (2, lt_rocket, true);
+		}
+
+		if (!strcmp(ent->model->name, "progs/flame2.mdl"))
+		{
+			if (qmb_initialized && r_part_flames.value)
+			{
+				//QMB_BigTorchFlame (ent->origin);
+				if (qmb_initialized && r_part_trails.value)
+					R_RocketTrail (oldorg, ent->origin, LAVA_TRAIL);
+			}
+		}
+
+		if ((!strcmp(ent->model->name, "progs/s_spike.mdl"))||(!strcmp(ent->model->name, "progs/spike.mdl")))
+		{
+			if (qmb_initialized && r_part_trails.value)
+			{
+				R_RocketTrail (oldorg, ent->origin, NAIL_TRAIL);
+			}
+		}
+
+        if (ent->model->flags)
+		{
+			if (ent->model->flags & EF_GIB)
+				R_RocketTrail (oldorg, ent->origin, 2);
+			else if (ent->model->flags & EF_ZOMGIB)
+				R_RocketTrail (oldorg, ent->origin, 4);
+			else if (ent->model->flags & EF_TRACER)
+				R_RocketTrail (oldorg, ent->origin, 3);
+			else if (ent->model->flags & EF_TRACER2)
+				R_RocketTrail (oldorg, ent->origin, 5);
+			else if (ent->model->flags & EF_ROCKET)
+			{
+				R_RocketTrail (oldorg, ent->origin, 0);
+				dl = CL_AllocDlight (i);
+				VectorCopy (ent->origin, dl->origin);
+				dl->radius = 200;
+				dl->die = cl.time + 0.01;
+	            dl->color[0] = 0.2;
+				dl->color[1] = 0.1;
+				dl->color[2] = 0.5;
+	            dl->type = SetDlightColor (2, lt_rocket, true);
+			}
+			else if (ent->model->flags & EF_GRENADE)
+				R_RocketTrail (oldorg, ent->origin, 1);
+			else if (ent->model->flags & EF_TRACER3)
+				R_RocketTrail (oldorg, ent->origin, 6);
+		}
+
+		// Tomaz - QC Glow Begin
+        if (ISLMPOINT(ent))
+        {
+	        dl = CL_AllocDlight (i);
+	        VectorCopy (ent->origin, dl->origin);
+	        dl->radius = 150;
+	        dl->die = cl.time + 0.001;
+	        dl->color[0] = ent->rendercolor[0];
+	        dl->color[1] = ent->rendercolor[1];
+	        dl->color[2] = ent->rendercolor[2];
+        }
+		// Tomaz - QC Glow End
+
 
 		ent->forcelink = false;
 

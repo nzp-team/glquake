@@ -259,6 +259,10 @@ void CL_ParseServerInfo (void)
 //
 
 // precache models
+	for (i=0 ; i<NUM_MODELINDEX ; i++)
+		cl_modelindex[i] = -1;
+
+// precache models
 	memset (cl.model_precache, 0, sizeof(cl.model_precache));
 	for (nummodels=1 ; ; nummodels++)
 	{
@@ -272,6 +276,13 @@ void CL_ParseServerInfo (void)
 		}
 		strcpy (model_precache[nummodels], str);
 		Mod_TouchModel (str);
+
+		if (!strcmp(model_precache[nummodels], "models/player.mdl"))
+			cl_modelindex[mi_player] = nummodels;
+		else if (!strcmp(model_precache[nummodels], "progs/flame.mdl"))
+			cl_modelindex[mi_flame1] = nummodels;
+		else if (!strcmp(model_precache[nummodels], "progs/flame2.mdl"))
+			cl_modelindex[mi_flame2] = nummodels;
 	}
 
 // precache sounds
@@ -294,25 +305,41 @@ void CL_ParseServerInfo (void)
 // now we try to load everything else until a cache allocation fails
 //
 
-	for (i=1 ; i<nummodels ; i++)
+   loading_num_step = loading_num_step +nummodels + numsounds;
+   loading_step = 1;
+
+  	for (i=1 ; i<nummodels ; i++)
 	{
 		cl.model_precache[i] = Mod_ForName (model_precache[i], false);
 		if (cl.model_precache[i] == NULL)
 		{
 			Con_Printf("Model %s not found\n", model_precache[i]);
+			loading_cur_step++;
 			return;
 		}
 		CL_KeepaliveMessage ();
+		loading_cur_step++;
+		strcpy(loading_name, model_precache[i]);
+		SCR_UpdateScreen ();
 	}
+	SCR_UpdateScreen ();
+
+	loading_step = 4;
 
 	S_BeginPrecaching ();
 	for (i=1 ; i<numsounds ; i++)
 	{
 		cl.sound_precache[i] = S_PrecacheSound (sound_precache[i]);
 		CL_KeepaliveMessage ();
+		loading_cur_step++;
+		strcpy(loading_name, sound_precache[i]);
+		SCR_UpdateScreen ();
 	}
 	S_EndPrecaching ();
 
+	SCR_UpdateScreen ();
+
+   	Clear_LoadingFill ();
 
 // local state
 	cl_entities[0].model = cl.worldmodel = cl.model_precache[1];
@@ -358,6 +385,18 @@ void CL_ParseUpdate (int bits)
 		i = MSG_ReadByte ();
 		bits |= (i<<8);
 	}
+
+	// Tomaz - QC Control Begin
+	if (bits & U_EXTEND1)
+	{
+		bits |= MSG_ReadByte() << 16;
+
+		if (bits & U_EXTEND2)
+		{
+			bits |= MSG_ReadByte() << 24;
+		}
+	}
+	// Tomaz - QC Control End
 
 	if (bits & U_LONGENTITY)	
 		num = MSG_ReadShort ();
@@ -478,6 +517,33 @@ if (bits&(1<<i))
 		ent->msg_angles[0][2] = MSG_ReadAngle();
 	else
 		ent->msg_angles[0][2] = ent->baseline.angles[2];
+
+// Tomaz - QC Alpha Scale Glow Begin
+	if (bits & U_RENDERAMT)
+	    ent->renderamt = MSG_ReadFloat();
+    else
+	    ent->renderamt = 0;
+
+    if (bits & U_RENDERMODE)
+	    ent->rendermode = MSG_ReadFloat();
+    else
+	    ent->rendermode = 0;
+
+	if (bits & U_RENDERCOLOR1)
+	    ent->rendercolor[0] = MSG_ReadFloat();
+    else
+	    ent->rendercolor[0] = 0;
+
+	if (bits & U_RENDERCOLOR2)
+	    ent->rendercolor[1] = MSG_ReadFloat();
+    else
+	    ent->rendercolor[1] = 0;
+
+	if (bits & U_RENDERCOLOR3)
+	    ent->rendercolor[2] = MSG_ReadFloat();
+    else
+	    ent->rendercolor[2] = 0;
+// Tomaz - QC Alpha Scale Glow End
 
 	if ( bits & U_NOLERP )
 		ent->forcelink = true;

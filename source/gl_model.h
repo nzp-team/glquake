@@ -33,10 +33,21 @@ m*_t structures are in-memory
 
 // entity effects
 
-#define	EF_BRIGHTFIELD			1
+#define	EF_BLUELIGHT			1
 #define	EF_MUZZLEFLASH 			2
 #define	EF_BRIGHTLIGHT 			4
-#define	EF_DIMLIGHT 			8
+#define	EF_REDLIGHT 			8
+#define	EF_ORANGELIGHT			16
+#define	EF_GREENLIGHT			32
+#define	EF_LIGHT				64
+#define	EF_NODRAW				128
+#define EF_BRIGHTFIELD			256
+#define EF_FULLBRIGHT			512
+#define EF_DARKLIGHT			1024
+#define EF_DARKFIELD			2048
+#define EF_PURPLELIGHT    		4096
+#define EF_RAYRED	 			8196			// red trail for porter x2
+#define EF_RAYGREEN  			16384			// gree trail for ray gun
 
 
 /*
@@ -119,6 +130,7 @@ typedef struct glpoly_s
 	int		numverts;
 	int		flags;			// for SURF_UNDERWATER
 	float	verts[4][VERTEXSIZE];	// variable sized (xyz s1t1 s2t2)
+//    vec3_t midpoint;//MHQuake // naievil -- fixme: this guy is causing some kind of rendering issue
 } glpoly_t;
 
 typedef struct msurface_s
@@ -343,10 +355,30 @@ typedef enum {mod_brush, mod_sprite, mod_alias} modtype_t;
 #define MOD_NOLERP	256
 //johnfits
 
+// some models are special
+typedef enum
+{
+	MOD_NORMAL,
+	MOD_PLAYER,
+	MOD_EYES,
+	MOD_FLAME,
+	MOD_THUNDERBOLT,
+	MOD_WEAPON,
+	MOD_LAVABALL,
+	MOD_SPIKE,
+	MOD_SHAMBLER,
+	MOD_SPR,
+	MOD_SPR32,
+//	MOD_GKEY,
+//	MOD_SKEY,
+} modhint_t;
+
 typedef struct model_s
 {
 	char		name[MAX_QPATH];
 	qboolean	needload;		// bmodels and sprites don't cache normally
+
+	modhint_t			modhint;
 
 	modtype_t	type;
 	int			numframes;

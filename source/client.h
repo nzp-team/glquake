@@ -54,6 +54,13 @@ typedef struct
 	int		percent;		// 0-256
 } cshift_t;
 
+typedef enum
+{
+	lt_default, lt_muzzleflash, lt_explosion, lt_rocket,
+	lt_red, lt_blue, lt_redblue, lt_green, NUM_DLIGHTTYPES,
+	lt_explosion2, lt_explosion3, lt_rayred, lt_raygreen
+} dlighttype_t;
+
 #define	CSHIFT_CONTENTS	0
 #define	CSHIFT_DAMAGE	1
 #define	CSHIFT_BONUS	2
@@ -78,11 +85,9 @@ typedef struct
 	float	decay;				// drop this each second
 	float	minlight;			// don't add when contributing less
 	int		key;
-#ifdef QUAKE2
 	qboolean	dark;			// subtracts light instead of adding
-#endif
-		vec3_t color; //LordHavoc Lit. Support
-
+	vec3_t color; //LordHavoc Lit. Support
+    int		type;		        // color
 } dlight_t;
 
 
@@ -204,9 +209,11 @@ typedef struct
 								// a lerp point for other data
 	double		oldtime;		// previous cl.time, time-oldtime is used
 								// to decay light values and smooth step ups
-	
+	double		ctime;			// joe: copy of cl.time, to avoid incidents caused by rewind
+
 
 	float		last_received_message;	// (realtime) for net trouble icon
+    double			laser_point_time;
 
 //
 // information that is static for the entire time connected to a server
@@ -318,6 +325,32 @@ void CL_NextDemo (void);
 extern	int				cl_numvisedicts;
 extern	entity_t		*cl_visedicts[MAX_VISEDICTS];
 
+// model indexes
+typedef	enum modelindex_s
+{
+	mi_player,
+	mi_eyes,
+	mi_flame0,
+	mi_flame1,
+	mi_flame2,
+	mi_q3torso,
+	mi_q3head,
+/*
+	mi_vw_light,
+	mi_vw_nail1,
+	mi_vw_nail2,
+	mi_vw_rock1,
+	mi_vw_rock2,
+	mi_vw_shot1,
+	mi_vw_shot2,
+	mi_vw_player,
+*/
+	NUM_MODELINDEX
+} modelindex_t;
+
+extern modelindex_t	cl_modelindex[NUM_MODELINDEX];
+extern	char			*cl_modelnames[NUM_MODELINDEX];
+
 //
 // cl_input
 //
@@ -384,3 +417,5 @@ void V_SetContentsColor (int contents);
 //
 void CL_InitTEnts (void);
 void CL_SignonReply (void);
+
+qboolean TraceLineN (vec3_t start, vec3_t end, vec3_t impact, vec3_t normal);

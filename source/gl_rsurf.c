@@ -132,12 +132,30 @@ void R_AddDynamicLights (msurface_t *surf)
 				else
 					dist = td + (sd>>1);
 				if (dist < minlight){
-					// LordHavoc: .lit support begin
 					brightness = rad - dist;
-					bl[0] += (int) (brightness * cred);
-					bl[1] += (int) (brightness * cgreen);
-					bl[2] += (int) (brightness * cblue);
-					// LordHavoc: .lit support end
+					if (!cl_dlights[lnum].dark)
+					{
+						bl[0] += (int) (brightness * cred);
+					    bl[1] += (int) (brightness * cgreen);
+					    bl[2] += (int) (brightness * cblue);
+					}
+					else
+				    {
+					  if(bl[0] > (int) (brightness * cred))
+                         bl[0] -= (int) (brightness * cred);
+                      else
+						 bl[0] = 0;
+
+					  if(bl[1] > (int) (brightness * cgreen))
+                         bl[1] -= (int) (brightness * cgreen);
+                      else
+						 bl[1] = 0;
+
+					  if(bl[2] > (int) (brightness * cblue))
+                         bl[2] -= (int) (brightness * cblue);
+					  else
+						 bl[2] = 0;
+					}
 				}
 				bl += 3;
 			}
@@ -1178,6 +1196,54 @@ void R_DrawBrushModel (entity_t *e)
 	}
 
     glPushMatrix ();
+
+    // naievil -- fixme
+    /*
+	//Crow_bar half_life render.
+	if (ISADDITIVE(e))
+	{
+		//Con_DPrintf("ISADDITIVE:brush\n");
+		float deg = e->renderamt;
+		float alpha1 = deg;
+		float alpha2 = 1 - deg;
+		if(deg <= 0.7)
+			sceGuDepthMask(GU_TRUE);
+		
+		sceGuEnable (GU_BLEND);
+		sceGuBlendFunc(GU_ADD, GU_FIX, GU_FIX,
+		GU_COLOR(alpha1,alpha1,alpha1,alpha1),
+		GU_COLOR(alpha2,alpha2,alpha2,alpha2));
+		dlight = qfalse;
+	}
+	else if (ISSOLID(e))
+	{
+		sceGuEnable(GU_ALPHA_TEST);
+		int c = (int)(e->renderamt * 255.0f);
+		sceGuAlphaFunc(GU_GREATER, c, 0xff);
+		dlight = qfalse;
+	}
+	else if (ISGLOW(e))
+	{
+		sceGuTexFunc(GU_TFX_MODULATE , GU_TCC_RGBA);
+		sceGuDepthMask(GU_TRUE);
+		sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_FIX, 0, 0xFFFFFFFF);
+		R_GlowSetupBegin(e);
+	}
+	else if (ISTEXTURE(e))
+	{
+		sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
+		sceGuColor(GU_RGBA(255, 255, 255, (int)(e->renderamt * 255.0f)));
+		dlight = qfalse;
+	}
+	else if (ISCOLOR(e))
+	{
+		sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
+		sceGuColor(GU_RGBA((int)(e->rendercolor[0] * 255.0f),
+			(int)(e->rendercolor[1] * 255.0f),
+			(int)(e->rendercolor[2] * 255.0f), 255));
+	}
+	*/
+
 	e->angles[0] = -e->angles[0];	// stupid quake bug
 	R_RotateForEntity (e);
 	e->angles[0] = -e->angles[0];	// stupid quake bug

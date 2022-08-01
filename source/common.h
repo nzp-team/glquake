@@ -37,6 +37,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
     (x_ > valmax_) ? valmax_ : x_;              \
 })
 
+#define bound(a, b, c) ((a) >= (c) ? (a) : (b) < (a) ? (a) : (b) > (c) ? (c) : (b))
+
 #if !defined BYTE_DEFINED
 typedef unsigned char 		byte;
 #define BYTE_DEFINED 1

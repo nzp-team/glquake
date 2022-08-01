@@ -45,8 +45,12 @@ extern	int nanmask;
 #define VectorSubtract(a,b,c) {c[0]=a[0]-b[0];c[1]=a[1]-b[1];c[2]=a[2]-b[2];}
 #define VectorAdd(a,b,c) {c[0]=a[0]+b[0];c[1]=a[1]+b[1];c[2]=a[2]+b[2];}
 #define VectorCopy(a,b) {b[0]=a[0];b[1]=a[1];b[2]=a[2];}
-
+#define VectorClear(a)		((a)[0] = (a)[1] = (a)[2] = 0)
+#define VectorSet(v, x, y, z)	((v)[0] = (x), (v)[1] = (y), (v)[2] = (z))
+#define VectorNegate(a, b)	((b)[0] = -(a)[0], (b)[1] = -(a)[1], (b)[2] = -(a)[2])
 #define DEG2RAD( a ) ( a * M_PI ) / 180.0F
+
+#define VectorNormalizeFast( v ){float	ilength = (float)rsqrt(DotProduct(v,v));v[0] *= ilength;v[1] *= ilength;v[2] *= ilength; }
 
 void VectorMA (vec3_t veca, float scale, vec3_t vecb, vec3_t vecc);
 
@@ -79,7 +83,22 @@ void AngleVectors (vec3_t angles, vec3_t forward, vec3_t right, vec3_t up);
 int BoxOnPlaneSide (vec3_t emins, vec3_t emaxs, struct mplane_s *plane);
 float	anglemod(float a);
 
+extern int _mathlib_temp_int1, _mathlib_temp_int2, _mathlib_temp_int3;
+extern float _mathlib_temp_float1, _mathlib_temp_float2, _mathlib_temp_float3;
+extern vec3_t _mathlib_temp_vec1, _mathlib_temp_vec2, _mathlib_temp_vec3;
 
+#define VectorL2Compare(v, w, m)					\
+	(_mathlib_temp_float1 = (m) * (m),				\
+	_mathlib_temp_vec1[0] = (v)[0] - (w)[0], _mathlib_temp_vec1[1] = (v)[1] - (w)[1], _mathlib_temp_vec1[2] = (v)[2] - (w)[2],\
+	_mathlib_temp_vec1[0] * _mathlib_temp_vec1[0] +	\
+	_mathlib_temp_vec1[1] * _mathlib_temp_vec1[1] +	\
+	_mathlib_temp_vec1[2] * _mathlib_temp_vec1[2] < _mathlib_temp_float1)
+
+#define VectorSupCompare(v, w, m)								\
+	(_mathlib_temp_float1 = m,									\
+	(v)[0] - (w)[0] > -_mathlib_temp_float1 && (v)[0] - (w)[0] < _mathlib_temp_float1 &&	\
+	(v)[1] - (w)[1] > -_mathlib_temp_float1 && (v)[1] - (w)[1] < _mathlib_temp_float1 &&	\
+	(v)[2] - (w)[2] > -_mathlib_temp_float1 && (v)[2] - (w)[2] < _mathlib_temp_float1)
 
 #define BOX_ON_PLANE_SIDE(emins, emaxs, p)	\
 	(((p)->type < 3)?						\
@@ -96,3 +115,6 @@ float	anglemod(float a);
 	)										\
 	:										\
 		BoxOnPlaneSide( (emins), (emaxs), (p)))
+
+
+float rsqrt( float number );

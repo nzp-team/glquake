@@ -227,8 +227,8 @@ void M_Main_Draw (void)
 		Draw_String(vid.width/4, vid.height/4 + (16 * i), MAIN_MENU_ITEMS[i]);
 	}
 
-	Draw_Fill(vid.width/4, vid.height/4 - 3 + (16 * m_main_cursor), strlen(MAIN_MENU_ITEMS[m_main_cursor])*8, 1, 255, 255, 255);
-	Draw_Fill(vid.width/4, vid.height/4 + 2 + 8 + (16 * m_main_cursor), strlen(MAIN_MENU_ITEMS[m_main_cursor])*8, 1, 255, 255, 255);
+	Draw_Fill(vid.width/4, vid.height/4 - 3 + (16 * m_main_cursor), strlen(MAIN_MENU_ITEMS[m_main_cursor])*8, 1, 255, 255, 255, 255);
+	Draw_Fill(vid.width/4, vid.height/4 + 2 + 8 + (16 * m_main_cursor), strlen(MAIN_MENU_ITEMS[m_main_cursor])*8, 1, 255, 255, 255, 255);
 }
 
 
@@ -305,8 +305,8 @@ void M_SinglePlayer_Draw (void)
 		Draw_String(vid.width/4, vid.height/4 + (16 * i), SINGLE_MENU_ITEMS[i]);
 	}
 
-	Draw_Fill(vid.width/4, vid.height/4 - 3 + (16 * m_singleplayer_cursor), strlen(SINGLE_MENU_ITEMS[m_singleplayer_cursor])*8, 1, 255, 255, 255);
-	Draw_Fill(vid.width/4, vid.height/4 + 2 + 8 + (16 * m_singleplayer_cursor), strlen(SINGLE_MENU_ITEMS[m_singleplayer_cursor])*8, 1, 255, 255, 255);
+	Draw_Fill(vid.width/4, vid.height/4 - 3 + (16 * m_singleplayer_cursor), strlen(SINGLE_MENU_ITEMS[m_singleplayer_cursor])*8, 1, 255, 255, 255, 255);
+	Draw_Fill(vid.width/4, vid.height/4 + 2 + 8 + (16 * m_singleplayer_cursor), strlen(SINGLE_MENU_ITEMS[m_singleplayer_cursor])*8, 1, 255, 255, 255, 255);
 }
 
 

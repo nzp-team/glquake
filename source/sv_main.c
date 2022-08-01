@@ -433,6 +433,15 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 	float	miss;
 	edict_t	*ent;
 
+// Tomaz - QC Alpha Scale Glow Begin
+	eval_t  *val;
+	float	renderamt  = 0;
+	float	rendermode = 0;
+
+	float	rendercolor[3];
+	memset(rendercolor, 0, sizeof(rendercolor));
+// Tomaz - QC Alpha Scale Glow End
+
 // find the client's PVS
 	VectorAdd (clent->v.origin, clent->v.view_ofs, org);
 	pvs = SV_FatPVS (org);
@@ -505,11 +514,58 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 		if (ent->baseline.modelindex != ent->v.modelindex)
 			bits |= U_MODEL;
 
-		if (e >= 256)
+        // Tomaz - QC Alpha Scale Glow Begin
+
+	{
+		//Smal Size
+		if ((val = GETEDICTFIELDVALUE(ent, eval_renderamt)) && val->_float != 255.0) // HalfLife support
+			 renderamt = val->_float / 255.0f;
+
+		if ((val = GETEDICTFIELDVALUE(ent, eval_rendermode)) && val->_float != 0) // HalfLife support
+			rendermode = val->_float;
+
+		if ((val = GETEDICTFIELDVALUE(ent, eval_rendercolor))) // HalfLife support
+		{
+			rendercolor[0] = val->vector[0] / 255.0f;
+			rendercolor[1] = val->vector[1] / 255.0f;
+			rendercolor[2] = val->vector[2] / 255.0f;
+		}
+
+		if (renderamt > 0)
+			bits |= U_RENDERAMT;
+
+		if (rendermode > 0)
+			bits |= U_RENDERMODE;
+
+		if (rendercolor[0] > 0)
+		{
+			bits |= U_RENDERCOLOR1;
+		}
+
+		if (rendercolor[1] > 0 )
+		{
+			bits |= U_RENDERCOLOR2;
+		}
+
+		if (rendercolor[2] > 0 )
+		{
+			bits |= U_RENDERCOLOR3;
+		}
+	}
+
+	// Tomaz - QC Alpha Scale Glow End
+		if (e >= 256)//We have more than 256 entities
 			bits |= U_LONGENTITY;
-			
-		if (bits >= 256)
+
+		if (bits >= 256)//this is we've exceded some old 8-bit message
 			bits |= U_MOREBITS;
+
+		// Tomaz - QC Control Begin
+		if (bits >= 65536)//this is if we've excited the original 16-bit message
+			bits |= U_EXTEND1;
+		if (bits >= 16777216)
+			bits |= U_EXTEND2;
+		// Tomaz - QC Control End
 
 	//
 	// write the message
@@ -518,6 +574,14 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 		
 		if (bits & U_MOREBITS)
 			MSG_WriteByte (msg, bits>>8);
+
+		// Tomaz - QC Control Begin
+		if (bits & U_EXTEND1)
+			MSG_WriteByte (msg, bits>>16);
+		if (bits & U_EXTEND2)
+			MSG_WriteByte (msg, bits>>24);
+		// Tomaz - QC Control End
+
 		if (bits & U_LONGENTITY)
 			MSG_WriteShort (msg,e);
 		else
@@ -545,6 +609,23 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 			MSG_WriteCoord (msg, ent->v.origin[2]);
 		if (bits & U_ANGLE3)
 			MSG_WriteAngle(msg, ent->v.angles[2]);
+		// Tomaz - QC Alpha Scale Glow Begin
+		if (bits & U_RENDERAMT)
+			MSG_WriteFloat(msg, renderamt);
+
+		if (bits & U_RENDERMODE)
+			MSG_WriteFloat(msg, rendermode);
+
+		if (bits & U_RENDERCOLOR1)
+			MSG_WriteFloat(msg, rendercolor[0]);
+
+		if (bits & U_RENDERCOLOR2)
+			MSG_WriteFloat(msg, rendercolor[1]);
+
+		if (bits & U_RENDERCOLOR3)
+			MSG_WriteFloat(msg, rendercolor[2]);
+		// Tomaz - QC Alpha Scale Glow End
+
 	}
 }
 

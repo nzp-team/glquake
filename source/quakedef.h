@@ -298,6 +298,11 @@ typedef struct
 	int		colormap;
 	int		skin;
 	int		effects;
+	// dr_mabuse1981: HalfLife rendermodes fixed START
+	unsigned short renderamt;
+	unsigned short rendermode;
+	unsigned short rendercolor;
+	// dr_mabuse1981: HalfLife rendermodes fixed END
 } entity_state_t;
 
 
@@ -336,6 +341,8 @@ typedef struct
 #endif
 
 #include "cl_hud.h"
+
+#include "gl_decal.h"
 
 //=============================================================================
 
@@ -399,6 +406,11 @@ extern int			current_skill;		// skill level for currently loaded level (in case
 extern qboolean		isDedicated;
 
 extern int			minimum_memory;
+
+#define ISUNDERWATER(x) ((x) == CONTENTS_WATER || (x) == CONTENTS_SLIME || (x) == CONTENTS_LAVA)
+
+int SV_HullPointContents (hull_t *hull, int num, vec3_t p);
+#define TruePointContents(p) SV_HullPointContents(&cl.worldmodel->hulls[0], 0, p)
 
 //
 // chase

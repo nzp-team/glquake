@@ -60,6 +60,36 @@ typedef struct {
 
 static gefv_cache	gefvCache[GEFV_CACHESIZE] = {{NULL, ""}, {NULL, ""}};
 
+// evaluation shortcuts
+int	eval_gravity;
+int eval_idealpitch, eval_pitch_speed;
+
+// Half_life modes. Crow_bar
+int	eval_renderamt, eval_rendermode, eval_rendercolor;
+
+ddef_t *ED_FindField (char *name);
+
+int FindFieldOffset (char *field)
+{
+	ddef_t	*d;
+
+	if (!(d = ED_FindField(field)))
+		return 0;
+
+	return d->ofs*4;
+}
+
+void FindEdictFieldOffsets (void)
+{
+	eval_gravity = FindFieldOffset ("gravity");
+
+    eval_idealpitch = FindFieldOffset ("idealpitch");
+	eval_pitch_speed = FindFieldOffset ("pitch_speed");
+	eval_renderamt   = FindFieldOffset ("renderamt");
+	eval_rendermode  = FindFieldOffset ("rendermode");
+    eval_rendercolor = FindFieldOffset ("rendercolor");
+}
+
 /*
 =================
 ED_ClearEdict
@@ -1061,6 +1091,7 @@ void PR_LoadProgs (void)
 	for (i=0 ; i<progs->numglobals ; i++)
 		((int *)pr_globals)[i] = LittleLong (((int *)pr_globals)[i]);
 
+   	FindEdictFieldOffsets ();
 	EndFrame = 0;
 
 	if ((f = ED_FindFunction ("EndFrame")) != NULL)

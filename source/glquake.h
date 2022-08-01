@@ -74,6 +74,39 @@ extern	PROC glTexturePointerEXT;
 extern	PROC glVertexPointerEXT;
 #endif
 
+
+/*
+---------------------------------
+half-life Render Modes. Crow_bar
+---------------------------------
+*/
+
+#define TEX_COLOR    1
+#define TEX_TEXTURE  2
+#define TEX_GLOW     3
+#define TEX_SOLID    4
+#define TEX_ADDITIVE 5
+#define TEX_LMPOINT  6 //for light point
+
+#define ISCOLOR(ent)    ((ent)->rendermode == TEX_COLOR    && ((ent)->rendercolor[0] <= 1|| \
+                                                               (ent)->rendercolor[1] <= 1|| \
+															   (ent)->rendercolor[2] <= 1))
+
+#define ISTEXTURE(ent)  ((ent)->rendermode == TEX_TEXTURE  && (ent)->renderamt > 0 && (ent)->renderamt <= 1)
+#define ISGLOW(ent)     ((ent)->rendermode == TEX_GLOW     && (ent)->renderamt > 0 && (ent)->renderamt <= 1)
+#define ISSOLID(ent)    ((ent)->rendermode == TEX_SOLID    && (ent)->renderamt > 0 && (ent)->renderamt <= 1)
+#define ISADDITIVE(ent) ((ent)->rendermode == TEX_ADDITIVE && (ent)->renderamt > 0 && (ent)->renderamt <= 1)
+
+#define ISLMPOINT(ent)  ((ent)->rendermode == TEX_LMPOINT  && ((ent)->rendercolor[0] <= 1|| \
+                                                               (ent)->rendercolor[1] <= 1|| \
+															   (ent)->rendercolor[2] <= 1))
+/*
+---------------------------------
+//half-life Render Modes
+---------------------------------
+*/
+
+
 // r_local.h -- private refresh defs
 
 #define ALIAS_BASE_SIZE_RATIO		(1.0 / 11.0)
@@ -108,6 +141,10 @@ typedef struct surfcache_s
 	byte				data[4];	// width*height elements
 } surfcache_t;
 
+typedef	enum
+{
+	pm_classic, pm_qmb, pm_quake3, pm_mixed
+} part_mode_t;
 
 typedef struct
 {
@@ -127,18 +164,25 @@ typedef enum {
 	pt_static, pt_grav, pt_slowgrav, pt_fire, pt_explode, pt_explode2, pt_blob, pt_blob2
 } ptype_t;
 
-// !!! if this is changed, it must be changed in d_ifacea.h too !!!
+typedef	byte	col_t[4];
+
 typedef struct particle_s
 {
-// driver-usable fields
-	vec3_t		org;
-	float		color;
-// drivers never touch the following fields
-	struct particle_s	*next;
-	vec3_t		vel;
-	float		ramp;
-	float		die;
-	ptype_t		type;
+	struct	particle_s	*next;
+	vec3_t				org, endorg;
+	col_t				color;
+	float				growth;
+	vec3_t				vel;
+	float 				ramp;
+	ptype_t 			type;
+	float				rotangle;
+	float				rotspeed;
+	float				size;
+	float				start;
+	float				die;
+	byte				hit;
+	byte				texindex;
+	byte				bounces;
 } particle_t;
 
 
@@ -194,6 +238,32 @@ extern	cvar_t	r_dynamic;
 extern	cvar_t	r_novis;
 extern cvar_t 	r_lerpmodels;
 extern cvar_t 	r_lerpmove;
+extern  cvar_t  r_farclip;
+
+extern  cvar_t  r_laserpoint;
+extern  cvar_t  r_particle_count;
+extern  cvar_t	r_part_explosions;
+extern  cvar_t	r_part_trails;
+extern  cvar_t	r_part_sparks;
+extern  cvar_t  r_part_spikes;
+extern  cvar_t	r_part_gunshots;
+extern  cvar_t	r_part_blood;
+extern  cvar_t	r_part_telesplash;
+extern  cvar_t	r_part_blobs;
+extern  cvar_t	r_part_lavasplash;
+extern	cvar_t	r_part_flames;
+extern	cvar_t	r_part_lightning;
+extern	cvar_t	r_part_flies;
+extern	cvar_t	r_bounceparticles;
+extern	cvar_t  r_explosiontype;
+extern  cvar_t	r_part_muzzleflash;
+extern  cvar_t	r_flametype;
+extern  cvar_t	r_bounceparticles;
+extern  cvar_t	r_decal_blood;
+extern  cvar_t	r_decal_bullets;
+extern  cvar_t	r_decal_sparks;
+extern  cvar_t	r_decal_explosions;
+extern  cvar_t  r_coronas;
 
 extern	cvar_t	gl_clear;
 extern	cvar_t	gl_cull;
@@ -261,3 +331,35 @@ void Fog_Init (void);
 void Fog_SetupState (void);
 
 qboolean VID_Is8bit(void);
+
+
+// naievil -- fixme: none of these work
+//-----------------------------------------------------
+void QMB_InitParticles (void);
+void QMB_ClearParticles (void);
+void QMB_DrawParticles (void);
+void QMB_Q3TorchFlame (vec3_t org, float size);
+void QMB_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count);
+void QMB_RocketTrail (vec3_t start, vec3_t end, trail_type_t type);
+void QMB_RayFlash (vec3_t org, float weapon);
+void QMB_BlobExplosion (vec3_t org);
+void QMB_ParticleExplosion (vec3_t org);
+void QMB_LavaSplash (vec3_t org);
+void QMB_TeleportSplash (vec3_t org);
+void QMB_InfernoFlame (vec3_t org);
+void QMB_StaticBubble (entity_t *ent);
+void QMB_ColorMappedExplosion (vec3_t org, int colorStart, int colorLength);
+void QMB_TorchFlame (vec3_t org);
+void QMB_FlameGt (vec3_t org, float size, float time);
+void QMB_BigTorchFlame (vec3_t org);
+void QMB_ShamblerCharge (vec3_t org);
+void QMB_LightningBeam (vec3_t start, vec3_t end);
+//void QMB_GenSparks (vec3_t org, byte col[3], float count, float size, float life);
+void QMB_EntityParticles (entity_t *ent);
+void QMB_MuzzleFlash (vec3_t org);
+void QMB_MuzzleFlashLG (vec3_t org);
+void QMB_Q3Gunshot (vec3_t org, int skinnum, float alpha);
+void QMB_Q3Teleport (vec3_t org, float alpha);
+void QMB_Q3TorchFlame (vec3_t org, float size);
+
+extern	qboolean	qmb_initialized;

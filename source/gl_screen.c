@@ -1506,13 +1506,11 @@ void SCR_UpdateScreen (void)
 	SCR_DrawConsole ();
 	M_Draw ();
 
-	// naievil -- fixme
 	if(scr_loadscreen.value) {
 		SCR_DrawLoadScreen();
 	}
 
-	// naievil -- fixme
-	//Draw_LoadingFill();
+	Draw_LoadingFill();
 
 	V_UpdatePalette ();
 

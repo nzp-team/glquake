@@ -60,6 +60,13 @@ int		texels;
 
 int GL_LoadPicTexture (qpic_t *pic);
 
+//Loading Fill by Crow_bar
+float 	loading_cur_step;
+char	loading_name[32];
+float 	loading_num_step;
+int 	loading_step;
+float 	loading_cur_step_bk;
+
 typedef struct
 {
 	int		texnum;
@@ -439,6 +446,8 @@ void Draw_Init (void)
 	// get the other pics we need
 	//
 	sniper_scope = Draw_CachePic ("gfx/hud/scope");
+
+	Clear_LoadingFill ();
 }
 
 
@@ -731,7 +740,7 @@ Draw_ConsoleBackground
 */
 void Draw_ConsoleBackground (int lines)
 {
-	Draw_Fill(0, 0, vid.width, lines, 0, 0, 0);
+	Draw_Fill(0, 0, vid.width, lines, 0, 0, 0, 255);
 }
 
 
@@ -760,15 +769,72 @@ void Draw_TileClear (int x, int y, int w, int h)
 }
 
 /*
+================
+Draw_LoadingFill
+By Crow_bar
+================
+*/
+void Draw_LoadingFill(void)
+{
+    if(!loading_num_step)
+		return;
+
+	int size       	= 8;
+	int max_step   	= 350;
+    int x          	= (vid.width  / 2) - (max_step / 2);
+    int y          	= vid.height - (size/ 2) - 25;
+	int l;
+	char str[64];
+	char* text;
+
+
+	if(loading_cur_step > loading_num_step)
+	      loading_cur_step = loading_num_step;
+
+	if (loading_cur_step < loading_cur_step_bk)
+		loading_cur_step = loading_cur_step_bk;
+
+	if (loading_cur_step == loading_num_step && loading_cur_step_bk != loading_num_step)
+		loading_cur_step = loading_cur_step_bk;
+
+    float loadsize = loading_cur_step * (max_step / loading_num_step);
+	Draw_FillByColor (x - 2, y - 2, max_step + 4, size + 4, 69, 69, 69, 255);
+	Draw_FillByColor (x, y, loadsize, size, 0, 0, 0, 200);
+
+	switch(loading_step) {
+		case 1: text = "Loading Models.."; break;
+		case 2: text = "Loading World.."; break;
+		case 3: text = "Running Test Frame.."; break;
+		case 4: text = "Loading Sounds.."; break;
+		default: text = "Initializing.."; break;
+	}
+
+	l = strlen (text);
+	Draw_String((vid.width - l*8)/2, y, text);
+
+	loading_cur_step_bk = loading_cur_step;
+}
+
+void Clear_LoadingFill (void)
+{
+    //it is end loading
+	loading_cur_step = 0;
+	loading_cur_step_bk = 0;
+	loading_num_step = 0;
+	loading_step = -1;
+	memset(loading_name, 0, sizeof(loading_name));
+}
+
+/*
 =============
 Draw_FillByColor
 
 Fills a box of pixels with a single color
 =============
 */
-void Draw_FillByColor (int x, int y, int w, int h, int r, int g, int b)
+void Draw_FillByColor (int x, int y, int w, int h, int r, int g, int b, int a)
 {
-	Draw_Fill(x, y, w, h, r, g, b);
+	Draw_Fill(x, y, w, h, r, g, b, a);
 }
 
 /*
@@ -778,10 +844,10 @@ Draw_Fill
 Fills a box of pixels with a single color
 =============
 */
-void Draw_Fill (int x, int y, int w, int h, int r, int g, int b)
+void Draw_Fill (int x, int y, int w, int h, int r, int g, int b, int a)
 {
 	glDisable (GL_TEXTURE_2D);
-	glColor3f (r/255, g/255, b/255);
+	glColor4f (r/255, g/255, b/255, a/255);
 
 	glBegin (GL_QUADS);
 
@@ -791,7 +857,7 @@ void Draw_Fill (int x, int y, int w, int h, int r, int g, int b)
 	glVertex2f (x, y+h);
 
 	glEnd ();
-	glColor3f (1,1,1);
+	glColor4f (1,1,1,1);
 	glEnable (GL_TEXTURE_2D);
 }
 //=============================================================================
@@ -1112,19 +1178,19 @@ void Draw_Crosshair (void)
 
 		x_value = (vid.width - 3)/2 - crosshair_offset_step;
 		y_value = (vid.height - 1)/2;
-		Draw_FillByColor(x_value, y_value, 3, 1, 255, (int)col, (int)col);
+		Draw_FillByColor(x_value, y_value, 3, 1, 255, (int)col, (int)col, 255);
 
 		x_value = (vid.width - 3)/2 + crosshair_offset_step;
 		y_value = (vid.height - 1)/2;
-		Draw_FillByColor(x_value, y_value, 3, 1, 255, (int)col, (int)col);
+		Draw_FillByColor(x_value, y_value, 3, 1, 255, (int)col, (int)col, 255);
 
 		x_value = (vid.width - 1)/2;
 		y_value = (vid.height - 3)/2 - crosshair_offset_step;
-		Draw_FillByColor(x_value, y_value, 1, 3, 255, (int)col, (int)col);
+		Draw_FillByColor(x_value, y_value, 1, 3, 255, (int)col, (int)col, 255);
 
 		x_value = (vid.width - 1)/2;
 		y_value = (vid.height - 3)/2 + crosshair_offset_step;
-		Draw_FillByColor(x_value, y_value, 1, 3, 255, (int)col, (int)col);
+		Draw_FillByColor(x_value, y_value, 1, 3, 255, (int)col, (int)col, 255);
     }
     else if (crosshair.value && cl.stats[STAT_ZOOM] != 1 && cl.stats[STAT_ZOOM] != 2)
 		Draw_CharacterRGBA((vid.width - 8)/2, (vid.height - 8)/2, '.', 255, col, col, crosshair_opacity, 1);
@@ -2237,8 +2303,10 @@ int loadtextureimage (char* filename, int matchwidth, int matchheight, qboolean 
 {
 	int texnum;
 	byte *data;
-	if (!(data = loadimagepixels (filename, complain, matchwidth, matchheight))) 
+	if (!(data = loadimagepixels (filename, complain, matchwidth, matchheight))) { 
+		Con_DPrintf("Cannot load image %s\n", filename);
 		return 0;
+	}
 	texnum = GL_LoadTexture (filename, image_width, image_height, data, mipmap, qtrue, 4);
 	free(data);
 	return texnum;

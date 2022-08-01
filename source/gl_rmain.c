@@ -101,6 +101,28 @@ cvar_t	gl_keeptjunctions = {"gl_keeptjunctions","0"};
 cvar_t	gl_reporttjunctions = {"gl_reporttjunctions","0"};
 cvar_t	gl_doubleeyes = {"gl_doubleeys", "1"};
 
+//QMB
+cvar_t  r_explosiontype     = {"r_explosiontype",    "0",qtrue};
+cvar_t	r_laserpoint		= {"r_laserpoint",       "0",qtrue};
+cvar_t	r_part_explosions	= {"r_part_explosions",  "1",qtrue};
+cvar_t	r_part_trails		= {"r_part_trails",      "1",qtrue};
+cvar_t	r_part_sparks		= {"r_part_sparks",      "1",qtrue};
+cvar_t	r_part_spikes		= {"r_part_spikes",      "1",qtrue};
+cvar_t	r_part_gunshots	    = {"r_part_gunshots",    "1",qtrue};
+cvar_t	r_part_blood		= {"r_part_blood",       "1",qtrue};
+cvar_t	r_part_telesplash	= {"r_part_telesplash",  "1",qtrue};
+cvar_t	r_part_blobs		= {"r_part_blobs",       "1",qtrue};
+cvar_t	r_part_lavasplash	= {"r_part_lavasplash",  "1",qtrue};
+cvar_t	r_part_flames		= {"r_part_flames",      "1",qtrue};
+cvar_t	r_part_lightning	= {"r_part_lightning",   "1",qtrue};
+cvar_t	r_part_flies		= {"r_part_flies",       "1",qtrue};
+cvar_t	r_part_muzzleflash  = {"r_part_muzzleflash", "1",qtrue};
+cvar_t	r_flametype	        = {"r_flametype",        "2",qtrue};
+//Shpuld
+cvar_t  r_model_brightness  = { "r_model_brightness", "1", qtrue};   // Toggle high brightness model lighting
+
+cvar_t	r_farclip	        = {"r_farclip",              "4096"};        //far cliping for q3 models
+
 //johnfitz -- struct for passing lerp information to drawing functions
 typedef struct {
 	short pose1;
@@ -617,9 +639,39 @@ void R_DrawAliasModel (entity_t *e)
 	VectorAdd (currententity->origin, clmodel->mins, mins);
 	VectorAdd (currententity->origin, clmodel->maxs, maxs);
 
+// naievil -- fixme: on psp this is == 2 ? 
 	if (R_CullBox (mins, maxs))
 		return;
 
+	// naievil -- fixme: need to translate
+	/*
+	if(ISADDITIVE(e))
+	{
+		float deg = e->renderamt;
+		float alpha_val  = deg;
+		float alpha_val2 = 1 - deg;
+
+		if(deg <= 0.7)
+		 sceGuDepthMask(GU_TRUE);
+
+		sceGuEnable (GU_BLEND);
+		sceGuBlendFunc(GU_ADD, GU_FIX, GU_FIX,
+		GU_COLOR(alpha_val,alpha_val,alpha_val,alpha_val),
+		GU_COLOR(alpha_val2,alpha_val2,alpha_val2,alpha_val2));
+	}
+	else if(ISGLOW(e))
+	{
+		sceGuDepthMask(GU_TRUE);
+		sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_FIX, 0, 0xFFFFFFFF);
+		sceGuTexFunc(GU_TFX_MODULATE , GU_TCC_RGBA);
+	}
+	else if (ISSOLID(e))
+	{
+		sceGuEnable(GU_ALPHA_TEST);
+		float c = (e->renderamt) * 255.0f;
+		sceGuAlphaFunc(GU_GREATER, 0x88, c);
+	}
+	*/
 
 	VectorCopy (currententity->origin, r_entorigin);
 	VectorSubtract (r_origin, r_entorigin, modelorg);

@@ -102,8 +102,10 @@ COMMON_OBJS =	chase.c \
 				snd_ctr.c \
 				in_null.c \
 				cd_null.c \
+				gl_decal.c \
+				gl_qmb.c \
 				gl_draw.c \
-                gl_fog.c \
+		                gl_fog.c \
 				gl_mesh.c \
 				gl_model.c \
 				gl_refrag.c \

@@ -363,6 +363,8 @@ void Mod_LoadTextures (lump_t *l)
 	loadmodel->numtextures = m->nummiptex;
 	loadmodel->textures = Hunk_AllocName (m->nummiptex * sizeof(*loadmodel->textures) , loadname);
 
+	loading_num_step = loading_num_step + m->nummiptex;
+
 	for (i=0 ; i<m->nummiptex ; i++)
 	{
 		m->dataofs[i] = LittleLong(m->dataofs[i]);
@@ -418,6 +420,9 @@ void Mod_LoadTextures (lump_t *l)
 				texture_mode = GL_LINEAR;
 			}
 		}
+		strcpy(loading_name, mt->name);
+        loading_cur_step++;
+		SCR_UpdateScreen();
 	}
 
 //
@@ -1287,23 +1292,104 @@ void Mod_LoadBrushModel (model_t *mod, void *buffer)
 
 // load into heap
 	
+	loading_num_step = loading_num_step + 16;
+	loading_step = 2;
+
+	strcpy(loading_name, "Vertexes");
+	SCR_UpdateScreen ();
+
 	Mod_LoadVertexes (&header->lumps[LUMP_VERTEXES]);
+
+    loading_cur_step++;
+	strcpy(loading_name, "Edges");
+	SCR_UpdateScreen ();
+
 	Mod_LoadEdges (&header->lumps[LUMP_EDGES]);
+
+    loading_cur_step++;
+	strcpy(loading_name, "Surfedges");
+	SCR_UpdateScreen ();
+
 	Mod_LoadSurfedges (&header->lumps[LUMP_SURFEDGES]);
+
+    loading_cur_step++;
+	strcpy(loading_name, "Entities");
+	SCR_UpdateScreen ();
+
+	Mod_LoadEntities (&header->lumps[LUMP_ENTITIES]);
+
+    loading_cur_step++;
+	strcpy(loading_name, "Textures");
+	SCR_UpdateScreen ();
+
 	Mod_LoadTextures (&header->lumps[LUMP_TEXTURES]);
 	Mod_LoadLighting (&header->lumps[LUMP_LIGHTING]);
+
+    loading_cur_step++;
+	SCR_UpdateScreen ();
+
 	Mod_LoadPlanes (&header->lumps[LUMP_PLANES]);
+
+    loading_cur_step++;
+	strcpy(loading_name, "Texinfo");
+	SCR_UpdateScreen ();
+
 	Mod_LoadTexinfo (&header->lumps[LUMP_TEXINFO]);
+
+    loading_cur_step++;
+	strcpy(loading_name, "Faces");
+	SCR_UpdateScreen ();
+
 	Mod_LoadFaces (&header->lumps[LUMP_FACES]);
+
+    loading_cur_step++;
+	strcpy(loading_name, "Marksurfaces");
+	SCR_UpdateScreen ();
+
 	Mod_LoadMarksurfaces (&header->lumps[LUMP_MARKSURFACES]);
+
+    loading_cur_step++;
+	strcpy(loading_name, "Visibility");
+	SCR_UpdateScreen ();
+
 	Mod_LoadVisibility (&header->lumps[LUMP_VISIBILITY]);
+
+    loading_cur_step++;
+	strcpy(loading_name, "Leafs");
+	SCR_UpdateScreen ();
+
 	Mod_LoadLeafs (&header->lumps[LUMP_LEAFS]);
+
+    loading_cur_step++;
+	strcpy(loading_name, "Nodes");
+	SCR_UpdateScreen ();
+
 	Mod_LoadNodes (&header->lumps[LUMP_NODES]);
+
+    loading_cur_step++;
+	strcpy(loading_name, "Clipnodes");
+	SCR_UpdateScreen ();
+
 	Mod_LoadClipnodes (&header->lumps[LUMP_CLIPNODES]);
-	Mod_LoadEntities (&header->lumps[LUMP_ENTITIES]);
+
+    loading_cur_step++;
+	strcpy(loading_name, "Submodels");
+	SCR_UpdateScreen ();
+
 	Mod_LoadSubmodels (&header->lumps[LUMP_MODELS]);
 
+    loading_cur_step++;
+	strcpy(loading_name, "Hull");
+	SCR_UpdateScreen ();
+
 	Mod_MakeHull0 ();
+	loading_cur_step++;
+
+	loading_step = 2;
+
+	strcpy(loading_name, "Screen");
+    loading_cur_step++;
+	SCR_UpdateScreen ();
 	
 	mod->numframes = 2;		// regular and alternate animation
 	
@@ -1620,6 +1706,35 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	daliasframetype_t	*pframetype;
 	daliasskintype_t	*pskintype;
 	int					start, end, total;
+
+// some models are special
+	// NOTE: comparing not only with player.mdl, but with all models
+	// begin with "player" coz we need to support DME models as well!
+	if (!strncmp(mod->name, "progs/player", 12))
+		mod->modhint = MOD_PLAYER;
+	else if (!strcmp(mod->name, "progs/eyes.mdl"))
+		mod->modhint = MOD_EYES;
+	else if (!strcmp(mod->name, "progs/flame0.mdl") ||
+		 !strcmp(mod->name, "progs/flame.mdl") ||
+		 !strcmp(mod->name, "progs/flame2.mdl"))
+		mod->modhint = MOD_FLAME;
+	else if (!strcmp(mod->name, "progs/bolt.mdl") ||
+		 !strcmp(mod->name, "models/misc/bolt2.mdl") ||
+		 !strcmp(mod->name, "progs/bolt3.mdl"))
+		mod->modhint = MOD_THUNDERBOLT;
+	else if (!strcmp(mod->name, "progs/VModels/v_Colt.mdl") || //JUKKI Add nzp weapons here please plox
+		 !strcmp(mod->name, "progs/VModels/v_kar.mdl") ||
+		 !strcmp(mod->name, "progs/VModels/v_thomp.mdl"))
+		mod->modhint = MOD_WEAPON;
+	else if (!strcmp(mod->name, "progs/lavaball.mdl"))
+		mod->modhint = MOD_LAVABALL;
+	else if (!strcmp(mod->name, "progs/spike.mdl") ||
+		 !strcmp(mod->name, "progs/s_spike.mdl"))
+		mod->modhint = MOD_SPIKE;
+	else if (!strcmp(mod->name, "progs/shambler.mdl"))
+		mod->modhint = MOD_SHAMBLER;
+	else
+		mod->modhint = MOD_NORMAL;
 	
 	start = Hunk_LowMark ();
 

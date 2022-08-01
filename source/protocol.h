@@ -32,14 +32,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define U_SIGNAL	(1<<7)		// just differentiates from other updates
 
 // svc_update can pass all of the fast update bits, plus more
-#define	U_ANGLE1	(1<<8)
-#define	U_ANGLE3	(1<<9)
-#define	U_MODEL		(1<<10)
-#define	U_COLORMAP	(1<<11)
-#define	U_SKIN		(1<<12)
-#define	U_EFFECTS	(1<<13)
-#define	U_LONGENTITY	(1<<14)
+#define	U_EXTEND1	    (1<<8)
+#define	U_ANGLE1	(1<<9)
+#define	U_ANGLE3	(1<<10)
+#define	U_MODEL		(1<<11)
+#define	U_COLORMAP	(1<<12)
+#define	U_SKIN		(1<<13)
+#define	U_EFFECTS	(1<<14)
 
+// Tomaz - QC Alpha Scale Glow Control Begin
+#define	U_LONGENTITY (1<<15)//blubs here, U_EXTEND1 used to be here, but it needs to be in the byte above, so moved it to the 1<<8 position, and moved the rest down
+#define	U_RENDERMODE    (1<<16)
+#define	U_RENDERAMT	    (1<<17)
+#define	U_RENDERCOLOR1  (1<<18)
+#define	U_RENDERCOLOR2  (1<<19)
+#define	U_RENDERCOLOR3  (1<<20)
+#define	U_EXTEND2	    (1<<21) // another byte to follow
+#define	U_FRAMETIME	    (1<<22) // another byte to follow
+// Tomaz - QC Alpha Scale Glow Control End
 
 #define	SU_VIEWHEIGHT	(1<<0)
 #define	SU_IDEALPITCH	(1<<1)
