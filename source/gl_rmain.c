@@ -859,6 +859,75 @@ void R_DrawEntitiesOnList (void)
 
 /*
 =============
+R_DrawView2Model
+=============
+*/
+void R_DrawView2Model (void)
+{
+	float		ambient[4], diffuse[4];
+	int			j;
+	int			lnum;
+	vec3_t		dist;
+	float		add;
+	dlight_t	*dl;
+	int			ambientlight, shadelight;
+
+	if (!r_drawviewmodel.value)
+		return;
+
+	if (chase_active.value)
+		return;
+
+	if (envmap)
+		return;
+
+	if (!r_drawentities.value)
+		return;
+
+	if (cl.stats[STAT_HEALTH] <= 0)
+		return;
+
+	currententity = &cl.viewent;
+	if (!currententity->model)
+		return;
+
+	j = R_LightPoint (currententity->origin);
+
+	if (j < 24)
+		j = 24;		// allways give some light on gun
+	ambientlight = j;
+	shadelight = j;
+
+// add dynamic lights		
+	for (lnum=0 ; lnum<MAX_DLIGHTS ; lnum++)
+	{
+		dl = &cl_dlights[lnum];
+		if (!dl->radius)
+			continue;
+		if (!dl->radius)
+			continue;
+		if (dl->die < cl.time)
+			continue;
+
+		VectorSubtract (currententity->origin, dl->origin, dist);
+		add = dl->radius - Length(dist);
+		if (add > 0)
+			ambientlight += add;
+	}
+
+	ambient[0] = ambient[1] = ambient[2] = ambient[3] = (float)ambientlight / 128;
+	diffuse[0] = diffuse[1] = diffuse[2] = diffuse[3] = (float)shadelight / 128;
+
+	// hack the depth range to prevent view model from poking into walls
+	glDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
+	R_DrawAliasModel (currententity);
+	glDepthRange (gldepthmin, gldepthmax);
+}
+
+
+
+/*
+=============
 R_DrawViewModel
 =============
 */
@@ -1358,6 +1427,7 @@ void R_RenderView (void)
 
 	R_RenderScene ();
 	R_DrawViewModel ();
+	R_DrawView2Model ();
 	R_DrawWaterSurfaces ();
 
 //  More fog right here :)
