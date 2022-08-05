@@ -123,6 +123,8 @@ cvar_t  r_model_brightness  = { "r_model_brightness", "1", qtrue};   // Toggle h
 
 cvar_t	r_farclip	        = {"r_farclip",              "4096"};        //far cliping for q3 models
 
+cvar_t	r_flatlightstyles = {"r_flatlightstyles", "0", qfalse};
+
 //johnfitz -- struct for passing lerp information to drawing functions
 typedef struct {
 	short pose1;

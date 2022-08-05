@@ -67,6 +67,7 @@ COMMON_OBJS =	chase.c \
 				cl_main.c \
 				cl_parse.c \
 				cl_tent.c \
+				bsp_strlcpy.c \
 				cmd.c \
 				common.c \
 				console.c \

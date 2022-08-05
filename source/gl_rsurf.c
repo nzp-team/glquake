@@ -67,10 +67,6 @@ R_AddDynamicLights
 */
 void R_AddDynamicLights (msurface_t *surf)
 {
-	// LordHavoc: .lit support begin
-	float		cred, cgreen, cblue, brightness;
-	unsigned	*bl;
-	// LordHavoc: .lit support end
 	int			lnum;
 	int			sd, td;
 	float		dist, rad, minlight;
@@ -79,6 +75,10 @@ void R_AddDynamicLights (msurface_t *surf)
 	int			i;
 	int			smax, tmax;
 	mtexinfo_t	*tex;
+	//johnfitz -- lit support via lordhavoc
+	float		cred, cgreen, cblue, brightness;
+	unsigned	*bl;
+	//johnfitz
 
 	smax = (surf->extents[0]>>4)+1;
 	tmax = (surf->extents[1]>>4)+1;
@@ -86,7 +86,7 @@ void R_AddDynamicLights (msurface_t *surf)
 
 	for (lnum=0 ; lnum<MAX_DLIGHTS ; lnum++)
 	{
-		if ( !(surf->dlightbits & (1<<lnum) ) )
+		if (! (surf->dlightbits[lnum >> 5] & (1U << (lnum & 31))))
 			continue;		// not lit by this light
 
 		rad = cl_dlights[lnum].radius;
@@ -109,14 +109,13 @@ void R_AddDynamicLights (msurface_t *surf)
 
 		local[0] -= surf->texturemins[0];
 		local[1] -= surf->texturemins[1];
-		
-		// LordHavoc: .lit support begin
+
+		//johnfitz -- lit support via lordhavoc
 		bl = blocklights;
 		cred = cl_dlights[lnum].color[0] * 256.0f;
 		cgreen = cl_dlights[lnum].color[1] * 256.0f;
 		cblue = cl_dlights[lnum].color[2] * 256.0f;
-		// LordHavoc: .lit support end
-		
+		//johnfitz
 		for (t = 0 ; t<tmax ; t++)
 		{
 			td = local[1] - t*16;
@@ -131,33 +130,16 @@ void R_AddDynamicLights (msurface_t *surf)
 					dist = sd + (td>>1);
 				else
 					dist = td + (sd>>1);
-				if (dist < minlight){
+				if (dist < minlight)
+				//johnfitz -- lit support via lordhavoc
+				{
 					brightness = rad - dist;
-					if (!cl_dlights[lnum].dark)
-					{
-						bl[0] += (int) (brightness * cred);
-					    bl[1] += (int) (brightness * cgreen);
-					    bl[2] += (int) (brightness * cblue);
-					}
-					else
-				    {
-					  if(bl[0] > (int) (brightness * cred))
-                         bl[0] -= (int) (brightness * cred);
-                      else
-						 bl[0] = 0;
-
-					  if(bl[1] > (int) (brightness * cgreen))
-                         bl[1] -= (int) (brightness * cgreen);
-                      else
-						 bl[1] = 0;
-
-					  if(bl[2] > (int) (brightness * cblue))
-                         bl[2] -= (int) (brightness * cblue);
-					  else
-						 bl[2] = 0;
-					}
+					bl[0] += (int) (brightness * cred);
+					bl[1] += (int) (brightness * cgreen);
+					bl[2] += (int) (brightness * cblue);
 				}
 				bl += 3;
+				//johnfitz
 			}
 		}
 	}

@@ -322,6 +322,7 @@ typedef struct
 
 #ifdef GLQUAKE
 #include "gl_model.h"
+#include "gl_decal.h"
 #else
 #include "model.h"
 #include "d_iface.h"
@@ -341,8 +342,6 @@ typedef struct
 #endif
 
 #include "cl_hud.h"
-
-#include "gl_decal.h"
 
 //=============================================================================
 

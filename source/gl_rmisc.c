@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
-
+extern cvar_t r_flatlightstyles;
 
 /*
 ==================
@@ -229,6 +229,8 @@ void R_Init (void)
 	Cvar_RegisterVariable (&r_part_muzzleflash);
 	Cvar_RegisterVariable (&r_flametype);
 	//Cvar_RegisterVariable (&r_model_brightness);
+
+	Cvar_RegisterVariable (&r_flatlightstyles);
 
 	R_InitParticles ();
 	R_InitParticleTexture ();
