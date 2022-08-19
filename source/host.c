@@ -56,7 +56,7 @@ byte		*host_colormap;
 
 cvar_t	host_framerate = {"host_framerate","0"};	// set for slow motion
 cvar_t	host_speeds = {"host_speeds","0"};			// set for running times
-cvar_t 	host_maxfps = {"host_maxfps", "72"};
+cvar_t 	host_maxfps = {"host_maxfps", "30"};
 
 cvar_t	sys_ticrate = {"sys_ticrate","0.05"};
 cvar_t	serverprofile = {"serverprofile","0"};

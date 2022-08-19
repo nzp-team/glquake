@@ -600,7 +600,7 @@ void HUD_Rounds (void)
 		if (!value)
 			value = 255;
 
-		Draw_ColoredString(vid.width/2 - (strlen("Round")*8)/2, 80, "Round", 255, value, value, 255, 2);
+		Draw_ColoredString(vid.width/2 - (strlen("Round")*16)/2, 80, "Round", 255, value, value, 255, 2);
 		
 		value -= cl.time * 0.4;
 
@@ -614,7 +614,7 @@ void HUD_Rounds (void)
 	// Now, fade out, and start fading worldtext in
 	// ~3s for fade out, 
 	else if (textstate == 1) {
-		Draw_ColoredString(vid.width/2 - (strlen("Round")*8)/2, 80, "Round", 255, 0, 0, value, 2);
+		Draw_ColoredString(vid.width/2 - (strlen("Round")*16)/2, 80, "Round", 255, 0, 0, value, 2);
 
 		HUD_WorldText(value2);
 		Draw_ColoredString(4, vid.height/2 + 32, "'Nazi Zombies'", 255, 255, 255, value2, 1);
