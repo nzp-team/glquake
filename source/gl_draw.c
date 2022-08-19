@@ -800,7 +800,7 @@ void Draw_LoadingFill(void)
 
     float loadsize = loading_cur_step * (max_step / loading_num_step);
 	Draw_FillByColor (x - 2, y - 2, max_step + 4, size + 4, 69, 69, 69, 255);
-	Draw_FillByColor (x, y, loadsize, size, 0, 0, 0, 200);
+	Draw_FillByColor (x, y, (int)loadsize, size, 255, 255, 255, 255);
 
 	switch(loading_step) {
 		case 1: text = "Loading Models.."; break;

@@ -1169,8 +1169,9 @@ void HUD_ProgressBar (void)
 		progressbar = 100 - ((cl.progress_bar-sv.time)*10);
 		if (progressbar >= 100)
 			progressbar = 100;
-		Draw_FillByColor  ((vid.width)/2 - 51, vid.height*0.75 - 1, 102, 5, 0, 0, 0,100);
-		Draw_FillByColor ((vid.width)/2 - 50, vid.height*0.75, progressbar, 3, 255, 255, 255,100);
+
+ 		Draw_FillByColor  (((vid.width) >> 1) - 51, (int)(vid.height*0.75 - 1), 102, 5, 0, 0, 0,100);
+ 		Draw_FillByColor (((vid.width) >> 1) - 50, (int)((vid.height*3) >> 2), (int)progressbar, 3, 255, 255, 255,100);
 
 		Draw_String ((vid.width - (88))/2, vid.height*0.75 + 10, "Reviving...");
 	}
