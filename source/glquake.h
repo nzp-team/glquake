@@ -264,6 +264,7 @@ extern  cvar_t	r_decal_bullets;
 extern  cvar_t	r_decal_sparks;
 extern  cvar_t	r_decal_explosions;
 extern  cvar_t  r_coronas;
+extern  cvar_t  r_model_brightness;
 
 extern	cvar_t	gl_clear;
 extern	cvar_t	gl_cull;

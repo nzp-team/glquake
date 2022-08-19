@@ -678,6 +678,24 @@ void R_DrawAliasModel (entity_t *e)
 	VectorCopy (currententity->origin, r_entorigin);
 	VectorSubtract (r_origin, r_entorigin, modelorg);
 
+
+	//Shpuld
+	if(r_model_brightness.value)
+	{
+		lightcolor[0] += 32;
+		lightcolor[1] += 32;
+		lightcolor[2] += 32;
+	}
+
+
+	for(int g = 0; g < 3; g++)
+	{
+		if(lightcolor[g] < 8)
+			lightcolor[g] = 8;
+		if(lightcolor[g] > 125)
+			lightcolor[g] = 125;
+	}
+
 	//
 	// get lighting information
 	//
