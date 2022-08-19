@@ -1333,9 +1333,9 @@ void HUD_Grenades (void)
 		else
 			Draw_String (356 + 12, 205 + 16, va ("%i",cl.stats[STAT_PRIGRENADES]));
 	}
-	Draw_StretchPic (356 + 20, 205, bettypic, 22, 22);
 	if (cl.stats[STAT_GRENADES] & UI_BETTY)
 	{
+		Draw_StretchPic (356 + 20, 205, bettypic, 22, 22);
 		if (cl.stats[STAT_PRIGRENADES] <= 0)
 			Draw_ColoredString (356 + 20 + 12, 205 + 16, va ("%i",cl.stats[STAT_SECGRENADES]), 255, 0, 0, 255, 1);
 		else
