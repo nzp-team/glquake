@@ -755,9 +755,9 @@ void R_DrawAliasModel (entity_t *e)
 	//Shpuld
 	if(r_model_brightness.value)
 	{
-		lightcolor[0] += 32;
-		lightcolor[1] += 32;
-		lightcolor[2] += 32;
+		lightcolor[0] += 48;
+		lightcolor[1] += 48;
+		lightcolor[2] += 48;
 	}
 
     glPushMatrix ();

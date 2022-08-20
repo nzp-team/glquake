@@ -1123,6 +1123,7 @@ This is called at the start of each level
 ================
 */
 extern float		scr_centertime_off;
+void Load_Waypoint ();
 
 #ifdef QUAKE2
 void SV_SpawnServer (char *server, char *startspot)
@@ -1278,12 +1279,106 @@ void SV_SpawnServer (char *server)
 		if (host_client->active)
 			SV_SendServerinfo (host_client);
 	
+	Load_Waypoint ();
 	Con_DPrintf ("Server spawned.\n");
 }
 
 //ZOMBIE AI THINGS BELOVE THIS!!!
 #define W_MAX_TEMPSTRING 2048
 char	*w_string_temp;
+int W_fopen (void)
+{
+	int h = 0;
+
+	Con_DPrintf("Loading waypoint file %s\n", va("%s/maps/%s.way",com_gamedir, sv.name));
+
+	Sys_FileOpenRead (va("%s/maps/%s.way",com_gamedir, sv.name), &h);
+	return h;
+}
+
+void W_fclose (int h)
+{
+	Sys_FileClose(h);
+}
+
+char *W_fgets (int h)
+{
+	// reads one line (up to a \n) into a string
+	int		i;
+	int		count;
+	char	buffer;
+
+	count = Sys_FileRead(h, &buffer, 1);
+	if (count && buffer == '\r')	// carriage return
+	{
+		count = Sys_FileRead(h, &buffer, 1);	// skip
+	}
+	if (!count)	// EndOfFile
+	{
+		return "";
+	}
+
+	i = 0;
+	while (count && buffer != '\n')
+	{
+		if (i < 128-1)	// no place for character in temp string
+		{
+			w_string_temp[i++] = buffer;
+		}
+
+		// read next character
+		count = Sys_FileRead(h, &buffer, 1);
+		if (count && buffer == '\r')	// carriage return
+		{
+			count = Sys_FileRead(h, &buffer, 1);	// skip
+		}
+	};
+	w_string_temp[i] = 0;
+
+	return (w_string_temp);
+}
+
+char *W_substring (char *p, int offset, int length)
+{
+	int		maxoffset;		// 2001-10-25 Enhanced temp string handling by Maddes
+
+	// cap values
+	maxoffset = strlen(p);
+	if (offset > maxoffset)
+	{
+		offset = maxoffset;
+	}
+	if (offset < 0)
+		offset = 0;
+// 2001-10-25 Enhanced temp string handling by Maddes  start
+	if (length >= maxoffset)
+		length = maxoffset-1;
+// 2001-10-25 Enhanced temp string handling by Maddes  end
+	if (length < 0)
+		length = 0;
+
+	p += offset;
+	strncpy(w_string_temp, p, length);
+	w_string_temp[length]=0;
+
+	return w_string_temp;
+}
+
+void W_stov (char *v, vec3_t out)
+{
+	int i;
+	vec3_t d;
+
+	for (i=0; i<3; i++)
+	{
+		while(v && (v[0] == ' ' || v[0] == '\'')) //skip unneeded data
+			v++;
+		d[i] = atof(v);
+		while (v && v[0] != ' ') // skip to next space
+			v++;
+	}
+	VectorCopy (d, out);
+}
 
 waypoint_ai waypoints[MAX_WAYPOINTS];
 void Load_Waypoint ()
