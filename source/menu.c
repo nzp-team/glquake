@@ -24,6 +24,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "winquake.h"
 #endif
 
+extern cvar_t	r_wateralpha;
+extern cvar_t	r_vsync;
+extern cvar_t	in_disable_analog;
+extern cvar_t	in_analog_strafe;
+extern cvar_t	in_x_axis_adjust;
+extern cvar_t	in_y_axis_adjust;
+extern cvar_t	crosshair;
+extern cvar_t	r_dithering;
+//extern cvar_t	r_retro;
+extern cvar_t	waypoint_mode;
+
 extern int loadingScreen;
 extern char* loadname2;
 extern char* loadnamespec;
@@ -46,8 +57,31 @@ achievement_list_t achievement_list[MAX_ACHIEVEMENTS];
 void (*vid_menudrawfn)(void);
 void (*vid_menukeyfn)(int key);
 
-enum {m_none, m_main, m_singleplayer, m_load, m_save, m_custommaps, m_setup, m_net, m_options, m_video, m_keys, m_quit, m_serialconfig, m_modemconfig, m_lanconfig, m_gameoptions, m_search, m_slist} m_state;
-
+enum 
+{
+	m_none, 
+	m_main, 
+	m_paused_menu, 
+	m_singleplayer, 
+	m_load, 
+	m_save, 
+	m_custommaps, 
+	m_setup, 
+	m_net, 
+	m_options, 
+	m_video, 
+	m_keys, 
+	m_help, 
+	m_quit, 
+	m_restart,
+	m_exit,
+	m_serialconfig, 
+	m_modemconfig, 
+	m_lanconfig, 
+	m_gameoptions, 
+	m_search, 
+	m_slist,
+} m_state;
 void M_Menu_Main_f (void);
 	void M_Menu_SinglePlayer_f (void);
 		void M_Menu_CustomMaps_f (void);
@@ -197,10 +231,9 @@ void M_ToggleMenu_f (void)
 {
 	m_entersound = true;
 
-	// naievil -- fixme don't have pause yet
-	if (key_dest == key_menu /*|| key_dest == key_menu_pause*/)
+	if (key_dest == key_menu || key_dest == key_menu_pause)
 	{
-		if (m_state != m_main /*&& m_state != m_paused_menu*/)
+		if (m_state != m_main && m_state != m_paused_menu)
 		{
 			M_Menu_Main_f ();
 			return;
@@ -215,14 +248,122 @@ void M_ToggleMenu_f (void)
 	}
 	else if (sv.active && (svs.maxclients > 1 || key_dest == key_game))
 	{
-		Con_Printf("Draw pause here\n");
-		// naievil -- fixme
-		//M_Paused_Menu_f();
+		M_Paused_Menu_f();
 	}
 	else
 	{
 		M_Menu_Main_f ();
 	}
+}
+
+
+int M_Paused_Cusor;
+#define Max_Paused_Iteams 5
+
+void M_Paused_Menu_f ()
+{
+	key_dest = key_menu_pause;
+	m_state = m_paused_menu;
+	m_entersound = true;
+	loadingScreen = 0;
+	loadscreeninit = false;
+	M_Paused_Cusor = 0;
+}
+
+static void M_Paused_Menu_Draw ()
+{
+	// Fill black to make everything easier to see
+	Draw_FillByColor(0, 0, vid.width, vid.height, 0, 0, 0, 102);
+
+	// Header
+	Draw_ColoredString(10, 10, "PAUSED", 255, 255, 255, 255, 2);
+
+	if ((M_Paused_Cusor == 0))
+		Draw_ColoredString(10, 135, "Resume", 255, 0, 0, 255, 1);
+	else
+		Draw_ColoredString(10, 135, "Resume", 255, 255, 255, 255, 1);
+
+	if ((M_Paused_Cusor == 1))
+		Draw_ColoredString(10, 145, "Restart", 255, 0, 0, 255, 1);
+	else
+		Draw_ColoredString(10, 145, "Restart", 255, 255, 255, 255, 1);
+
+	if ((M_Paused_Cusor == 2))
+		Draw_ColoredString(10, 155, "Settings", 255, 0, 0, 255, 1);
+	else
+		Draw_ColoredString(10, 155, "Settings", 255, 255, 255, 255, 1);
+
+	if (waypoint_mode.value) {
+		if ((M_Paused_Cusor == 3))
+			Draw_ColoredString(10, 165, "Save Waypoints", 255, 0, 0, 255, 1);
+		else
+			Draw_ColoredString(10, 165, "Save Waypoints", 255, 255, 255, 255, 1);
+	} else {
+		if ((M_Paused_Cusor == 3))
+			Draw_ColoredString(10, 165, "Achievements", 255, 0, 0, 255, 1);
+		else
+			Draw_ColoredString(10, 165, "Achievements", 255, 255, 255, 255, 1);
+	}
+
+	if ((M_Paused_Cusor == 4))
+		Draw_ColoredString(10, 175, "Main Menu", 255, 0, 0, 255, 1);
+	else
+		Draw_ColoredString(10, 175, "Main Menu", 255, 255, 255, 255, 1);
+}
+
+static void M_Paused_Menu_Key (int key)
+{
+	switch (key)
+	{
+		case K_ESCAPE:
+		case K_AUX2:
+			S_LocalSound ("sounds/menu/enter.wav");
+			Cbuf_AddText("togglemenu\n");
+			break;
+
+		case K_DOWNARROW:
+			S_LocalSound ("sounds/menu/navigate.wav");
+			if (++M_Paused_Cusor >= Max_Paused_Iteams)
+				M_Paused_Cusor = 0;
+			break;
+
+		case K_UPARROW:
+			S_LocalSound ("sounds/menu/navigate.wav");
+			if (--M_Paused_Cusor < 0)
+				M_Paused_Cusor = Max_Paused_Iteams - 1;
+			break;
+
+		case K_ENTER:
+		case K_AUX1:
+			m_entersound = true;
+
+			switch (M_Paused_Cusor)
+			{
+			case 0:
+				key_dest = key_game;
+				m_state = m_none;
+				break;
+			case 1:
+				M_Menu_Restart_f();
+				break;
+			case 2:
+				M_Menu_Options_f();
+				key_dest = key_menu_pause;
+				break;
+			case 3:
+				if (waypoint_mode.value) {
+					Cbuf_AddText("impulse 101\n");
+				}
+				/*else
+					M_Menu_Achievement_f();
+				*/ // naievil -- fixme: do not have achievements
+				key_dest = key_menu_pause;
+				break;
+			case 4:
+				M_Menu_Exit_f();
+				break;
+			}
+		}
 }
 
 
@@ -305,6 +446,143 @@ void M_Main_Key (int key)
 		}
 	}
 }
+
+//=============================================================================
+/* RESTART MENU */
+
+qboolean	wasInMenus;
+
+
+char *restartMessage [] =
+{
+
+  " Are you sure you want",
+  "  to restart this game? ",  //msg:0
+  "                               ",
+  "   A :Yes    B : No       "
+};
+
+
+void M_Menu_Restart_f (void)
+{
+	wasInMenus = (key_dest == key_menu_pause);
+	key_dest = key_menu_pause;
+	m_state = m_restart;
+	m_entersound = true;
+}
+
+
+void M_Restart_Key (int key)
+{
+	switch (key)
+	{
+	case K_ESCAPE:
+	case K_AUX2:
+	case 'n':
+	case 'N':
+		m_state = m_paused_menu;
+		m_entersound = true;
+		break;
+
+	case 'Y':
+	case 'y':
+	case K_ENTER:
+	case K_AUX1:
+		key_dest = key_game;
+		m_state = m_none;
+		// Cbuf_AddText ("restart\n"); // nai -- old, now do soft reset
+		PR_ExecuteProgram (pr_global_struct->Soft_Restart);
+		break;
+
+	default:
+		break;
+	}
+
+}
+
+
+void M_Restart_Draw (void)
+{
+	m_state = m_paused_menu;
+	m_recursiveDraw = true;
+	M_Draw ();
+	m_state = m_restart;
+
+	M_DrawTextBox (56, 76, 24, 4);
+	M_Print (64, 84,  restartMessage[0]);
+	M_Print (64, 92,  restartMessage[1]);
+	M_Print (64, 100, restartMessage[2]);
+	M_Print (64, 108, restartMessage[3]);
+}
+
+
+
+
+//=============================================================================
+/* EXIT MENU */
+
+
+char *exitMessage [] =
+{
+
+  " Are you sure you want  ",
+  "to quit to the Main Menu?",  //msg:0
+  "                                  ",
+  "   A :Yes    B : No       "
+};
+
+
+void M_Menu_Exit_f (void)
+{
+	wasInMenus = (key_dest == key_menu_pause);
+	key_dest = key_menu_pause;
+	m_state = m_exit;
+	m_entersound = true;
+}
+
+
+void M_Exit_Key (int key)
+{
+	switch (key)
+	{
+	case K_ESCAPE:
+	case K_AUX2:
+	case 'n':
+	case 'N':
+		m_state = m_paused_menu;
+		m_entersound = true;
+		break;
+
+	case 'Y':
+	case 'y':
+	case K_ENTER:
+	case K_AUX1:
+		Cbuf_AddText("disconnect\n");
+		CL_ClearState ();
+		M_Menu_Main_f();
+		break;
+
+	default:
+		break;
+	}
+
+}
+
+
+void M_Exit_Draw (void)
+{
+	m_state = m_paused_menu;
+	m_recursiveDraw = true;
+	M_Draw ();
+	m_state = m_exit;
+
+	M_DrawTextBox (56, 76, 24, 4);
+	M_Print (64, 84,  exitMessage[0]);
+	M_Print (64, 92,  exitMessage[1]);
+	M_Print (64, 100, exitMessage[2]);
+	M_Print (64, 108, exitMessage[3]);
+}
+
 
 //=============================================================================
 /* SINGLE PLAYER MENU */
@@ -760,7 +1038,6 @@ int		options_cursor;
 
 void M_Menu_Options_f (void)
 {
-	key_dest = key_menu;
 	m_state = m_options;
 	m_entersound = true;
 }
@@ -971,8 +1248,12 @@ void M_Options_Key (int k)
 		M_AdjustSliders (1);
 		break;
 
+	case K_ESCAPE:
 	case K_AUX2:
-		M_Menu_Main_f();
+		if (key_dest == key_menu_pause)
+			M_Paused_Menu_f();
+		else
+			M_Menu_Main_f ();
 		break;
 	}
 
@@ -1017,7 +1298,6 @@ int		bind_grab;
 
 void M_Menu_Keys_f (void)
 {
-	key_dest = key_menu;
 	m_state = m_keys;
 	m_entersound = true;
 }
@@ -1140,6 +1420,10 @@ void M_Keys_Key (int k)
 
 	switch (k)
 	{
+	case K_ESCAPE:
+	case K_AUX2:
+		M_Menu_Options_f();
+		break;
 
 	case K_LEFTARROW:
 	case K_UPARROW:
@@ -1684,6 +1968,7 @@ void M_GameOptions_Key (int key)
 		break;
 
 	case K_ENTER:
+	case K_AUX1:
 		S_LocalSound ("misc/menu2.wav");
 		if (gameoptions_cursor == 0)
 		{
@@ -1729,7 +2014,7 @@ void M_Init (void)
 
 void M_Draw (void)
 {
-	if (m_state == m_none || key_dest != key_menu)
+	if (m_state == m_none || key_dest != key_menu && key_dest != key_menu_pause)
 		return;
 
 	if (!m_recursiveDraw)
@@ -1758,6 +2043,10 @@ void M_Draw (void)
 	case m_none:
 		break;
 
+	case m_paused_menu:
+		M_Paused_Menu_Draw();
+		break;
+
 	case m_main:
 		M_Main_Draw ();
 		break;
@@ -1780,6 +2069,14 @@ void M_Draw (void)
 
 	case m_quit:
 		M_Quit_Draw ();
+		break;
+
+	case m_restart:
+		M_Restart_Draw ();
+		break;
+
+	case m_exit:
+		M_Exit_Draw ();
 		break;
 
 	case m_gameoptions:
@@ -1813,6 +2110,10 @@ void M_Keydown (int key)
 	case m_none:
 		return;
 
+	case m_paused_menu:
+		M_Paused_Menu_Key (key);
+		break;
+
 	case m_main:
 		M_Main_Key (key);
 		return;
@@ -1829,12 +2130,20 @@ void M_Keydown (int key)
 		M_Keys_Key (key);
 		return;
 
+	case m_restart:
+		M_Restart_Key (key);
+		return;
+
 	case m_video:
 		M_Video_Key (key);
 		return;
 
 	case m_quit:
 		M_Quit_Key (key);
+		return;
+
+	case m_exit:
+		M_Exit_Key (key);
 		return;
 
 	case m_gameoptions:

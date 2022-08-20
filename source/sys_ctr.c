@@ -229,7 +229,7 @@ void Sys_SetKeys(u32 keys, u32 state){
 	if( keys & KEY_SELECT)
 		Key_Event(K_SELECT, state);
 	if( keys & KEY_START)
-		Key_Event(K_ENTER, state);
+		Key_Event(K_ESCAPE, state);
 	if( keys & KEY_DUP)
 		Key_Event(K_UPARROW, state);
 	if( keys & KEY_DDOWN)

@@ -848,6 +848,7 @@ Fills a box of pixels with a single color
 void Draw_Fill (int x, int y, int w, int h, int r, int g, int b, int a)
 {
 	glDisable (GL_TEXTURE_2D);
+	glEnable (GL_ALPHA_TEST);
 	glColor4f (r/255, g/255, b/255, a/255);
 
 	glBegin (GL_QUADS);
@@ -859,6 +860,7 @@ void Draw_Fill (int x, int y, int w, int h, int r, int g, int b, int a)
 
 	glEnd ();
 	glColor4f (1,1,1,1);
+	glDisable (GL_ALPHA_TEST);
 	glEnable (GL_TEXTURE_2D);
 }
 //=============================================================================
@@ -1734,8 +1736,13 @@ int GL_LoadTexture32 (char *identifier, int width, int height, byte *data, qbool
 		{
 			if (!strcmp (identifier, glt->identifier))
 			{
-				if (width != glt->width || height != glt->height)
-					Sys_Error ("GL_LoadTexture: cache mismatch");
+				if (width != glt->width || height != glt->height) {
+					// naievil -- fixme: 	this means we have a memory leak somewhere, was sys_error
+					// 						OR that two different people used the same texture name
+					//						which is actually possible
+					Con_Printf("GL_LoadTexture: cache mismatch for %s\n", identifier);
+					break;
+				}
 				return gltextures[i].texnum;
 			}
 		}
