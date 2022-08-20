@@ -18,6 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 #include "quakedef.h"
+#include <sys/dirent.h>
 
 #ifdef _WIN32
 #include "winquake.h"
@@ -28,12 +29,24 @@ extern char* loadname2;
 extern char* loadnamespec;
 extern qboolean loadscreeninit;
 
+// Backgrounds
+qpic_t *menu_bk;
+
+// Map screens
+qpic_t *menu_ndu;
+qpic_t *menu_wh;
+//qpic_t *menu_kn;
+qpic_t *menu_ch;
+//qpic_t *menu_wn;
+qpic_t *menu_custom;
+qpic_t *menu_cuthum;
+
 achievement_list_t achievement_list[MAX_ACHIEVEMENTS];
 
 void (*vid_menudrawfn)(void);
 void (*vid_menukeyfn)(int key);
 
-enum {m_none, m_main, m_singleplayer, m_load, m_save, m_custommaps, m_setup, m_net, m_options, m_video, m_keys, m_help, m_quit, m_serialconfig, m_modemconfig, m_lanconfig, m_gameoptions, m_search, m_slist} m_state;
+enum {m_none, m_main, m_singleplayer, m_load, m_save, m_custommaps, m_setup, m_net, m_options, m_video, m_keys, m_quit, m_serialconfig, m_modemconfig, m_lanconfig, m_gameoptions, m_search, m_slist} m_state;
 
 void M_Menu_Main_f (void);
 	void M_Menu_SinglePlayer_f (void);
@@ -41,7 +54,6 @@ void M_Menu_Main_f (void);
 	void M_Menu_Options_f (void);
 		void M_Menu_Keys_f (void);
 		void M_Menu_Video_f (void);
-	void M_Menu_Help_f (void);
 	void M_Menu_Quit_f (void);
 void M_Menu_GameOptions_f (void);
 
@@ -51,7 +63,6 @@ void M_Main_Draw (void);
 	void M_Options_Draw (void);
 		void M_Keys_Draw (void);
 		void M_Video_Draw (void);
-	void M_Help_Draw (void);
 	void M_Quit_Draw (void);
 
 void M_Main_Key (int key);
@@ -60,7 +71,6 @@ void M_Main_Key (int key);
 	void M_Options_Key (int key);
 		void M_Keys_Key (int key);
 		void M_Video_Key (int key);
-	void M_Help_Key (int key);
 	void M_Quit_Key (int key);
 void M_GameOptions_Key (int key);
 
@@ -71,6 +81,27 @@ qboolean	m_recursiveDraw;
 int			m_return_state;
 qboolean	m_return_onerror;
 char		m_return_reason [32];
+
+typedef struct
+{
+	int 		occupied;
+	int 	 	map_allow_game_settings;
+	int 	 	map_use_thumbnail;
+	char* 		map_name;
+	char* 		map_name_pretty;
+	char* 		map_desc_1;
+	char* 		map_desc_2;
+	char* 		map_desc_3;
+	char* 		map_desc_4;
+	char* 		map_desc_5;
+	char* 		map_desc_6;
+	char* 		map_desc_7;
+	char* 		map_desc_8;
+	char* 		map_author;
+	char* 		map_thumbnail_path;
+} usermap_t;
+
+usermap_t custom_maps[50];
 
 /*
 ================
@@ -199,7 +230,7 @@ void M_ToggleMenu_f (void)
 /* MAIN MENU */
 
 int	m_main_cursor;
-#define	MAIN_ITEMS	5
+#define	MAIN_ITEMS	4
 
 
 void M_Menu_Main_f (void)
@@ -216,12 +247,14 @@ void M_Menu_Main_f (void)
 
 void M_Main_Draw (void)
 {
+	menu_bk = Draw_CachePic("gfx/menu/menu_background");
+	Draw_Pic (0, 0, menu_bk);
+
 	char *MAIN_MENU_ITEMS[MAIN_ITEMS];
 	MAIN_MENU_ITEMS[0] = "Single Player";
 	MAIN_MENU_ITEMS[1] = "Multi Player";
 	MAIN_MENU_ITEMS[2] = "Options";
-	MAIN_MENU_ITEMS[3] = "Help";
-	MAIN_MENU_ITEMS[4] = "Quit";
+	MAIN_MENU_ITEMS[3] = "Quit";
 
 	for (int i = 0; i < MAIN_ITEMS; i++) {
 		Draw_String(vid.width/4, vid.height/4 + (16 * i), MAIN_MENU_ITEMS[i]);
@@ -267,10 +300,6 @@ void M_Main_Key (int key)
 			break;
 
 		case 3:
-			M_Menu_Help_f ();
-			break;
-
-		case 4:
 			M_Menu_Quit_f ();
 			break;
 		}
@@ -295,6 +324,8 @@ void M_Menu_SinglePlayer_f (void)
 
 void M_SinglePlayer_Draw (void)
 {
+	Draw_Pic (0, 0, menu_bk);
+
 	char *SINGLE_MENU_ITEMS[SINGLEPLAYER_ITEMS];
 	SINGLE_MENU_ITEMS[0] = "Nacht Der Untoten";
 	SINGLE_MENU_ITEMS[1] = "Warehouse";
@@ -383,27 +414,263 @@ void M_SinglePlayer_Key (int key)
 //=============================================================================
 /* SINGLE PLAYER MENU */
 
-int	m_maps_cursor;
-int m_maps_items;
+int	m_map_cursor;
+int	MAP_ITEMS;
+int user_maps_num = 0;
+int current_custom_map_page;
+int custom_map_pages;
+int multiplier;
+char  user_levels[256][MAX_QPATH];
+
+// UGHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
+// fuck windows
+char* remove_windows_newlines(char* line)
+{
+	char *p = strchr(line, '\r');
+	while (p) {
+		*p = '\0';
+		strcat(line, ++p);
+		p = strchr(p, '\r');
+	}
+
+	return line;
+}
+
+void Map_Finder(void)
+{
+	struct dirent *dp;
+    DIR *dir = opendir(va("%s/maps", com_gamedir)); // Open the directory - dir contains a pointer to manage the dir
+
+	if(dir < 0)
+	{
+		Sys_Error ("Map_Finder");
+		return;
+	}
+
+	for (int i = 0; i < 50; i++) {
+		custom_maps[i].occupied = false;
+	}
+	
+	while(dp=readdir(dir))
+	{
+		
+		if(dp->d_name[0] == '.')
+		{
+			continue;
+		}
+
+		if(!strcmp(COM_FileExtension(dp->d_name),"bsp")|| !strcmp(COM_FileExtension(dp->d_name),"BSP"))
+	    {
+			char ntype[32];
+
+			COM_StripExtension(dp->d_name, ntype);
+			custom_maps[user_maps_num].occupied = true;
+			custom_maps[user_maps_num].map_name = malloc(sizeof(char)*32);
+			sprintf(custom_maps[user_maps_num].map_name, "%s", ntype);
+
+			char* 		setting_path;
+
+			setting_path 								  	= malloc(sizeof(char)*64);
+			custom_maps[user_maps_num].map_thumbnail_path 	= malloc(sizeof(char)*64);
+			strcpy(setting_path, 									va("%s/maps/", com_gamedir));
+			strcpy(custom_maps[user_maps_num].map_thumbnail_path, 	"gfx/menu/custom/");
+			strcat(setting_path, 									custom_maps[user_maps_num].map_name);
+			strcat(custom_maps[user_maps_num].map_thumbnail_path, 	custom_maps[user_maps_num].map_name);
+			strcat(setting_path, ".txt");
+
+			FILE    *setting_file;			
+			setting_file = fopen(setting_path, "rb");
+			if (setting_file != NULL) {
+
+				fseek(setting_file, 0L, SEEK_END);
+				size_t sz = ftell(setting_file);
+				fseek(setting_file, 0L, SEEK_SET);
+
+				int state;
+				state = 0;
+				int value;
+
+				custom_maps[user_maps_num].map_name_pretty = malloc(sizeof(char)*32);
+				custom_maps[user_maps_num].map_desc_1 = malloc(sizeof(char)*40);
+				custom_maps[user_maps_num].map_desc_2 = malloc(sizeof(char)*40);
+				custom_maps[user_maps_num].map_desc_3 = malloc(sizeof(char)*40);
+				custom_maps[user_maps_num].map_desc_4 = malloc(sizeof(char)*40);
+				custom_maps[user_maps_num].map_desc_5 = malloc(sizeof(char)*40);
+				custom_maps[user_maps_num].map_desc_6 = malloc(sizeof(char)*40);
+				custom_maps[user_maps_num].map_desc_7 = malloc(sizeof(char)*40);
+				custom_maps[user_maps_num].map_desc_8 = malloc(sizeof(char)*40);
+				custom_maps[user_maps_num].map_author = malloc(sizeof(char)*40);
+
+				char* buffer = (char*)calloc(sz+1, sizeof(char));
+				fread(buffer, sz, 1, setting_file);
+
+				strtok(buffer, "\n");
+				while(buffer != NULL) {
+					switch(state) {
+						case 0: strcpy(custom_maps[user_maps_num].map_name_pretty, remove_windows_newlines(buffer)); break;
+						case 1: strcpy(custom_maps[user_maps_num].map_desc_1, remove_windows_newlines(buffer)); break;
+						case 2: strcpy(custom_maps[user_maps_num].map_desc_2, remove_windows_newlines(buffer)); break;
+						case 3: strcpy(custom_maps[user_maps_num].map_desc_3, remove_windows_newlines(buffer)); break;
+						case 4: strcpy(custom_maps[user_maps_num].map_desc_4, remove_windows_newlines(buffer)); break;
+						case 5: strcpy(custom_maps[user_maps_num].map_desc_5, remove_windows_newlines(buffer)); break;
+						case 6: strcpy(custom_maps[user_maps_num].map_desc_6, remove_windows_newlines(buffer)); break;
+						case 7: strcpy(custom_maps[user_maps_num].map_desc_7, remove_windows_newlines(buffer)); break;
+						case 8: strcpy(custom_maps[user_maps_num].map_desc_8, remove_windows_newlines(buffer)); break;
+						case 9: strcpy(custom_maps[user_maps_num].map_author, remove_windows_newlines(buffer)); break;
+						case 10: value = 0; sscanf(remove_windows_newlines(buffer), "%d", &value); custom_maps[user_maps_num].map_use_thumbnail = value; break;
+						case 11: value = 0; sscanf(remove_windows_newlines(buffer), "%d", &value); custom_maps[user_maps_num].map_allow_game_settings = value; break;
+						default: break;
+					}
+					state++;
+					buffer = strtok(NULL, "\n");
+				}
+				free(buffer);
+				buffer = 0;
+				fclose(setting_file);
+			}
+			user_maps_num++;
+		}
+	}
+    closedir(dir); // close the handle (pointer)
+	custom_map_pages = (int)ceil((double)(user_maps_num + 1)/15);
+}
+
 void M_Menu_CustomMaps_f (void)
 {
 	key_dest = key_menu;
 	m_state = m_custommaps;
 	m_entersound = true;
-	m_maps_items = 1;
+	MAP_ITEMS = 13;
+	current_custom_map_page = 1;
 }
 
 
 void M_Menu_CustomMaps_Draw (void)
 {
-/*
-	for (int i = 0; i < SINGLEPLAYER_ITEMS; i++) {
-		Draw_String(vid.width/4, vid.height/4 + (16 * i), SINGLE_MENU_ITEMS[i]);
+	// Background
+	// Draw_Pic(0, 0, menu_bk); // naievil -- why are we doing this if we fill it?
+
+	// Fill black to make everything easier to see
+	Draw_FillByColor(0, 0, 480, 272, 0, 0, 0, 102);
+
+	// Version String
+	Draw_ColoredString(vid.width - 40, 5, "v1.0", 255, 255, 255, 255, 1);
+
+	// Header
+	Draw_ColoredString(10, 10, "CUSTOM MAPS", 255, 255, 255, 255, 2);
+
+	int 	line_increment;
+
+	line_increment = 0;
+
+	if (current_custom_map_page > 1)
+		multiplier = (current_custom_map_page - 1) * 15;
+	else
+		multiplier = 0;
+
+	for (int i = 0; i < 15; i++) {
+		if (custom_maps[i + multiplier].occupied == false)
+			continue;
+
+		if (m_map_cursor == i) {
+
+			if (custom_maps[i + multiplier].map_use_thumbnail == 1) {
+				menu_cuthum = Draw_CachePic(custom_maps[i + multiplier].map_thumbnail_path);
+				if (menu_cuthum != NULL) {
+					Draw_Pic(256, 45, menu_cuthum);
+				}
+			}
+			
+			if (custom_maps[i + multiplier].map_name_pretty != 0)
+				Draw_ColoredString(10, 45 + (10 * i), custom_maps[i + multiplier].map_name_pretty, 255, 0, 0, 255, 1);
+			else
+				Draw_ColoredString(10, 45 + (10 * i), custom_maps[i + multiplier].map_name, 255, 0, 0, 255, 1);
+
+			if (custom_maps[i + multiplier].map_desc_1 != 0) {
+				if (strcmp(custom_maps[i + multiplier].map_desc_1, " ") != 0) {
+					Draw_ColoredString(140, 155, custom_maps[i + multiplier].map_desc_1, 255, 255, 255, 255, 1);
+				}
+			}
+			if (custom_maps[i + multiplier].map_desc_2 != 0) {
+				if (strcmp(custom_maps[i + multiplier].map_desc_2, " ") != 0) {
+					line_increment++;
+					Draw_ColoredString(140, 165, custom_maps[i + multiplier].map_desc_2, 255, 255, 255, 255, 1);
+				}
+			}
+			if (custom_maps[i + multiplier].map_desc_3 != 0) {
+				if (strcmp(custom_maps[i + multiplier].map_desc_3, " ") != 0) {
+					line_increment++;
+					Draw_ColoredString(140, 175, custom_maps[i + multiplier].map_desc_3, 255, 255, 255, 255, 1);
+				}
+			}
+			if (custom_maps[i + multiplier].map_desc_4 != 0) {
+				if (strcmp(custom_maps[i + multiplier].map_desc_4, " ") != 0) {
+					line_increment++;
+					Draw_ColoredString(140, 185, custom_maps[i + multiplier].map_desc_4, 255, 255, 255, 255, 1);
+				}
+			}
+			if (custom_maps[i + multiplier].map_desc_5 != 0) {
+				if (strcmp(custom_maps[i + multiplier].map_desc_5, " ") != 0) {
+					line_increment++;
+					Draw_ColoredString(140, 195, custom_maps[i + multiplier].map_desc_5, 255, 255, 255, 255, 1);
+				}
+			}
+			if (custom_maps[i + multiplier].map_desc_6 != 0) {
+				if (strcmp(custom_maps[i + multiplier].map_desc_6, " ") != 0) {
+					line_increment++;
+					Draw_ColoredString(140, 205, custom_maps[i + multiplier].map_desc_6, 255, 255, 255, 255, 1);
+				}
+			}
+			if (custom_maps[i + multiplier].map_desc_7 != 0) {
+				if (strcmp(custom_maps[i + multiplier].map_desc_7, " ") != 0) {
+					line_increment++;
+					Draw_ColoredString(140, 215, custom_maps[i + multiplier].map_desc_7, 255, 255, 255, 255, 1);
+				}
+			}
+			if (custom_maps[i + multiplier].map_desc_8 != 0) {
+				if (strcmp(custom_maps[i + multiplier].map_desc_8, " ") != 0) {
+					line_increment++;
+					Draw_ColoredString(140, 225, custom_maps[i + multiplier].map_desc_8, 255, 255, 255, 255, 1);
+				}
+			}
+			if (custom_maps[i + multiplier].map_author != 0) {
+				if (strcmp(custom_maps[i + multiplier].map_author, " ") != 0) {
+					int y = 165 + (10 * line_increment);
+					Draw_ColoredString(140, y, custom_maps[i + multiplier].map_author, 255, 255, 0, 255, 1);
+				}
+			}
+		} else {
+			if (custom_maps[i + multiplier].map_name_pretty != 0)
+				Draw_ColoredString(10, 45 + (10 * i), custom_maps[i + multiplier].map_name_pretty, 255, 255, 255, 255, 1);
+			else
+				Draw_ColoredString(10, 45 + (10 * i), custom_maps[i + multiplier].map_name, 255, 255, 255, 255, 1);
+		}
 	}
 
-	Draw_Fill(vid.width/4, vid.height/4 - 3 + (16 * m_singleplayer_cursor), strlen(SINGLE_MENU_ITEMS[m_singleplayer_cursor])*8, 1, 255, 255, 255);
-	Draw_Fill(vid.width/4, vid.height/4 + 2 + 8 + (16 * m_singleplayer_cursor), strlen(SINGLE_MENU_ITEMS[m_singleplayer_cursor])*8, 1, 255, 255, 255);
-*/
+	if (current_custom_map_page != custom_map_pages) {
+		if (m_map_cursor == 15)
+			Draw_ColoredString(10, 230, "Next Page", 255, 0, 0, 255, 1);
+		else
+			Draw_ColoredString(10, 230, "Next Page", 255, 255, 255, 255, 1);
+	} else {
+		Draw_ColoredString(10, 230, "Next Page", 128, 128, 128, 255, 1);
+	}
+
+	if (current_custom_map_page != 1) {
+		if (m_map_cursor == 16)
+			Draw_ColoredString(10, 240, "Previous Page", 255, 0, 0, 255, 1);
+		else
+			Draw_ColoredString(10, 240, "Previous Page", 255, 255, 255, 255, 1);
+	} else {
+		Draw_ColoredString(10, 240, "Previous Page", 128, 128, 128, 255, 1);
+	}
+
+
+
+	if (m_map_cursor == 17)
+		Draw_ColoredString(10, 250, "Back", 255, 0, 0, 255, 1);
+	else
+		Draw_ColoredString(10, 250, "Back", 255, 255, 255, 255, 1);
 }
 
 
@@ -411,28 +678,75 @@ void M_Menu_CustomMaps_Key (int key)
 {
 	switch (key)
 	{
+		case K_ESCAPE:
+		case K_AUX2:
+			M_Menu_SinglePlayer_f ();
+			break;
+		case K_DOWNARROW:
+			S_LocalSound ("sounds/menu/navigate.wav");
 
-	case K_DOWNARROW:
-		S_LocalSound ("misc/menu1.wav");
-		if (++m_maps_cursor >= m_maps_items)
-			m_maps_cursor = 0;
-		break;
+			m_map_cursor++;
 
-	case K_UPARROW:
-		S_LocalSound ("misc/menu1.wav");
-		if (--m_maps_cursor < 0)
-			m_maps_cursor = m_maps_items - 1;
-		break;
+			if (m_map_cursor < 14 && custom_maps[m_map_cursor + multiplier].occupied == false) {
+				m_map_cursor = 15;
+			}
 
-	case K_ENTER:
-	case K_AUX1:
-		m_entersound = true;
-		break;
+			if (m_map_cursor == 15 && current_custom_map_page == custom_map_pages)
+				m_map_cursor = 16;
+			
+			if (m_map_cursor == 16 && current_custom_map_page == 1)
+				m_map_cursor = 0; // naievil -- was 17, but we don't have a back button print
 
-	// b button
-	case K_AUX2:
-		M_Menu_SinglePlayer_f ();
-		break;
+			if (m_map_cursor >= 18)
+				m_map_cursor = 0;
+			break;
+		case K_UPARROW:
+			S_LocalSound ("sounds/menu/navigate.wav");
+
+			m_map_cursor--;
+
+			if (m_map_cursor < 0)
+				m_map_cursor = 16; // naievil -- was 17, but we don't have a back button print?
+
+			if (m_map_cursor == 16 && current_custom_map_page == 1)
+				m_map_cursor = 15;
+
+			if (m_map_cursor == 15 && current_custom_map_page == custom_map_pages)
+				m_map_cursor = 14;
+
+			if (m_map_cursor <= 14 && custom_maps[m_map_cursor + multiplier].occupied == false) {
+				for (int i = 14; i > -1; i--) {
+					if (custom_maps[i + multiplier].occupied == true) {
+						m_map_cursor = i;
+						break;
+					}
+				}
+			}
+			break;
+		case K_ENTER:
+		case K_AUX1:
+			m_entersound = true;
+			if (m_map_cursor == 17) {
+				M_Menu_SinglePlayer_f ();
+			} else if (m_map_cursor == 16) {
+				current_custom_map_page--;
+			} else if (m_map_cursor == 15) {
+				current_custom_map_page++;
+			} else
+			{
+				key_dest = key_game;
+				if (sv.active)
+					Cbuf_AddText ("disconnect\n");
+				Cbuf_AddText ("maxplayers 1\n");
+				Cbuf_AddText (va("map %s\n", custom_maps[m_map_cursor + multiplier].map_name));
+				loadingScreen = 1;
+				loadname2 = custom_maps[m_map_cursor + multiplier].map_name;
+				if (custom_maps[m_map_cursor + multiplier].map_name_pretty != 0)
+					loadnamespec = custom_maps[m_map_cursor + multiplier].map_name_pretty;
+				else
+					loadnamespec = custom_maps[m_map_cursor + multiplier].map_name;
+			}
+			break;
 	}
 }
 
@@ -558,6 +872,9 @@ void M_DrawCheckbox (int x, int y, int on)
 
 void M_Options_Draw (void)
 {
+	if (key_dest != key_menu_pause)
+		Draw_Pic (0, 0, menu_bk);
+
 	float		r;
 
 	M_Print (16, 32, "    Customize controls");
@@ -758,6 +1075,9 @@ void M_Keys_Draw (void)
 	char	*name;
 	int		x, y;
 
+	if (key_dest != key_menu_pause)
+		Draw_Pic (0, 0, menu_bk);
+
 	if (bind_grab)
 		M_Print (12, 32, "Press a key or button for this action");
 	else
@@ -874,51 +1194,6 @@ void M_Video_Draw (void)
 void M_Video_Key (int key)
 {
 	(*vid_menukeyfn) (key);
-}
-
-//=============================================================================
-/* HELP MENU */
-
-int		help_page;
-#define	NUM_HELP_PAGES	6
-
-
-void M_Menu_Help_f (void)
-{
-	key_dest = key_menu;
-	m_state = m_help;
-	m_entersound = true;
-	help_page = 0;
-}
-
-
-
-void M_Help_Draw (void)
-{
-
-}
-
-
-void M_Help_Key (int key)
-{
-	switch (key)
-	{
-
-	case K_UPARROW:
-	case K_RIGHTARROW:
-		m_entersound = true;
-		if (++help_page >= NUM_HELP_PAGES)
-			help_page = 0;
-		break;
-
-	case K_DOWNARROW:
-	case K_LEFTARROW:
-		m_entersound = true;
-		if (--help_page < 0)
-			help_page = NUM_HELP_PAGES-1;
-		break;
-	}
-
 }
 
 //=============================================================================
@@ -1446,8 +1721,9 @@ void M_Init (void)
 	Cmd_AddCommand ("menu_options", M_Menu_Options_f);
 	Cmd_AddCommand ("menu_keys", M_Menu_Keys_f);
 	Cmd_AddCommand ("menu_video", M_Menu_Video_f);
-	Cmd_AddCommand ("help", M_Menu_Help_f);
 	Cmd_AddCommand ("menu_quit", M_Menu_Quit_f);
+
+	Map_Finder();
 }
 
 
@@ -1500,10 +1776,6 @@ void M_Draw (void)
 
 	case m_video:
 		M_Video_Draw ();
-		break;
-
-	case m_help:
-		M_Help_Draw ();
 		break;
 
 	case m_quit:
@@ -1559,10 +1831,6 @@ void M_Keydown (int key)
 
 	case m_video:
 		M_Video_Key (key);
-		return;
-
-	case m_help:
-		M_Help_Key (key);
 		return;
 
 	case m_quit:
