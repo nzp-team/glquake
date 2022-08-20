@@ -905,7 +905,7 @@ void R_DrawView2Model (void)
 	if (cl.stats[STAT_HEALTH] <= 0)
 		return;
 
-	currententity = &cl.viewent;
+	currententity = &cl.viewent2;
 	if (!currententity->model)
 		return;
 
