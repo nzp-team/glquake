@@ -945,6 +945,7 @@ void CL_Init (void)
 	Cvar_RegisterVariable (&sensitivity);
 	Cvar_RegisterVariable (&in_tolerance);
 	Cvar_RegisterVariable (&in_acceleration);
+	Cvar_RegisterVariable (&in_aimassist);
 
 	Cvar_RegisterVariable (&m_pitch);
 	Cvar_RegisterVariable (&m_yaw);

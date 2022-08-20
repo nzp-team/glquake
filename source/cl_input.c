@@ -522,13 +522,13 @@ void CL_SendMove (usercmd_t *cmd)
 	{
 		if(!zoom_snap)
 		{
-
 			CL_Aim_Snap();
 			zoom_snap = 1;
 		}
 	}
-	else
+	else {
 		zoom_snap = 0;
+	}
 
 	//==== Sniper Scope Swaying ====
 	if(cl.stats[STAT_ZOOM] == 2)

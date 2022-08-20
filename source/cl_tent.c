@@ -85,6 +85,8 @@ void CL_ParseBeam (model_t *m)
 	Con_Printf ("beam list overflow!\n");	
 }
 
+
+extern int decal_mark;
 /*
 =================
 CL_ParseTEnt
@@ -139,6 +141,12 @@ void CL_ParseTEnt (void)
 		pos[0] = MSG_ReadCoord ();
 		pos[1] = MSG_ReadCoord ();
 		pos[2] = MSG_ReadCoord ();
+		//R00k--start
+		if (r_decal_bullets.value)
+		{
+			R_SpawnDecalStatic(pos, decal_mark, 8);
+		}
+		//R00k--end
 		R_RunParticleEffect (pos, vec3_origin, 0, 20);
 		break;
 		

@@ -542,6 +542,7 @@ void Draw_CharacterRGBA(int x, int y, int num, float r, float g, float b, float 
 	glTexCoord2f (fcol, frow + (float)(size/(float)scale));
 	glVertex2f (x, y+(8*(scale)));
 	glEnd ();
+	glColor4f(1,1,1,1);
 	glDisable(GL_ALPHA_TEST);
 }
 
