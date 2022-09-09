@@ -35,7 +35,7 @@ jobs:
       - name: Download Archives
         working-directory: ./
         run: |
-          curl ${{ needs.Compile-NRO.outputs.3ds_link }} -o ctr-nzp-3ds.zip
+          curl ${{ needs.Compile-3ds.outputs.3ds_link }} -o ctr-nzp-3ds.zip
       - name: Generate Build Date
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H-%M-%S')"
