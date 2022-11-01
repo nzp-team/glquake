@@ -27,4 +27,52 @@ jobs:
           zip -r ctr-nzp-3ds.zip nzportable.3dsx nzportable.smdh
           curl --upload-file ./ctr-nzp-3ds.zip https://transfer.sh/ctr-nzp-3ds.zip > output-log.log
           echo "::set-output name=zip::$(cat output-log.log)"
-
+  Unify-and-Release:
+    runs-on: ubuntu-latest
+    needs: Compile-3ds
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download Archives
+        working-directory: ./
+        run: |
+          curl ${{ needs.Compile-3ds.outputs.3ds_link }} -o ctr-nzp-3ds.zip
+      - name: Generate Build Date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H-%M-%S')"
+      - name: Delete Old Release
+        uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        with:
+          delete_release: true
+          tag_name: bleeding-edge
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: bleeding-edge
+          release_name: Automated Release ${{ steps.date.outputs.date }}
+          body: |
+            This is a **bleeding edge** NZ:P 3DS release, stability is not guarenteed.
+            To install:
+            - Grab the .ZIP archive for your platform
+            - 3DS: Extract the `.3dsx`, copy it to /3ds/nzportable on SD Card, copy data assets.
+          draft: true
+          prerelease: false
+      - name: Upload 3DS Archive
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ctr-nzp-3ds.zip
+          asset_name: ctr-nzp-3ds.zip
+          asset_content_type: application/zip
+      - name: Publish Release
+        uses: StuYarrow/publish-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          id: ${{ steps.create_release.outputs.id }}
