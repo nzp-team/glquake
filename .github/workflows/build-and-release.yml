@@ -14,7 +14,7 @@ jobs:
           git clone https://github.com/masterfeizz/picaGL.git
           cd picaGL
           mkdir clean
-          make install
+          CFLAGS=-Wno-error make install
       - name: Build
         working-directory: ./
         run: |
