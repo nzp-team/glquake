@@ -24,7 +24,7 @@ jobs:
         id: zip
         working-directory: ./
         run: |
-          zip -r vita-nzp-3ds.zip nzportable.3dsx nzportable.smdh
+          zip -r ctr-nzp-3ds.zip nzportable.3dsx nzportable.smdh
           curl --upload-file ./ctr-nzp-3ds.zip https://transfer.sh/ctr-nzp-3ds.zip > output-log.log
           echo "::set-output name=zip::$(cat output-log.log)"
   Unify-and-Release:
