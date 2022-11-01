@@ -4,7 +4,7 @@ jobs:
   Compile-3ds:
     runs-on: ubuntu-latest
     outputs:
-      3ds_link: ${{ steps.zip.outputs.zip }}
+      o3ds_link: ${{ steps.zip.outputs.zip }}
     container:
       image: devkitpro/devkitarm
     steps:
@@ -35,7 +35,7 @@ jobs:
       - name: Download Archives
         working-directory: ./
         run: |
-          curl ${{ needs.Compile-3ds.outputs.3ds_link }} -o ctr-nzp-3ds.zip
+          curl ${{ needs.Compile-3ds.outputs.o3ds_link }} -o ctr-nzp-3ds.zip
       - name: Generate Build Date
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H-%M-%S')"
