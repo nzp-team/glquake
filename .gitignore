@@ -2,3 +2,6 @@
 */*.d
 build/*
 *.sh
+*.3dsx
+*.smdh
+*.elf
