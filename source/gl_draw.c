@@ -303,30 +303,6 @@ qpic_t	*Draw_CachePic (char *path)
 	return &pic->pic;
 }
 
-void Draw_CharToConback (int num, byte *dest)
-{
-	int		row, col;
-	byte	*source;
-	int		drawline;
-	int		x;
-
-	row = num>>4;
-	col = num&15;
-	source = draw_chars + (row<<10) + (col<<3);
-
-	drawline = 8;
-
-	while (drawline--)
-	{
-		for (x=0 ; x<8 ; x++)
-			if (source[x] != 255)
-				dest[x] = 0x60 + source[x];
-		source += 128;
-		dest += 320;
-	}
-
-}
-
 typedef struct
 {
 	char *name;
@@ -411,15 +387,6 @@ void Draw_Init (void)
 		Cvar_Set ("gl_max_size", "256");
 
 	Cmd_AddCommand ("gl_texturemode", &Draw_TextureMode_f);
-
-	// load the console background and the charset
-	// by hand, because we need to write the version
-	// string into the background before turning
-	// it into a texture
-	draw_chars = W_GetLumpName ("conchars");
-	for (int i=0 ; i<256*64 ; i++)
-		if (draw_chars[i] == 0)
-			draw_chars[i] = 255;	// proper transparent color
 
 	// now turn them into textures
 	char_texture = loadtextureimage ("gfx/charset", 0, 0, false, false);
