@@ -1166,7 +1166,7 @@ void Draw_Crosshair (void)
     else if (crosshair.value && cl.stats[STAT_ZOOM] != 1 && cl.stats[STAT_ZOOM] != 2)
 		Draw_CharacterRGBA((vid.width - 8)/2, (vid.height - 8)/2, '.', 255, col, col, crosshair_opacity, 1);
 	if (cl.stats[STAT_ZOOM] == 2)
-		Draw_Pic (0, 0, sniper_scope);
+		Draw_Pic (-39, -15, sniper_scope);
    	if (Hitmark_Time > sv.time)
         Draw_Pic ((vid.width - hitmark->width)/2,(vid.height - hitmark->height)/2, hitmark);
 }
