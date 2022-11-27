@@ -1002,7 +1002,7 @@ void SCR_DrawLoadScreen (void)
 		}
 
 		if (load_screen_exists == qtrue)
-			Draw_Pic(scr_vrect.x, scr_vrect.y, lscreen);
+			Draw_StretchPic(scr_vrect.x, scr_vrect.y, lscreen, 400, 240);
 
 		Draw_FillByColor(0, 0, 480, 24, 0, 0, 0, 150);
 		Draw_FillByColor(0, 248, 480, 24, 0, 0, 0, 150);
