@@ -19,7 +19,7 @@ ICON		:= 	icon.png
 
 APP_AUTHOR 		:= NZP Team
 APP_TITLE 		:= Nazi Zombies Portable
-APP_DESCRIPTION := Work-in-Progress Call of Duty Zombies demake powered by ctrQuake
+APP_DESCRIPTION := WiP Call of Duty Zombies demake powered by ctrQuake
 
 #---------------------------------------------------------------------------------
 # options for code generation
