@@ -132,6 +132,18 @@ void InsertLinkAfter (link_t *l, link_t *after)
 ============================================================================
 */
 
+int q_snprintf (char *str, size_t size, const char *format, ...)
+{
+	int		ret;
+	va_list		argptr;
+
+	va_start (argptr, format);
+	ret = q_vsnprintf (str, size, format, argptr);
+	va_end (argptr);
+
+	return ret;
+}
+
 void Q_memset (void *dest, int fill, int count)
 {
 	int             i;
