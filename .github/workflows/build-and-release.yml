@@ -24,8 +24,8 @@ jobs:
         id: zip
         working-directory: ./
         run: |
-          zip -r ctr-nzp-3ds.zip nzportable.3dsx nzportable.smdh
-          curl --upload-file ./ctr-nzp-3ds.zip https://transfer.sh/ctr-nzp-3ds.zip > output-log.log
+          zip -r ctr-nzp-3dsx.zip nzportable.3dsx nzportable.smdh
+          curl --upload-file ./ctr-nzp-3dsx.zip https://transfer.sh/ctr-nzp-3dsx.zip > output-log.log
           echo "::set-output name=zip::$(cat output-log.log)"
   Unify-and-Release:
     runs-on: ubuntu-latest
@@ -35,7 +35,7 @@ jobs:
       - name: Download Archives
         working-directory: ./
         run: |
-          curl ${{ needs.Compile-3ds.outputs.o3ds_link }} -o ctr-nzp-3ds.zip
+          curl ${{ needs.Compile-3ds.outputs.o3ds_link }} -o ctr-nzp-3dsx.zip
       - name: Generate Build Date
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H-%M-%S')"
@@ -55,10 +55,10 @@ jobs:
           tag_name: bleeding-edge
           release_name: Automated Release ${{ steps.date.outputs.date }}
           body: |
-            This is a **bleeding edge** NZ:P 3DS release, stability is not guarenteed.
+            This is a **bleeding edge** NZ:P .3dsx release, stability is not guarenteed.
             To install:
-            - Grab the .ZIP archive for your platform
-            - 3DS: Extract the `.3dsx`, copy it to /3ds/nzportable on SD Card, copy data assets.
+            - Grab the .ZIP archive (ctr-nzp-3dsx.zip)
+            - Extract the contents of the .ZIP archive and copy it to /3ds/nzportable on your SD Card.
           draft: true
           prerelease: false
       - name: Upload 3DS Archive
