@@ -14,11 +14,12 @@ BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data
 INCLUDES	:=	include
+ICON		:= 	icon.png
 #ROMFS		:=	romfs
 
-APP_AUTHOR 		:= Naievil
+APP_AUTHOR 		:= NZP Team
 APP_TITLE 		:= Nazi Zombies Portable
-APP_DESCRIPTION := NZP based on ctrQuake
+APP_DESCRIPTION := Work-in-Progress Call of Duty Zombies demake powered by ctrQuake
 
 #---------------------------------------------------------------------------------
 # options for code generation
