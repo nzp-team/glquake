@@ -5,3 +5,4 @@ build/*
 *.3dsx
 *.smdh
 *.elf
+.DS_Store
