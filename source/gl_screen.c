@@ -804,7 +804,7 @@ char *lodinglinetext;
 qpic_t *awoo;
 char *ReturnLoadingtex (void)
 {
-    int StringNum = Random_Int(55);
+    int StringNum = Random_Int(74);
     switch(StringNum)
     {
         case 1:
@@ -898,7 +898,7 @@ char *ReturnLoadingtex (void)
             return  "ggnore";
             break;
         case 31:
-            return  "Have you tried NZ:P on PC or NX?";
+			return  "NZ:P is also on PC, Switch, Vita, and PSP!";
             break;
         case 32:
             return  "Submerge your device in water for godmode!";
@@ -967,6 +967,63 @@ char *ReturnLoadingtex (void)
 			return  "\"my mom gave me plunger money\"";
 			break;
 		case 54:
+			return "dolphin dive on top of your friend for god mode";
+			break;
+		case 55:
+			return "no free rides. ass, grass, or cash!";
+			break;
+		case 56:
+			return "nzp-team.github.io/latest/game.html";
+			break;
+		case 57:
+			return "im an mlg gamer girl so its pretty guaranteed";
+			break;
+		case 58:
+			return "this is a w because you cant have enough fnaf";
+			break;
+		case 59:
+			return "i hope santa drops bombs on the uk";
+			break;
+		case 60:
+			return "Hoyl shit, bro! You fucking ported fortnite!";
+			break;
+		case 61:
+			return "icarly feet futtishist.";
+			break;
+		case 62:
+			return "Well, it's impossible to play, I'm disgusted.";
+			break;
+		case 63:
+			return "I like my women to not be cartoons";
+			break;
+		case 64:
+			return "Plot twist: NZP was always broken";
+			break;
+		case 65:
+			return "testing some think.";
+			break;
+		case 66:
+			return "fnaf is older than gay marriage in the us";
+			break;
+		case 67:
+			return "i want that twink Obliterated";
+			break;
+		case 68:
+			return "i think he's started the femboy transition process";
+			break;
+		case 69:
+			return "nice";
+			break;
+		case 70:
+			return "He's FUCKING annoying";
+			break;
+		case 71:
+			return "yeah pog female bikers";
+			break;
+		case 72:
+			return "This is either a stroke of genius or just a stroke";
+			break;
+		case 73:
 			return  "Play some Custom Maps!";
 			break;
     }
@@ -984,6 +1041,7 @@ void SCR_DrawLoadScreen (void)
 	}
 
 	if (loadingScreen) {
+		Draw_FillByColor(0, 0, 400, 240, 0, 0, 0, 255);
 		if (!loadscreeninit) {
 			load_screen_exists = qfalse;
 
@@ -1004,8 +1062,8 @@ void SCR_DrawLoadScreen (void)
 		if (load_screen_exists == qtrue)
 			Draw_StretchPic(scr_vrect.x, scr_vrect.y, lscreen, 400, 240);
 
-		Draw_FillByColor(0, 0, 480, 24, 0, 0, 0, 150);
-		Draw_FillByColor(0, 248, 480, 24, 0, 0, 0, 150);
+		Draw_FillByColor(0, 0, 480, 24, 0, 0, 0, 175);
+		Draw_FillByColor(0, 216, 480, 24, 0, 0, 0, 175);
 
 		Draw_ColoredString(2, 4, loadnamespec, 255, 255, 0, 255, 2);
 	}
@@ -1040,7 +1098,14 @@ void SCR_SetUpToDrawConsole (void)
 		return;		// never a console with loading plaque
 		
 // decide on the height of the console
-	con_forcedup = !cl.worldmodel || cls.signon != SIGNONS;
+	if (!cl.worldmodel || cls.signon != SIGNONS)//blubs here, undid it actually
+	{
+		con_forcedup = qtrue;
+	}
+	else
+	{
+		con_forcedup = qfalse;
+	}
 
 	if (con_forcedup)
 	{
@@ -1051,7 +1116,7 @@ void SCR_SetUpToDrawConsole (void)
 		scr_conlines = vid.height/2;	// half screen
 	else
 		scr_conlines = 0;				// none visible
-	
+
 	if (scr_conlines < scr_con_current)
 	{
 		scr_con_current -= scr_conspeed.value*host_frametime;
@@ -1066,11 +1131,7 @@ void SCR_SetUpToDrawConsole (void)
 			scr_con_current = scr_conlines;
 	}
 
-	if (clearconsole++ < vid.numpages)
-	{
-		Sbar_Changed ();
-	}
-	else if (clearnotify++ < vid.numpages)
+	if (clearnotify++ < vid.numpages)
 	{
 	}
 	else
@@ -1083,7 +1144,7 @@ SCR_DrawConsole
 ==================
 */
 void SCR_DrawConsole (void)
-{
+{	
 	if (scr_con_current)
 	{
 		scr_copyeverything = 1;
