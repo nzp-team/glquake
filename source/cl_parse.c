@@ -315,7 +315,7 @@ void CL_ParseServerInfo (void)
 		{
 			Con_Printf("Model %s not found\n", model_precache[i]);
 			loading_cur_step++;
-			return;
+			//return;
 		}
 		CL_KeepaliveMessage ();
 		loading_cur_step++;
