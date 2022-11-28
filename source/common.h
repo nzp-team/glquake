@@ -155,6 +155,8 @@ int Q_strcasecmp (char *s1, char *s2);
 int Q_strncasecmp (char *s1, char *s2, int n);
 int	Q_atoi (char *str);
 float Q_atof (char *str);
+int q_snprintf (char *str, size_t size, const char *format, ...);
+int q_vsnprintf(char *str, size_t size, const char *format, va_list args);
 
 //============================================================================
 

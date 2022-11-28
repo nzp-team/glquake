@@ -132,6 +132,25 @@ void InsertLinkAfter (link_t *l, link_t *after)
 ============================================================================
 */
 
+#define	snprintf_func		snprintf
+#define	vsnprintf_func		vsnprintf
+
+int q_vsnprintf(char *str, size_t size, const char *format, va_list args)
+{
+	int		ret;
+
+	ret = vsnprintf_func (str, size, format, args);
+
+	if (ret < 0)
+		ret = (int)size;
+	if (size == 0)	/* no buffer */
+		return ret;
+	if ((size_t)ret >= size)
+		str[size - 1] = '\0';
+
+	return ret;
+}
+
 int q_snprintf (char *str, size_t size, const char *format, ...)
 {
 	int		ret;
