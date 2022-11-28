@@ -286,8 +286,11 @@ int main (int argc, char **argv)
 {
 	static float time, oldtime;
 	static quakeparms_t parms;
+	bool new3ds_flag = false;
 
 	osSetSpeedupEnable(true);
+
+	APT_CheckNew3DS(&new3ds_flag);
 
 	gfxInit(GSP_RGB565_OES,GSP_RGB565_OES,false); 
 	gfxSetDoubleBuffering(GFX_BOTTOM, false);
@@ -295,7 +298,10 @@ int main (int argc, char **argv)
 
 	chdir("sdmc:/3ds/nzportable");
 
-	parms.memsize = 16 * 1024 * 1024;
+	if (new3ds_flag == true)
+		parms.memsize = 64 * 1024 * 1024;
+	else
+		parms.memsize = 16 * 1024 * 1024;
 	parms.membase = malloc (parms.memsize);
 	parms.basedir = ".";
 
