@@ -768,7 +768,7 @@ void Draw_LoadingFill(void)
 
     float loadsize = loading_cur_step * (max_step / loading_num_step);
 	Draw_FillByColor (x - 2, y - 2, max_step + 4, size + 4, 69, 69, 69, 255);
-	Draw_FillByColor (x, y, (int)loadsize, size, 255, 255, 255, 255);
+	Draw_FillByColor (x, y, (int)loadsize, size, 0, 0, 0, 200);
 
 	switch(loading_step) {
 		case 1: text = "Loading Models.."; break;
@@ -801,7 +801,7 @@ Draw_FillByColor
 Fills a box of pixels with a single color
 =============
 */
-void Draw_FillByColor (int x, int y, int w, int h, int r, int g, int b, int a)
+void Draw_FillByColor (int x, int y, int w, int h, float r, float g, float b, float a)
 {
 	Draw_Fill(x, y, w, h, r, g, b, a);
 }
@@ -813,7 +813,7 @@ Draw_Fill
 Fills a box of pixels with a single color
 =============
 */
-void Draw_Fill (int x, int y, int w, int h, int r, int g, int b, int a)
+void Draw_Fill (int x, int y, int w, int h, float r, float g, float b, float a)
 {
 	glDisable (GL_TEXTURE_2D);
 	glEnable (GL_ALPHA_TEST);
