@@ -266,8 +266,12 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 	buf = (unsigned *)COM_LoadStackFile (mod->name, stackbuf, sizeof(stackbuf));
 	if (!buf)
 	{
-		if (crash)
-			Sys_Error ("Mod_NumForName: %s not found", mod->name);
+		// Reload with another .mdl
+		buf = (unsigned *)COM_LoadStackFile("models/missing_model.mdl", stackbuf, sizeof(stackbuf));
+		if (buf)
+		{
+			Con_Printf ("Missing model %s substituted\n", mod->name);
+		}
 		return NULL;
 	}
 	
@@ -1641,13 +1645,26 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 		if (pskintype->type == ALIAS_SKIN_SINGLE) {
 			Mod_FloodFillSkin( skin, pheader->skinwidth, pheader->skinheight );
 
-			// save 8 bit texels for the player model to remap
-	//		if (!strcmp(loadmodel->name,"models/player.mdl")) {
-				texels = Hunk_AllocName(s, loadname);
-				pheader->texels[i] = texels - (byte *)pheader;
-				memcpy (texels, (byte *)(pskintype + 1), s);
-	//		}
-			sprintf (name, "%s_%i", loadmodel->name, i);
+			texels = Hunk_AllocName(s, loadname);
+			pheader->texels[i] = texels - (byte *)pheader;
+			memcpy (texels, (byte *)(pskintype + 1), s);
+
+			//spike - external model textures with dp naming -- eg progs/foo.mdl_0.tga
+			//always use the alpha channel for external images. gpus prefer aligned data anyway.
+			char filename[MAX_QPATH];
+			byte *data;
+			int fwidth = 0, fheight = 0;
+			qboolean malloced=false;
+			q_snprintf (filename, sizeof(filename), "%s_%i", loadmodel->name, i);
+			data = loadtextureimage(filename, 0, 0, qfalse, qfalse);
+
+			if (data) {
+				pheader->gl_texturenum[i][0] =
+					GL_LoadTexture (filename, pheader->skinwidth, 
+					pheader->skinheight, (byte *)(pskintype + 1), true, false, 1);
+					pskintype = (daliasskintype_t *)((byte *)(pskintype+1) + s);
+			} else {
+				sprintf (name, "%s_%i", loadmodel->name, i);
 			pheader->gl_texturenum[i][0] =
 			pheader->gl_texturenum[i][1] =
 			pheader->gl_texturenum[i][2] =
@@ -1655,6 +1672,7 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 				GL_LoadTexture (name, pheader->skinwidth, 
 				pheader->skinheight, (byte *)(pskintype + 1), true, false, 1);
 			pskintype = (daliasskintype_t *)((byte *)(pskintype+1) + s);
+			}
 		} else {
 			// animating skin group.  yuck.
 			pskintype++;
