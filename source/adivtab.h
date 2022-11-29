@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // table of quotients and remainders for [-15...16] / [-15...16]
 
-// numerator = -15
+// numerator =-15
 {1, 0},
 {1, -1},
 {1, -2},
