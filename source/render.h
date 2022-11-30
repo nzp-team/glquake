@@ -132,6 +132,12 @@ typedef struct
 	float		fov_x, fov_y;
 
 	int			ambientlight;
+
+	float 		fog_start;
+	float 		fog_end;
+	float 		fog_red;
+	float 		fog_green;
+	float 		fog_blue;
 } refdef_t;
 
 
