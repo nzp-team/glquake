@@ -296,6 +296,15 @@ int main (int argc, char **argv)
 	gfxSetDoubleBuffering(GFX_BOTTOM, false);
 	gfxSwapBuffersGpu();
 
+	uint8_t model;
+
+	cfguInit();
+	CFGU_GetSystemModel(&model);
+	cfguExit();
+	
+	if(model != CFG_MODEL_2DS)
+		gfxSetWide(true);
+	
 	chdir("sdmc:/3ds/nzportable");
 
 	if (new3ds_flag == true)
