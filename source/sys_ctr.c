@@ -292,7 +292,7 @@ int main (int argc, char **argv)
 
 	APT_CheckNew3DS(&new3ds_flag);
 
-	gfxInit(GSP_RGB565_OES,GSP_RGB565_OES,false); 
+	gfxInit(GSP_BGR8_OES, GSP_RGB565_OES, false); 
 	gfxSetDoubleBuffering(GFX_BOTTOM, false);
 	gfxSwapBuffersGpu();
 
