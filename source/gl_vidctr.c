@@ -50,7 +50,7 @@ GL_Init
 */
 void GL_Init (void)
 {
-	pglInit();
+	pglInitEx(0x040000, 0x100000);
 
 	gl_vendor = glGetString (GL_VENDOR);
 	gl_renderer = glGetString (GL_RENDERER);
