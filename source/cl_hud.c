@@ -354,7 +354,7 @@ void HUD_Points (void)
 
 
     x = 5;
-    y = 179;
+    y = 167;
 	for (i=0 ; i<l ; i++)
 	{
 		k = pointsort[i];
