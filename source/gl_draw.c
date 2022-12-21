@@ -2250,7 +2250,12 @@ byte* loadimagepixels (char* filename, qboolean complain, int matchwidth, int ma
 	FILE	*f;
 	char	basename[128], name[132];
 	byte	*c;
-	COM_StripExtension(filename, basename); // strip the extension to allow TGA
+
+	if (complain == qfalse)
+		COM_StripExtension(filename, basename); // strip the extension to allow TGA
+	else
+		strcpy(basename, filename);
+
 	c = (byte*)basename;
 	while (*c)
 	{
@@ -2258,6 +2263,7 @@ byte* loadimagepixels (char* filename, qboolean complain, int matchwidth, int ma
 			*c = '+';
 		c++;
 	}
+
 	//Try TGA
 	sprintf (name, "%s.tga", basename);
 	COM_FOpenFile (name, &f);
@@ -2269,8 +2275,8 @@ byte* loadimagepixels (char* filename, qboolean complain, int matchwidth, int ma
 	if (f)
 		return LoadPCX (f, matchwidth, matchheight);
 	
-	if (complain)
-		Con_Printf ("Couldn't load %s.tga or %s.pcx \n", filename);
+	//if (complain)
+	//	Con_Printf ("Couldn't load %s.tga or %s.pcx \n", filename);
 	
 	return NULL;
 }

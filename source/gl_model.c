@@ -1624,7 +1624,7 @@ Mod_LoadAllSkins
 void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 {
 	int		i, j, k;
-	char	name[32];
+	char	name[32], model[64], model2[64];
 	int		s;
 	byte	*copy;
 	byte	*skin;
@@ -1644,35 +1644,30 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 	{
 		if (pskintype->type == ALIAS_SKIN_SINGLE) {
 			Mod_FloodFillSkin( skin, pheader->skinwidth, pheader->skinheight );
+			COM_StripExtension(loadmodel->name, model);
 
 			texels = Hunk_AllocName(s, loadname);
 			pheader->texels[i] = texels - (byte *)pheader;
 			memcpy (texels, (byte *)(pskintype + 1), s);
 
-			//spike - external model textures with dp naming -- eg progs/foo.mdl_0.tga
-			//always use the alpha channel for external images. gpus prefer aligned data anyway.
-			char filename[MAX_QPATH];
-			byte *data;
-			int fwidth = 0, fheight = 0;
-			qboolean malloced=false;
-			q_snprintf (filename, sizeof(filename), "%s_%i", loadmodel->name, i);
-			data = loadtextureimage(filename, 0, 0, qfalse, qfalse);
-
-			if (data) {
-				pheader->gl_texturenum[i][0] =
-					GL_LoadTexture (filename, pheader->skinwidth, 
-					pheader->skinheight, (byte *)(pskintype + 1), true, false, 1);
-					pskintype = (daliasskintype_t *)((byte *)(pskintype+1) + s);
-			} else {
-				sprintf (name, "%s_%i", loadmodel->name, i);
+			// HACK HACK HACK
+			sprintf(model2, "%s.mdl_%i", model, i);
 			pheader->gl_texturenum[i][0] =
 			pheader->gl_texturenum[i][1] =
 			pheader->gl_texturenum[i][2] =
-			pheader->gl_texturenum[i][3] =
-				GL_LoadTexture (name, pheader->skinwidth, 
-				pheader->skinheight, (byte *)(pskintype + 1), true, false, 1);
-			pskintype = (daliasskintype_t *)((byte *)(pskintype+1) + s);
+			pheader->gl_texturenum[i][3] = loadtextureimage(model2, 0, 0, qtrue, qtrue);
+
+			if (pheader->gl_texturenum[i][0] == 0) // did not find a matching TGA...
+			{
+				sprintf(name, "%s_%i", loadmodel->name, i);
+				pheader->gl_texturenum[i][0] =
+				pheader->gl_texturenum[i][1] =
+				pheader->gl_texturenum[i][2] =
+				pheader->gl_texturenum[i][3] = GL_LoadTexture (name, pheader->skinwidth, 
+					pheader->skinheight, (byte *)(pskintype + 1), true, false, 1);
 			}
+			
+			pskintype = (daliasskintype_t *)((byte *)(pskintype+1) + s);
 		} else {
 			// animating skin group.  yuck.
 			pskintype++;
@@ -1916,7 +1911,7 @@ void * Mod_LoadSpriteFrame (void * pin, mspriteframe_t **ppframe, int framenum)
 	int					i, width, height, size, origin[2];
 	unsigned short		*ppixout;
 	byte				*ppixin;
-	char				name[64];
+	char				name[64], sprite[64], sprite2[64];
 
 	pinframe = (dspriteframe_t *)pin;
 
@@ -1940,8 +1935,17 @@ void * Mod_LoadSpriteFrame (void * pin, mspriteframe_t **ppframe, int framenum)
 	pspriteframe->left = origin[0];
 	pspriteframe->right = width + origin[0];
 
-	sprintf (name, "%s_%i", loadmodel->name, framenum);
-	pspriteframe->gl_texturenum = GL_LoadTexture (name, width, height, (byte *)(pinframe + 1), true, true, 1);
+	// HACK HACK HACK
+	sprintf (name, "%s.spr_%i", loadmodel->name, framenum);
+
+	COM_StripExtension(loadmodel->name, sprite);
+	sprintf(sprite2, "%s.spr_%i", sprite, framenum);
+	pspriteframe->gl_texturenum = loadtextureimage(sprite2, 0, 0, qtrue, qtrue);
+
+	if (pspriteframe->gl_texturenum == 0) // did not find a matching TGA...
+	{
+		pspriteframe->gl_texturenum = GL_LoadTexture (name, width, height, (byte *)(pinframe + 1), true, true, 1);
+	}
 
 	return (void *)((byte *)pinframe + sizeof (dspriteframe_t) + size);
 }
