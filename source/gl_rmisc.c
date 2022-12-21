@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern cvar_t r_flatlightstyles;
 
 int decal_blood1, decal_blood2, decal_blood3, decal_q3blood, decal_burn, decal_mark, decal_glow;
+int zombie_skins[4];
 
 /*
 ==================
@@ -40,6 +41,12 @@ void	R_InitOtherTextures (void)
 	decal_burn	  = loadtextureimage ("textures/decals/explo_burn01", 0, 0, qfalse, qtrue);
 	decal_mark	  = loadtextureimage ("textures/decals/particle_burn01", 0, 0, qfalse, qtrue);
 	decal_glow	  = loadtextureimage ("textures/decals/glow2", 0, 0, qfalse, qtrue);
+
+	// external zombie skins
+	zombie_skins[0] = loadtextureimage ("models/ai/zfull.mdl_0", 0, 0, qtrue, qtrue);
+	zombie_skins[1] = loadtextureimage ("models/ai/zfull.mdl_1", 0, 0, qtrue, qtrue);
+	zombie_skins[2] = loadtextureimage ("models/ai/zfull.mdl_2", 0, 0, qtrue, qtrue);
+	zombie_skins[3] = loadtextureimage ("models/ai/zfull.mdl_3", 0, 0, qtrue, qtrue);
 }
 
 /*
