@@ -164,7 +164,8 @@ void R_RotateForEntity (entity_t *e)
     glRotatef (-e->angles[0],  0, 1, 0);
     glRotatef (e->angles[2],  1, 0, 0);
 
-	glScalef (e->scale, e->scale, e->scale);
+	if (e != &cl.viewent && e != &cl.viewent2)
+		glScalef (e->scale, e->scale, e->scale);
 }
 
 /*
