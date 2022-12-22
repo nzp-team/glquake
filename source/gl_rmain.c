@@ -776,7 +776,7 @@ void R_DrawAliasModel (entity_t *e)
 			glScalef (paliashdr->scale[0] * scale, paliashdr->scale[1], paliashdr->scale[2]);
 		} else {
 			glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
-			glScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+			glScalef (paliashdr->scale[0] * e->v.scale, paliashdr->scale[1], paliashdr->scale[2]);
 		}
 		
 	}
