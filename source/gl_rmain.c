@@ -163,6 +163,8 @@ void R_RotateForEntity (entity_t *e)
     glRotatef (e->angles[1],  0, 0, 1);
     glRotatef (-e->angles[0],  0, 1, 0);
     glRotatef (e->angles[2],  1, 0, 0);
+
+	glScalef (e->scale, e->scale, e->scale);
 }
 
 /*
@@ -776,7 +778,7 @@ void R_DrawAliasModel (entity_t *e)
 			glScalef (paliashdr->scale[0] * scale, paliashdr->scale[1], paliashdr->scale[2]);
 		} else {
 			glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
-			glScalef (paliashdr->scale[0] * e->scale, paliashdr->scale[1] * e->scale, paliashdr->scale[2] * e->scale);
+			glScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
 		}
 		
 	}
