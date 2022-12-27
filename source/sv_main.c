@@ -437,7 +437,6 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 	eval_t  *val;
 	float	renderamt  = 0;
 	float	rendermode = 0;
-	float 	scale = 1;
 
 	float	rendercolor[3];
 	memset(rendercolor, 0, sizeof(rendercolor));
@@ -514,16 +513,6 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 		
 		if (ent->baseline.modelindex != ent->v.modelindex)
 			bits |= U_MODEL;
-
-		if (ent->baseline.scale != ent->v.scale) {
-			if (ent->v.scale == 0)
-				ent->v.scale = 1;
-
-			if (ent->v.scale > 16)
-				ent->v.scale = 16;
-
-			bits |= U_SCALE;
-		}
 
         // Tomaz - QC Alpha Scale Glow Begin
 
@@ -620,8 +609,6 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 			MSG_WriteCoord (msg, ent->v.origin[2]);
 		if (bits & U_ANGLE3)
 			MSG_WriteAngle(msg, ent->v.angles[2]);
-		if (bits & U_SCALE)
-			MSG_WriteFloat(msg, ent->v.scale);
 		// Tomaz - QC Alpha Scale Glow Begin
 		if (bits & U_RENDERAMT)
 			MSG_WriteFloat(msg, renderamt);
@@ -1043,13 +1030,11 @@ void SV_CreateBaseline (void)
 		if (entnum > 0 && entnum <= svs.maxclients)
 		{
 			svent->baseline.colormap = entnum;
-			svent->baseline.scale = 1;
 			svent->baseline.modelindex = SV_ModelIndex("models/player.mdl");
 		}
 		else
 		{
 			svent->baseline.colormap = 0;
-			svent->baseline.scale = 1;
 			svent->baseline.modelindex =
 				SV_ModelIndex(pr_strings + svent->v.model);
 		}
@@ -1064,7 +1049,6 @@ void SV_CreateBaseline (void)
 		MSG_WriteByte (&sv.signon, svent->baseline.frame);
 		MSG_WriteByte (&sv.signon, svent->baseline.colormap);
 		MSG_WriteByte (&sv.signon, svent->baseline.skin);
-		MSG_WriteByte (&sv.signon, svent->baseline.scale);
 		for (i=0 ; i<3 ; i++)
 		{
 			MSG_WriteCoord(&sv.signon, svent->baseline.origin[i]);

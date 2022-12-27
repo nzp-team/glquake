@@ -518,11 +518,6 @@ if (bits&(1<<i))
 	else
 		ent->msg_angles[0][2] = ent->baseline.angles[2];
 
-	if (bits & U_SCALE)
-		ent->scale = MSG_ReadFloat();
-	else
-		ent->scale = 1;
-
 // Tomaz - QC Alpha Scale Glow Begin
 	if (bits & U_RENDERAMT)
 	    ent->renderamt = MSG_ReadFloat();
@@ -576,7 +571,6 @@ void CL_ParseBaseline (entity_t *ent)
 	ent->baseline.frame = MSG_ReadByte ();
 	ent->baseline.colormap = MSG_ReadByte();
 	ent->baseline.skin = MSG_ReadByte();
-	ent->baseline.scale = MSG_ReadByte();
 	for (i=0 ; i<3 ; i++)
 	{
 		ent->baseline.origin[i] = MSG_ReadCoord ();
@@ -945,7 +939,6 @@ void CL_ParseStatic (void)
 	ent->colormap = vid.colormap;
 	ent->skinnum = ent->baseline.skin;
 	ent->effects = ent->baseline.effects;
-	ent->scale = ent->baseline.scale;
 
 	VectorCopy (ent->baseline.origin, ent->origin);
 	VectorCopy (ent->baseline.angles, ent->angles);	
