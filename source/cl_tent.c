@@ -161,6 +161,37 @@ void CL_ParseTEnt (void)
 		dl->die = cl.time + 0.5;
 		dl->decay = 300;
 		break;
+
+	case TE_RAYSPLASHGREEN:
+		pos[0] = MSG_ReadCoord ();
+		pos[1] = MSG_ReadCoord ();
+		pos[2] = MSG_ReadCoord ();
+		dl = CL_AllocDlight (0);
+		VectorCopy (pos, dl->origin);
+		dl->radius = 65;
+		dl->die = cl.time + 0.3;
+		dl->decay = 300;
+		dl->color[0] = 0;
+		dl->color[1] = 255;
+		dl->color[2] = 0; 
+		R_RunParticleEffect (pos, vec3_origin, 0, 256);
+		//S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 0.5); // NZPFIXME - add raygun hum
+		break;
+	case TE_RAYSPLASHRED:
+		pos[0] = MSG_ReadCoord ();
+		pos[1] = MSG_ReadCoord ();
+		pos[2] = MSG_ReadCoord ();
+		dl = CL_AllocDlight (0);
+		VectorCopy (pos, dl->origin);
+		dl->radius = 65;
+		dl->die = cl.time + 0.3;
+		dl->decay = 300;
+		dl->color[0] = 255;
+		dl->color[1] = 0;
+		dl->color[2] = 0; 
+		R_RunParticleEffect (pos, vec3_origin, 0, 512);
+		//S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 0.5); // NZPFIXME - add raygun hum
+		break;
 		
 	case TE_TAREXPLOSION:			// tarbaby explosion
 		pos[0] = MSG_ReadCoord ();
@@ -214,32 +245,6 @@ void CL_ParseTEnt (void)
 		dl->die = cl.time + 0.5;
 		dl->decay = 300;
 		break;
-		
-#ifdef QUAKE2
-	case TE_IMPLOSION:
-		pos[0] = MSG_ReadCoord ();
-		pos[1] = MSG_ReadCoord ();
-		pos[2] = MSG_ReadCoord ();
-		break;
-
-	case TE_RAILTRAIL:
-		pos[0] = MSG_ReadCoord ();
-		pos[1] = MSG_ReadCoord ();
-		pos[2] = MSG_ReadCoord ();
-		endpos[0] = MSG_ReadCoord ();
-		endpos[1] = MSG_ReadCoord ();
-		endpos[2] = MSG_ReadCoord ();
-		S_StartSound (-1, 0, cl_sfx_rail, pos, 1, 1);
-		S_StartSound (-1, 1, cl_sfx_r_exp3, endpos, 1, 1);
-		R_RocketTrail (pos, endpos, 0+128);
-		R_ParticleExplosion (endpos);
-		dl = CL_AllocDlight (-1);
-		VectorCopy (endpos, dl->origin);
-		dl->radius = 350;
-		dl->die = cl.time + 0.5;
-		dl->decay = 300;
-		break;
-#endif
 
 	default:
 		Sys_Error ("CL_ParseTEnt: bad type");

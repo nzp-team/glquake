@@ -403,7 +403,41 @@ R_RunParticleEffect
 
 ===============
 */
+
+#define RunParticleEffect(var, org, dir, color, count)		\
+	if (qmb_initialized)				\
+		QMB_RunParticleEffect (org, dir, color, count);		\
+	else													\
+		Run_Classic_ParticleEffect (org, dir, color, count);
+
 void R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
+{
+	if (color == 73 || color == 225)
+	{
+		RunParticleEffect(/*blood*/0, org, dir, color, count);
+		return;
+	}
+
+	switch (count)
+	{
+		case 10:
+		case 20:
+		case 30:
+			RunParticleEffect(/*sparks*/0, org, dir, color, count);
+			break;
+		default:
+			RunParticleEffect(/*gunshots*/0, org, dir, color, count);
+	}
+}
+
+
+/*
+===============
+Run_Classic_ParticleEffect
+===============
+*/
+
+void Run_Classic_ParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 {
 	int			i, j;
 	particle_t	*p;
