@@ -629,6 +629,7 @@ void R_DrawZombieLimb (entity_t *e, int which)
 	model_t		*clmodel;
 	aliashdr_t	*paliashdr;
 	entity_t 	*limb_ent;
+	lerpdata_t	lerpdata;
 
 	switch(which) {
 		case 1:
