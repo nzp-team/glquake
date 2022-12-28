@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
+extern qboolean domaxammo;
+
 char *svc_strings[] =
 {
 	"svc_bad",
@@ -1103,6 +1105,10 @@ void CL_ParseServerMessage (void)
 
 		case svc_useprint:
 			SCR_UsePrint (MSG_ReadByte (),MSG_ReadShort (),MSG_ReadByte ());
+			break;
+
+		case svc_maxammo:
+			domaxammo = true;
 			break;
 			
 		case svc_stufftext:
