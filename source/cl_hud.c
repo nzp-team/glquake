@@ -1225,7 +1225,7 @@ void HUD_Parse_Achievement (int ach)
 	achievement_time = Sys_FloatTime() + 10;
 	ach_pic = ach;
 	achievement_list[ach].unlocked = 1;
-	Save_Achivements();
+	//Save_Achivements();
 }
 
 /*
