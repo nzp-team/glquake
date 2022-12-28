@@ -699,6 +699,7 @@ R_DrawAliasModel
 =================
 */
 int doZHack;
+extern int zombie_skins[4];
 void R_DrawAliasModel (entity_t *e)
 {
 	char		specChar;
