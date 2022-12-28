@@ -70,6 +70,7 @@ typedef struct entity_s
 	byte					*colormap;
 	int						effects;		// light, particals, etc
 	int						skinnum;		// for Alias models
+	int 					iframetime;		// dummy for dquake parity
 	int						visframe;		// last frame this entity was
 											//  found in an active leaf
 											
