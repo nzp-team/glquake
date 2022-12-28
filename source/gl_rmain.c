@@ -617,12 +617,90 @@ void R_SetupEntityTransform (entity_t *e, lerpdata_t *lerpdata)
 
 /*
 =================
+R_DrawZombieLimb
+
+=================
+*/
+//Blubs Z hacks: need this declaration.
+model_t *Mod_FindName (char *name);
+
+void R_DrawZombieLimb (entity_t *e, int which)
+{
+	model_t		*clmodel;
+	aliashdr_t	*paliashdr;
+	entity_t 	*limb_ent;
+
+	switch(which) {
+		case 1:
+			limb_ent = &cl_entities[e->z_head];
+			break;
+		case 2:
+			limb_ent = &cl_entities[e->z_larm];
+			break;
+		case 3:
+			limb_ent = &cl_entities[e->z_rarm];
+			break;
+		default:
+			return;
+	}
+
+	clmodel = limb_ent->model;
+
+	if (clmodel == NULL)
+		return;
+
+	VectorCopy(e->origin, r_entorigin);
+	VectorSubtract(r_origin, r_entorigin, modelorg);
+
+	// locate the proper data
+	paliashdr = (aliashdr_t *)Mod_Extradata(clmodel);//e->model
+	c_alias_polys += paliashdr->numtris;
+
+	GL_DisableMultitexture();
+
+	//Shpuld
+	if(r_model_brightness.value)
+	{
+		lightcolor[0] += 48;
+		lightcolor[1] += 48;
+		lightcolor[2] += 48;
+	}
+
+	glPushMatrix ();
+
+	glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
+	glScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+
+	if (gl_smoothmodels.value)
+		glShadeModel (GL_SMOOTH);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	if (gl_affinemodels.value)
+		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+
+	R_SetupAliasFrame (paliashdr, e->frame, &lerpdata);
+	R_SetupEntityTransform (e, &lerpdata);
+	GL_DrawAliasFrame(paliashdr, lerpdata);
+
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	glShadeModel (GL_FLAT);
+	if (gl_affinemodels.value)
+		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+	glPopMatrix ();
+}
+
+/*
+=================
 R_DrawAliasModel
 
 =================
 */
+int doZHack;
 void R_DrawAliasModel (entity_t *e)
 {
+	char		specChar;
 	int			i, j;
 	int			lnum;
 	vec3_t		dist;
@@ -674,6 +752,8 @@ void R_DrawAliasModel (entity_t *e)
 		sceGuAlphaFunc(GU_GREATER, 0x88, c);
 	}
 	*/
+
+	specChar = clmodel->name[strlen(clmodel->name) - 5];
 
 	VectorCopy (currententity->origin, r_entorigin);
 	VectorSubtract (r_origin, r_entorigin, modelorg);
@@ -742,7 +822,15 @@ void R_DrawAliasModel (entity_t *e)
 	//
 	// locate the proper data
 	//
-	paliashdr = (aliashdr_t *)Mod_Extradata (e->model);
+	if(doZHack && specChar == '#')
+	{
+		if(clmodel->name[strlen(clmodel->name) - 6] == 'c')
+			paliashdr = (aliashdr_t *) Mod_Extradata(Mod_FindName("models/ai/zcfull.mdl"));
+		else
+			paliashdr = (aliashdr_t *) Mod_Extradata(Mod_FindName("models/ai/zfull.mdl"));
+	}
+	else
+		paliashdr = (aliashdr_t *)Mod_Extradata (e->model);
 
 	c_alias_polys += paliashdr->numtris;
 
@@ -781,8 +869,33 @@ void R_DrawAliasModel (entity_t *e)
 		
 	}
 
-	anim = (int)(cl.time*10) & 3;
-    GL_Bind(paliashdr->gl_texturenum[currententity->skinnum][anim]);
+	if (specChar == '#')//Zombie body
+	{
+		switch(e->skinnum)
+		{
+			case 0:
+				GL_Bind(zombie_skins[0]);
+				break;
+			case 1:
+				GL_Bind(zombie_skins[1]);
+				break;
+			case 2:
+				GL_Bind(zombie_skins[2]);
+				break;
+			case 3:
+				GL_Bind(zombie_skins[3]);
+				break;
+			default: //out of bounds? assuming 0
+				Con_Printf("Zombie tex out of bounds: Tex[%i]\n",e->skinnum);
+				GL_Bind(zombie_skins[0]);
+				break;
+		}
+	}
+	else
+	{
+		anim = (int)(cl.time*10) & 3;
+		GL_Bind(paliashdr->gl_texturenum[e->skinnum][anim]);
+	}
 
 	// we can't dynamically colormap textures, so they are cached
 	// seperately for the players.  Heads are just uncolored.
@@ -811,6 +924,16 @@ void R_DrawAliasModel (entity_t *e)
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	glPopMatrix ();
+
+	if (doZHack == 0 && specChar == '#')//if we're drawing zombie, also draw its limbs in one call
+	{
+		if(e->z_head)
+			R_DrawZombieLimb(e,1);
+		if(e->z_larm)
+			R_DrawZombieLimb(e,2);
+		if(e->z_rarm)
+			R_DrawZombieLimb(e,3);
+	}
 
 	if (r_shadows.value)
 	{
@@ -842,14 +965,41 @@ void R_DrawEntitiesOnList (void)
 	if (!r_drawentities.value)
 		return;
 
+	int zHackCount = 0;
+	doZHack = 0;
+	char specChar;
+
 	// draw sprites seperately, because of alpha blending
 	for (i=0 ; i<cl_numvisedicts ; i++)
 	{
 		currententity = cl_visedicts[i];
 
+		specChar = currententity->model->name[strlen(currententity->model->name)-5];
+
+		if(specChar == '(' || specChar == '^')//skip heads and arms: it's faster to do this than a strcmp...
+		{
+			continue;
+		}
+		doZHack = 0;
+		if(specChar == '#')
+		{
+			if(zHackCount > 5 || ((currententity->z_head != 0) && (currententity->z_larm != 0) && (currententity->z_rarm != 0)))
+			{
+				doZHack = 1;
+			}
+			else
+			{
+				zHackCount ++;//drawing zombie piece by piece.
+			}
+		}
+
 		switch (currententity->model->type)
 		{
 		case mod_alias:
+			/*if(specChar == '$')//This is for smooth alpha, draw in the following loop, not this one
+			{
+				continue;
+			}*/
 			R_DrawAliasModel (currententity);
 			break;
 
@@ -860,6 +1010,7 @@ void R_DrawEntitiesOnList (void)
 		default:
 			break;
 		}
+		doZHack = 0;
 	}
 
 	for (i=0 ; i<cl_numvisedicts ; i++)
