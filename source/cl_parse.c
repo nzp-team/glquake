@@ -1264,6 +1264,10 @@ void CL_ParseServerMessage (void)
 			Cmd_ExecuteString ("help", src_command);
 			break;
 
+		case svc_achievement:
+			HUD_Parse_Achievement (MSG_ReadByte());
+			break;
+
 		case svc_hitmark:
 			Hitmark_Time = sv.time + 0.2;
 			break;
