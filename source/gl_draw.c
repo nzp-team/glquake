@@ -1875,6 +1875,8 @@ byte* LoadPCX (FILE *f, int matchwidth, int matchheight)
 	}
 	image_width = pcx->xmax+1;
 	image_height = pcx->ymax+1;
+
+	fclose(f);
 	return image_rgba;
 }
 
