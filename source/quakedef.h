@@ -173,7 +173,7 @@ void	VID_UnlockBuffer (void);
 #define W_KILLU   29 //357
 #define W_COMPRESSOR 30 // Gewehr
 #define W_M1000  31 //garand
-//#define W_KOLLIDER  32
+#define W_KOLLIDER  32 // mp5
 #define W_PORTER  33 // Ray
 #define W_WIDDER  34 // M1A1
 #define W_FIW  35 //upgraded flamethrower

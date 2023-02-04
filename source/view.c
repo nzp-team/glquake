@@ -709,7 +709,7 @@ static float OldYawTheta;
 static float OldPitchTheta;
 
 
-static vec2_t cADSOfs;
+static vec3_t cADSOfs;
 
 void CalcGunAngle (void)
 {
@@ -1140,7 +1140,7 @@ void V_CalcRefdef (void)
 	//============================================================ Engine-Side Iron Sights ============================================================
 	AngleVectors (r_refdef.viewangles, temp_forward, temp_right, temp_up);
 
-	vec2_t ADSOffset;
+	vec3_t ADSOffset;
 	if(cl.stats[STAT_ZOOM] == 1 || cl.stats[STAT_ZOOM] == 2)
 	{
 		ADSOffset[0] = sv_player->v.ADS_Offset[0];
@@ -1155,10 +1155,12 @@ void V_CalcRefdef (void)
 	{
 		ADSOffset[0] = 0;
 		ADSOffset[1] = 0;
+		ADSOffset[2] = 0;
 	}
 	//Side offset
 	cADSOfs [0] += (ADSOffset[0] - cADSOfs[0]) * 0.25;
 	cADSOfs [1] += (ADSOffset[1] - cADSOfs[1]) * 0.25;
+	cADSOfs [2] += (ADSOffset[2] - cADSOfs[2]) * 0.25;
 
 	temp_right[0] *= cADSOfs[0];
 	temp_right[1] *= cADSOfs[0];
@@ -1168,9 +1170,13 @@ void V_CalcRefdef (void)
 	temp_up[1] *= cADSOfs[1];
 	temp_up[2] *= cADSOfs[1];
 
-	view->origin[0] +=(temp_right[0] + temp_up[0]);
-	view->origin[1] +=(temp_right[1] + temp_up[1]);
-	view->origin[2] +=(temp_right[2] + temp_up[2]);
+	temp_forward[0] *= cADSOfs[2];
+	temp_forward[1] *= cADSOfs[2];
+	temp_forward[2] *= cADSOfs[2];
+
+	view->origin[0] +=(temp_forward[0] + temp_right[0] + temp_up[0]);
+	view->origin[1] +=(temp_forward[1] + temp_right[1] + temp_up[1]);
+	view->origin[2] +=(temp_forward[2] + temp_right[2] + temp_up[2]);
 
 	float speed = (0.2 + sqrt((cl.velocity[0] * cl.velocity[0])	+	(cl.velocity[1] * cl.velocity[1])));
 	speed = speed/190;
