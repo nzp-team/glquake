@@ -256,7 +256,7 @@ void R_DrawSpriteModel (entity_t *e)
 		right = vright;
 	}
 
-	Fog_DisableGFog ();
+	//Fog_DisableGFog ();
 
 	glColor3f (1,1,1);
 
@@ -291,7 +291,7 @@ void R_DrawSpriteModel (entity_t *e)
 
 	glDisable (GL_ALPHA_TEST);
 
-	Fog_EnableGFog ();
+	//Fog_EnableGFog ();
 }
 
 /*
@@ -1274,7 +1274,7 @@ void R_SetupFrame (void)
 	if (cl.maxclients > 1)
 		Cvar_Set ("r_fullbright", "0");
 
-	Fog_SetupFrame (); //johnfitz
+	//Fog_SetupFrame (); //johnfitz
 
 	R_AnimateLight ();
 
