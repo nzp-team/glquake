@@ -28,8 +28,6 @@ extern bool new3ds_flag;
 
 circlePosition cstick;
 
-cvar_t  csensitivity = {"csensitivity","3", true};
-
 extern cvar_t in_analog_strafe;
 extern cvar_t in_x_axis_adjust;
 extern cvar_t in_y_axis_adjust;
@@ -37,7 +35,6 @@ extern cvar_t in_mlook; //Heffo - mlook cvar
 
 void IN_Init (void)
 {
-	Cvar_RegisterVariable (&csensitivity);
 	Cvar_RegisterVariable (&in_analog_strafe);
 }
 
@@ -147,8 +144,8 @@ void IN_Move (usercmd_t *cmd)
     	}
 
 
-    	cstick.dx = abs(cstick.dx) < 10 ? 0 : cstick.dx * csensitivity.value * 0.01;
-    	cstick.dy = abs(cstick.dy) < 10 ? 0 : cstick.dy * csensitivity.value * 0.01;
+    	cstick.dx = abs(cstick.dx) < 10 ? 0 : cstick.dx * sensitivity.value * 0.01;
+    	cstick.dy = abs(cstick.dy) < 10 ? 0 : cstick.dy * sensitivity.value * 0.01;
 
     	cl.viewangles[YAW] -= cstick.dx;
     	cl.viewangles[PITCH] += cstick.dy;

@@ -1031,7 +1031,7 @@ void M_Menu_CustomMaps_Key (int key)
 //=============================================================================
 /* OPTIONS MENU */
 
-#define	OPTIONS_ITEMS	13
+#define	OPTIONS_ITEMS	14
 #define	SLIDER_RANGE	10
 
 int		options_cursor;
@@ -1114,6 +1114,10 @@ void M_AdjustSliders (int dir)
 	case 11:	// lookstrafe
 		Cvar_SetValue ("lookstrafe", !lookstrafe.value);
 		break;
+
+	case 12:	// in_analog_strafe (Cnub aim)
+		Cvar_SetValue ("in_analog_strafe", !in_analog_strafe.value);
+		break;
 	}
 }
 
@@ -1190,8 +1194,11 @@ void M_Options_Draw (void)
 	M_Print (16, 120, "            Lookstrafe");
 	M_DrawCheckbox (220, 120, lookstrafe.value);
 
+	M_Print (16, 128, "Analog Strafe (CNub Aim)");
+	M_DrawCheckbox (220, 128, in_analog_strafe.value);
+
 	if (vid_menudrawfn)
-		M_Print (16, 128, "         Video Options");
+		M_Print (16, 136, "         Video Options");
 
 // cursor
 	M_DrawCharacter (200, 32 + options_cursor*8, 12+((int)(realtime*4)&1));
@@ -1217,7 +1224,7 @@ void M_Options_Key (int k)
 		case 2:
 			Cbuf_AddText ("exec default.cfg\n");
 			break;
-		case 12:
+		case 13:
 			M_Menu_Video_f ();
 			break;
 		default:
@@ -1257,10 +1264,10 @@ void M_Options_Key (int k)
 		break;
 	}
 
-	if (options_cursor == 12 && vid_menudrawfn == NULL)
+	if (options_cursor == 13 && vid_menudrawfn == NULL)
 	{
 		if (k == K_UPARROW)
-			options_cursor = 11;
+			options_cursor = 12;
 		else
 			options_cursor = 0;
 	}
