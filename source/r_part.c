@@ -63,7 +63,8 @@ void R_InitParticles (void)
 	particles = (particle_t *)
 			Hunk_AllocName (r_numparticles * sizeof(particle_t), "particles");
 
-	QMB_InitParticles();
+	// naievil -- particles are not drawn correctly, making it look bad
+	//QMB_InitParticles();
 }
 
 void R_DarkFieldParticles (entity_t *ent)
