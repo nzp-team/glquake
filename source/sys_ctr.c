@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 int __stacksize__ = 4 * 1024 * 1024; 
 u32 __ctru_linear_heap_size = 28 * 1024 * 1024; 
+bool new3ds_flag;
 
 extern void Touch_Init();
 extern void Touch_Update();
@@ -286,7 +287,7 @@ int main (int argc, char **argv)
 {
 	static float time, oldtime;
 	static quakeparms_t parms;
-	bool new3ds_flag = false;
+	new3ds_flag = false;
 
 	osSetSpeedupEnable(true);
 
