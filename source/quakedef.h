@@ -201,6 +201,9 @@ void	VID_UnlockBuffer (void);
 #define W_TESLA  56
 #define W_DG3 	 57 //tesla
 
+#define W_SPRING 58
+#define W_PULVERIZER 59
+
 #define W_NOWEP   420
 
 //===========================================
