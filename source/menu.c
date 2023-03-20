@@ -855,7 +855,7 @@ void M_Menu_CustomMaps_Draw (void)
 			if (custom_maps[i + multiplier].map_use_thumbnail == 1) {
 				menu_cuthum = Draw_CachePic(custom_maps[i + multiplier].map_thumbnail_path);
 				if (menu_cuthum != NULL) {
-					Draw_Pic(256, 45, menu_cuthum);
+					Draw_StretchPic(256, 45, menu_cuthum, 175, 100);
 				}
 			}
 			
