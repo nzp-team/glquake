@@ -1640,6 +1640,27 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 
 	s = pheader->skinwidth * pheader->skinheight;
 
+	//
+	// General texture override stuff.
+	//
+
+	// Mustang & Sally // v_biatch
+	if (strcmp(loadmodel->name, "models/weapons/m1911/v_biatch_left.mdl") == 0 ||
+	strcmp(loadmodel->name, "models/weapons/m1911/v_biatch_right.mdl") == 0) {
+		pheader->gl_texturenum[0][0] = 
+		pheader->gl_texturenum[0][1] = 
+		pheader->gl_texturenum[0][2] = 
+		pheader->gl_texturenum[0][3] = loadtextureimage("models/weapons/m1911/v_biatch.mdl_0", 0, 0, qtrue, qtrue);
+		
+		pheader->gl_texturenum[1][0] = 
+		pheader->gl_texturenum[1][1] = 
+		pheader->gl_texturenum[1][2] = 
+		pheader->gl_texturenum[1][3] = loadtextureimage("models/weapons/m1911/v_biatch.mdl_0", 0, 0, qtrue, qtrue);
+
+		pskintype = (daliasskintype_t *)((byte *)(pskintype+1) + s);
+		return (void *)pskintype;
+	}
+
 	for (i=0 ; i<numskins ; i++)
 	{
 		if (pskintype->type == ALIAS_SKIN_SINGLE) {
