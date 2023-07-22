@@ -569,6 +569,40 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 
 /*
 =============
+Draw_ColoredStretchPic
+=============
+*/
+void Draw_ColoredStretchPic (int x, int y, qpic_t *pic, int x_value, int y_value, float r, float g , float b, float a)
+{
+	glpic_t			*gl;
+
+	if (scrap_dirty)
+		Scrap_Upload ();
+	gl = (glpic_t *)pic->data;
+
+
+	glEnable(GL_BLEND);
+	glColor4f(r/255.0,g/255.0,b/255.0,a/255.0);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	GL_Bind (gl->texnum);
+	glBegin (GL_QUADS);
+	glTexCoord2f (0, 0);
+	glVertex2f (x, y);
+	glTexCoord2f (1, 0);
+	glVertex2f (x+x_value, y);
+	glTexCoord2f (1, 1);
+	glVertex2f (x+x_value, y+y_value);
+	glTexCoord2f (0, 1);
+	glVertex2f (x, y+y_value);
+	glEnd ();
+
+	glColor4f(1,1,1,1);
+}
+
+/*
+=============
 Draw_StretchPic
 =============
 */

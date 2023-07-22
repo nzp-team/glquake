@@ -479,11 +479,7 @@ void HUD_Blood (void)
 	    return;
     float color = 255.0 + modifier;
     
-    Draw_ColorPic(0,0,fx_blood_lu,color,color,color,alpha);
-    //Draw_ColorPic (0, 0, fx_blood_lu, 82, 6, 6, alpha);
-    /*Draw_ColorPic (0, vid.height - fx_blood_ru->height, fx_blood_ld, 82, 6, 6, alpha);
-    Draw_ColorPic (vid.width - fx_blood_ru->width, 0, fx_blood_ru, 82, 6, 6, alpha);
-    Draw_ColorPic (vid.width - fx_blood_ru->width, vid.height - fx_blood_ru->height, fx_blood_rd, 82, 6, 6, alpha);*/
+    Draw_ColoredStretchPic(0, 0, fx_blood_lu, 400, 240, color,color,color,alpha);
 }
 
 /*

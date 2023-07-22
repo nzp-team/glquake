@@ -28,6 +28,7 @@ void Draw_Character (int x, int y, int num);
 void Draw_DebugChar (char num);
 void Draw_Pic (int x, int y, qpic_t *pic);
 void Draw_StretchPic (int x, int y, qpic_t *pic, int x_value, int y_value);
+void Draw_ColoredStretchPic (int x, int y, qpic_t *pic, int x_value, int y_value, float r, float g , float b, float a);
 void Draw_ColorPic (int x, int y, qpic_t *pic, float r, float g , float b, float a);
 void Draw_TransPic (int x, int y, qpic_t *pic);
 void Draw_TransPicTranslate (int x, int y, qpic_t *pic, byte *translation);
