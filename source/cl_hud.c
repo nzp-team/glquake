@@ -1070,55 +1070,44 @@ int current_perk_order;
 
 void HUD_Perks (void)
 {
-	int i;
-	int y;
-	y = vid.height - sb_round[1]->height - jugpic->height -2;
+	int x, y, scale;
 
-	for (i = 0; i < 9; i++)
-	{
-		if (perk_order[i])
-		{
-			if (perk_order[i] == P_JUG)
-			{
-				Draw_StretchPic (2, y, jugpic, 20, 20);
-				y = y - 22;
-			}
-			else if (perk_order[i] == P_DOUBLE)
-			{
-				Draw_StretchPic (2, y, doublepic, 20, 20);
-				y = y - 22;
-			}
-			else if (perk_order[i] == P_SPEED)
-			{
-				Draw_StretchPic (2, y, speedpic, 20, 20);
-				y = y - 22;
-			}
-			else if (perk_order[i] == P_REVIVE)
-			{
-				Draw_StretchPic (2, y, revivepic, 20, 20);
-				y = y - 22;
-			}
-			else if (perk_order[i] == P_FLOP)
-			{
-				Draw_StretchPic (2, y, floppic, 20, 20);
-				y = y - 22;
-			}
-			else if (perk_order[i] == P_STAMIN)
-			{
-				Draw_StretchPic (2, y, staminpic, 20, 20);
-				y = y - 22;
-			}
-			else if (perk_order[i] == P_DEAD)
-			{
-				Draw_StretchPic (2, y, deadpic, 20, 20);
-				y = y - 22;
-			}
-			else if (perk_order[i] == P_MULE)
-			{
-				Draw_StretchPic (2, y, mulepic, 20, 20);
-				y = y - 22;
-			}
+	x = 18;
+	y = 2;
+	scale = 22;
+
+	// Draw second column first -- these need to be
+	// overlayed below the first column.
+	for (int i = 4; i < 8; i++) {
+		if (perk_order[i]) {
+			if (perk_order[i] == P_JUG) {Draw_StretchPic(x, y, jugpic, scale, scale);}
+			if (perk_order[i] == P_DOUBLE) {Draw_StretchPic(x, y, doublepic, scale, scale);}
+			if (perk_order[i] == P_SPEED) {Draw_StretchPic(x, y, speedpic, scale, scale);}
+			if (perk_order[i] == P_REVIVE) {Draw_StretchPic(x, y, revivepic, scale, scale);}
+			if (perk_order[i] == P_FLOP) {Draw_StretchPic(x, y, floppic, scale, scale);}
+			if (perk_order[i] == P_STAMIN) {Draw_StretchPic(x, y, staminpic, scale, scale);}
+			if (perk_order[i] == P_DEAD) {Draw_StretchPic(x, y, deadpic, scale, scale);}
+			if (perk_order[i] == P_MULE) {Draw_StretchPic(x, y, mulepic, scale, scale);}
 		}
+		y += scale;
+	}
+
+	x = 6;
+	y = 2;
+
+	// Now the first column.
+	for (int i = 0; i < 4; i++) {
+		if (perk_order[i]) {
+			if (perk_order[i] == P_JUG) {Draw_StretchPic(x, y, jugpic, scale, scale);}
+			if (perk_order[i] == P_DOUBLE) {Draw_StretchPic(x, y, doublepic, scale, scale);}
+			if (perk_order[i] == P_SPEED) {Draw_StretchPic(x, y, speedpic, scale, scale);}
+			if (perk_order[i] == P_REVIVE) {Draw_StretchPic(x, y, revivepic, scale, scale);}
+			if (perk_order[i] == P_FLOP) {Draw_StretchPic(x, y, floppic, scale, scale);}
+			if (perk_order[i] == P_STAMIN) {Draw_StretchPic(x, y, staminpic, scale, scale);}
+			if (perk_order[i] == P_DEAD) {Draw_StretchPic(x, y, deadpic, scale, scale);}
+			if (perk_order[i] == P_MULE) {Draw_StretchPic(x, y, mulepic, scale, scale);}
+		}
+		y += scale;
 	}
 }
 

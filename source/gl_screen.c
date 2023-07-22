@@ -738,12 +738,8 @@ void SCR_DrawFPS (void)
 	if (scr_showfps.value)
 	{
 		char	st[16];
-		int	x, y;
 		sprintf (st, "%4.0f fps", lastfps);
-		x = 320 - (strlen(st)<<3);
-		y = 200 - 8;
-
-		Draw_String (0, 0, st);
+		Draw_String (300, 0, st);
 	}
 }
 
