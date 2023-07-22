@@ -1565,18 +1565,6 @@ void SCR_UpdateScreen (void)
 		Cvar_SetValue ("r_viewmodel_fov", 30);
 		zoomin_time = 0;
 	}
-	else if (cl.stats[STAT_ZOOM] == 3)
-	{
-		if(!original_fov) {
-			original_fov = scr_fov.value;
-			original_view_fov = scr_fov_viewmodel.value;
-		}
-
-		scr_fov.value += (original_fov - 10 - scr_fov.value) * 0.3;
-		scr_fov_viewmodel.value += (original_view_fov - 10 - scr_fov_viewmodel.value) * 0.3;
-		Cvar_SetValue("fov",scr_fov.value);
-		Cvar_SetValue("r_viewmodel_fov", scr_fov_viewmodel.value);
-	}
 	else if (cl.stats[STAT_ZOOM] == 0 && original_fov != 0)
 	{
 		if(scr_fov.value < (original_fov + 1))//+1 for accounting for floating point inaccuracies
