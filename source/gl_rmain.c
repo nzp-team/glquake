@@ -86,6 +86,7 @@ cvar_t	r_dynamic = {"r_dynamic","1"};
 cvar_t	r_novis = {"r_novis","0"};
 cvar_t	r_lerpmodels = {"r_lerpmodels", "1"};
 cvar_t  r_lerpmove = {"r_lerpmove", "1"};
+cvar_t 	r_skyfog = {"r_skyfog", "1"};
 
 cvar_t	gl_finish = {"gl_finish","0"};
 cvar_t	gl_clear = {"gl_clear","0"};

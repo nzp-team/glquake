@@ -1,21 +1,8 @@
 /*
-Copyright (C) 1996-2001 Id Software, Inc.
-Copyright (C) 2002-2009 John Fitzgibbons and others
-Copyright (C) 2007-2008 Kristian Duske
-Copyright (C) 2010-2014 QuakeSpasm developers
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+Fogging system based on FitzQuake's implementation
+
 */
-//gl_fog.c -- global fog
 
 #include "quakedef.h"
 
@@ -25,20 +12,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 //==============================================================================
 
-extern refdef_t r_refdef;
+extern refdef_t	r_refdef;
 
-float 	old_start;
-float 	old_end;
-float 	old_red;
-float 	old_green;
-float 	old_blue;
+float old_start;
+float old_end;
+float old_red;
+float old_green;
+float old_blue;
 
-float 	fade_time; 			// duration of fade
-float 	fade_done; 			// time when fade will be done
+float fade_time; //duration of fade
+float fade_done; //time when fade will be done
 
 /*
 =============
 Fog_Update
+
 update internal variables
 =============
 */
@@ -81,6 +69,7 @@ void Fog_Update (float start, float end, float red, float green, float blue, flo
 /*
 =============
 Fog_ParseServerMessage
+
 handle an SVC_FOG message from server
 =============
 */
@@ -101,6 +90,7 @@ void Fog_ParseServerMessage (void)
 /*
 =============
 Fog_FogCommand_f
+
 handle the 'fog' console command
 =============
 */
@@ -179,6 +169,7 @@ void Fog_FogCommand_f (void)
 /*
 =============
 Fog_ParseWorldspawn
+
 called at map load
 =============
 */
@@ -239,6 +230,7 @@ void Fog_ParseWorldspawn (void)
 /*
 =============
 Fog_SetupFrame
+
 called at the beginning of each frame
 =============
 */
@@ -255,8 +247,7 @@ void Fog_SetupFrame (void)
 		c[0] = f * old_red + (1.0 - f) * r_refdef.fog_red;
 		c[1] = f * old_green + (1.0 - f) * r_refdef.fog_green;
 		c[2] = f * old_blue + (1.0 - f) * r_refdef.fog_blue;
-		c[3] = 1.0;
-        //c[3] = r_skyfog.value;
+        c[3] = r_skyfog.value;
 	}
 	else
 	{
@@ -266,14 +257,18 @@ void Fog_SetupFrame (void)
 		c[1] = r_refdef.fog_green;
 		c[2] = r_refdef.fog_blue;
 		c[3] = 1.0;
-        //c[3] = r_skyfog.value;
+        c[3] = r_skyfog.value;
 	}
 
 	if(e == 0)
 		e = -1;
 
 	glFogf(GL_FOG_DENSITY, 0.6);
+	c[0] = 1;
+	c[1] = 0;
+	c[2] = 0;
 	glFogf(GL_FOG_COLOR, *c);
+	//sceGuFog ( s, e, GU_COLOR( c[0]* 0.01f, c[1]* 0.01f, c[2]* 0.01f, c[3] ) );
 
 	if(s == 0 || e < 0)
 		glDisable(GL_FOG);
@@ -281,7 +276,61 @@ void Fog_SetupFrame (void)
 
 /*
 =============
+Fog_SetColorForSkyS
+Start called before drawing flat-colored sky
+Crow_bar*
+=============
+*/
+void Fog_SetColorForSkyS (void)
+{
+	/*if (r_refdef.fog_end > 0.0f && r_skyfog.value)
+	{
+		float a = r_refdef.fog_end * 0.00025f;
+		float r = r_refdef.fog_red * 0.01f + (a * 0.25f);
+		float g = r_refdef.fog_green * 0.01f + (a * 0.25f);
+		float b = r_refdef.fog_blue * 0.01f + (a * 0.25f);
+		
+		if (a > 1.0f)
+			a = 1.0f;
+		if (r > 1.0f)
+			r = 1.0f;
+		if (g > 1.0f)
+			g = 1.0f;
+		if (b > 1.0f)
+			b = 1.0f;
+		
+		//sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
+		//glCle
+		//sceGuColor(GU_COLOR(r,g,b,a));
+		glEnable(GL_BLEND);
+		
+		//sceGuEnable(GU_BLEND);
+		//sceGuBlendFunc(GU_ADD, GU_FIX, GU_FIX, GU_COLOR(r,g,b,a), GU_COLOR(r,g,b,a));
+	}*/
+}
+
+/*
+=============
+Fog_SetColorForSky
+End called before drawing flat-colored sky
+Crow_bar*
+=============
+*/
+void Fog_SetColorForSkyE (void)
+{
+	/*if (r_refdef.fog_end > 0.0f && r_skyfog.value)
+	{
+		sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
+		sceGuColor(0xffffffff);
+		//sceGuDisable(GU_BLEND);
+		//sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
+	}*/
+}
+
+/*
+=============
 Fog_GetStart
+
 returns current start of fog
 =============
 */
@@ -301,6 +350,7 @@ float Fog_GetStart (void)
 /*
 =============
 Fog_GetEnd
+
 returns current end of fog
 =============
 */
@@ -320,27 +370,74 @@ float Fog_GetEnd (void)
 /*
 =============
 Fog_EnableGFog
+
 called before drawing stuff that should be fogged
 =============
 */
 void Fog_EnableGFog (void)
 {
-	if (!Fog_GetStart() == 0 || (!Fog_GetEnd()) <= 0)
+	if (!Fog_GetStart() == 0 || !Fog_GetEnd() <= 0) {
+		glFogf(GL_FOG_MODE, GL_EXP2);
 		glEnable(GL_FOG);
+	}	
 }
 
 /*
 =============
 Fog_DisableGFog
+
 called after drawing stuff that should be fogged
 =============
 */
 void Fog_DisableGFog (void)
 {
-	if (!Fog_GetStart() == 0 || (!Fog_GetEnd()) <= 0)
+	if (!Fog_GetStart() == 0 || !Fog_GetEnd() <= 0)
 		glDisable(GL_FOG);
 }
 
+/*
+=============
+Fog_SetColorForSky
+
+called before drawing flat-colored sky
+=============
+*/
+/*
+void Fog_SetColorForSky (void)
+{
+	float c[3];
+	float f, d;
+
+	if (fade_done > cl.time)
+	{
+		f = (fade_done - cl.time) / fade_time;
+		d = f * old_density + (1.0 - f) * fog_density;
+		c[0] = f * old_red + (1.0 - f) * fog_red;
+		c[1] = f * old_green + (1.0 - f) * fog_green;
+		c[2] = f * old_blue + (1.0 - f) * fog_blue;
+	}
+	else
+	{
+		d = fog_density;
+		c[0] = fog_red;
+		c[1] = fog_green;
+		c[2] = fog_blue;
+	}
+
+	if (d > 0)
+		glColor3fv (c);
+}
+*/
+//==============================================================================
+//
+//  VOLUMETRIC FOG
+//
+//==============================================================================
+/*
+
+void Fog_DrawVFog (void){}
+void Fog_MarkModels (void){}
+*/
 //==============================================================================
 //
 //  INIT
@@ -350,9 +447,11 @@ void Fog_DisableGFog (void)
 /*
 =============
 Fog_NewMap
+
 called whenever a map is loaded
 =============
 */
+
 void Fog_NewMap (void)
 {
 	Fog_ParseWorldspawn (); //for global fog
@@ -362,6 +461,7 @@ void Fog_NewMap (void)
 /*
 =============
 Fog_Init
+
 called when quake initializes
 =============
 */
@@ -376,18 +476,4 @@ void Fog_Init (void)
 	r_refdef.fog_green = 0.5;
 	r_refdef.fog_blue = 0.5;
 	fade_time = 1;
-
-	Fog_SetupState ();
-}
-
-/*
-=============
-Fog_SetupState
- 
-ericw -- moved from Fog_Init, state that needs to be setup when a new context is created
-=============
-*/
-void Fog_SetupState (void)
-{
-	glFogi(GL_FOG_MODE, GL_EXP2);
 }

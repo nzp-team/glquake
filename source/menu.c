@@ -810,7 +810,7 @@ void Map_Finder(void)
 		}
 	}
     closedir(dir); // close the handle (pointer)
-	custom_map_pages = (int)ceil((double)(user_maps_num + 1)/15);
+	custom_map_pages = (int)ceil((double)(user_maps_num)/15);
 }
 
 void M_Menu_CustomMaps_f (void)
@@ -927,28 +927,28 @@ void M_Menu_CustomMaps_Draw (void)
 
 	if (current_custom_map_page != custom_map_pages) {
 		if (m_map_cursor == 15)
-			Draw_ColoredString(10, 230, "Next Page", 255, 0, 0, 255, 1);
+			Draw_ColoredString(10, 210, "Next Page", 255, 0, 0, 255, 1);
 		else
-			Draw_ColoredString(10, 230, "Next Page", 255, 255, 255, 255, 1);
+			Draw_ColoredString(10, 210, "Next Page", 255, 255, 255, 255, 1);
 	} else {
-		Draw_ColoredString(10, 230, "Next Page", 128, 128, 128, 255, 1);
+		Draw_ColoredString(10, 210, "Next Page", 128, 128, 128, 255, 1);
 	}
 
 	if (current_custom_map_page != 1) {
 		if (m_map_cursor == 16)
-			Draw_ColoredString(10, 240, "Previous Page", 255, 0, 0, 255, 1);
+			Draw_ColoredString(10, 220, "Previous Page", 255, 0, 0, 255, 1);
 		else
-			Draw_ColoredString(10, 240, "Previous Page", 255, 255, 255, 255, 1);
+			Draw_ColoredString(10, 220, "Previous Page", 255, 255, 255, 255, 1);
 	} else {
-		Draw_ColoredString(10, 240, "Previous Page", 128, 128, 128, 255, 1);
+		Draw_ColoredString(10, 220, "Previous Page", 128, 128, 128, 255, 1);
 	}
 
 
 
 	if (m_map_cursor == 17)
-		Draw_ColoredString(10, 250, "Back", 255, 0, 0, 255, 1);
+		Draw_ColoredString(10, 230, "Back", 255, 0, 0, 255, 1);
 	else
-		Draw_ColoredString(10, 250, "Back", 255, 255, 255, 255, 1);
+		Draw_ColoredString(10, 230, "Back", 255, 255, 255, 255, 1);
 }
 
 
@@ -973,7 +973,7 @@ void M_Menu_CustomMaps_Key (int key)
 				m_map_cursor = 16;
 			
 			if (m_map_cursor == 16 && current_custom_map_page == 1)
-				m_map_cursor = 0; // naievil -- was 17, but we don't have a back button print
+				m_map_cursor = 17;
 
 			if (m_map_cursor >= 18)
 				m_map_cursor = 0;
@@ -984,7 +984,7 @@ void M_Menu_CustomMaps_Key (int key)
 			m_map_cursor--;
 
 			if (m_map_cursor < 0)
-				m_map_cursor = 16; // naievil -- was 17, but we don't have a back button print?
+				m_map_cursor = 17;
 
 			if (m_map_cursor == 16 && current_custom_map_page == 1)
 				m_map_cursor = 15;
@@ -1008,8 +1008,10 @@ void M_Menu_CustomMaps_Key (int key)
 				M_Menu_SinglePlayer_f ();
 			} else if (m_map_cursor == 16) {
 				current_custom_map_page--;
+				m_map_cursor = 0;
 			} else if (m_map_cursor == 15) {
 				current_custom_map_page++;
+				m_map_cursor = 0;
 			} else
 			{
 				key_dest = key_game;

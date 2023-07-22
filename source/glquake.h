@@ -239,6 +239,7 @@ extern	cvar_t	r_novis;
 extern cvar_t 	r_lerpmodels;
 extern cvar_t 	r_lerpmove;
 extern  cvar_t  r_farclip;
+extern 	cvar_t 	r_skyfog;
 
 extern  cvar_t  r_laserpoint;
 extern  cvar_t  r_particle_count;
