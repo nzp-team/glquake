@@ -1033,8 +1033,14 @@ Draw_Crosshair
 */
 
 extern float crosshair_opacity;
+extern cvar_t cl_crosshair_debug;
 void Draw_Crosshair (void)
 {	
+	if (cl_crosshair_debug.value) {
+		Draw_FillByColor(vid.width/2, 0, 1, 240, 255, 0, 0, 255);
+		Draw_FillByColor(0, vid.height/2, 400, 1, 0, 255, 0, 255);
+	}
+
 	if (cl.stats[STAT_HEALTH] < 20) 
 		return;
 

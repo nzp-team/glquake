@@ -303,8 +303,8 @@ int main (int argc, char **argv)
 	CFGU_GetSystemModel(&model);
 	cfguExit();
 	
-	if(model != CFG_MODEL_2DS)
-		gfxSetWide(true);
+	//if(model != CFG_MODEL_2DS)
+	//	gfxSetWide(true);
 	
 	chdir("sdmc:/3ds/nzportable");
 

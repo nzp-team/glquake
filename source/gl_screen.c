@@ -93,6 +93,7 @@ cvar_t		scr_printspeed = {"scr_printspeed","8"};
 cvar_t 		scr_showfps = {"scr_showfps", "0"};
 cvar_t		scr_loadscreen = {"scr_loadscreen","1"};
 cvar_t		gl_triplebuffer = {"gl_triplebuffer", "1", true };
+cvar_t 		cl_crosshair_debug = {"cl_crosshair_debug", "0", true};
 
 extern	cvar_t	crosshair;
 
@@ -685,6 +686,7 @@ void SCR_Init (void)
 	Cvar_RegisterVariable (&scr_printspeed);
 	Cvar_RegisterVariable (&scr_showfps);
 	Cvar_RegisterVariable (&scr_loadscreen);
+	Cvar_RegisterVariable (&cl_crosshair_debug);
 
 	Cvar_RegisterVariable (&gl_triplebuffer);
 
