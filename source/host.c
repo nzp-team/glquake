@@ -56,7 +56,7 @@ byte		*host_colormap;
 
 cvar_t	host_framerate = {"host_framerate","0"};	// set for slow motion
 cvar_t	host_speeds = {"host_speeds","0"};			// set for running times
-cvar_t 	host_maxfps = {"host_maxfps", "30"};
+cvar_t 	host_maxfps = {"host_maxfps", "500"};
 
 cvar_t	sys_ticrate = {"sys_ticrate","0.05"};
 cvar_t	serverprofile = {"serverprofile","0"};
@@ -217,6 +217,7 @@ void	Host_FindMaxClients (void)
 Host_InitLocal
 ======================
 */
+extern bool new3ds_flag;
 void Host_InitLocal (void)
 {
 	Host_InitCommands ();
@@ -224,6 +225,14 @@ void Host_InitLocal (void)
 	Cvar_RegisterVariable (&host_framerate);
 	Cvar_RegisterVariable (&host_speeds);
 	Cvar_RegisterVariable (&host_maxfps);
+
+	if (host_maxfps.value == 500) {
+		if (new3ds_flag) {
+			Cvar_SetValue("host_maxfps", 60);
+		} else {
+			Cvar_SetValue("host_maxfps", 30);
+		}
+	}
 
 	Cvar_RegisterVariable (&sys_ticrate);
 	Cvar_RegisterVariable (&serverprofile);
