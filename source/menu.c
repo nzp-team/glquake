@@ -1033,7 +1033,7 @@ void M_Menu_CustomMaps_Key (int key)
 //=============================================================================
 /* OPTIONS MENU */
 
-#define	OPTIONS_ITEMS	14
+#define	OPTIONS_ITEMS	13
 #define	SLIDER_RANGE	10
 
 int		options_cursor;
@@ -1116,10 +1116,6 @@ void M_AdjustSliders (int dir)
 	case 11:	// lookstrafe
 		Cvar_SetValue ("lookstrafe", !lookstrafe.value);
 		break;
-
-	case 12:	// in_analog_strafe (Cnub aim)
-		Cvar_SetValue ("in_analog_strafe", !in_analog_strafe.value);
-		break;
 	}
 }
 
@@ -1195,9 +1191,6 @@ void M_Options_Draw (void)
 
 	M_Print (16, 120, "            Lookstrafe");
 	M_DrawCheckbox (220, 120, lookstrafe.value);
-
-	M_Print (16, 128, "Analog Strafe (CNub Aim)");
-	M_DrawCheckbox (220, 128, in_analog_strafe.value);
 
 	if (vid_menudrawfn)
 		M_Print (16, 136, "         Video Options");
