@@ -500,56 +500,71 @@ void R_SetupAliasFrame (aliashdr_t *paliashdr, int frame, lerpdata_t *lerpdata)
 		frame = 0;
 	}
 
-	posenum = paliashdr->frames[frame].firstpose;
-	numposes = paliashdr->frames[frame].numposes;
+	// HACK: if we're a certain distance away, don't bother blending
+	// motolegacy -- Lets not care about Z (up).. chances are they're out of the frustum anyway
+	int dist_x = (cl.viewent.origin[0] - e->origin[0]);
+	int dist_y = (cl.viewent.origin[1] - e->origin[1]);
+	int distance_from_client = (int)((dist_x) * (dist_x) + (dist_y) * (dist_y)); // no use sqrting, just slows us down.
 
-	if (numposes > 1)
-	{
-		e->lerptime = paliashdr->frames[frame].interval;
-		posenum += (int)(cl.time / e->lerptime) % numposes;
-	}
-	else
+	// They're too far away from us to care about blending their frames.
+	if (distance_from_client >= 40000) { // 200 * 200
+		// Fix them from jumping from last lerp
+		lerpdata->pose1 = lerpdata->pose2 = paliashdr->frames[frame].firstpose;
+
 		e->lerptime = 0.1;
+		lerpdata->blend = 1;
+	} else {
+		posenum = paliashdr->frames[frame].firstpose;
+		numposes = paliashdr->frames[frame].numposes;
 
-	if (e->lerpflags & LERP_RESETANIM) //kill any lerp in progress
-	{
-		e->lerpstart = 0;
-		e->previouspose = posenum;
-		e->currentpose = posenum;
-		e->lerpflags -= LERP_RESETANIM;
-	}
-	else if (e->currentpose != posenum) // pose changed, start new lerp
-	{
-		if (e->lerpflags & LERP_RESETANIM2) //defer lerping one more time
+		if (numposes > 1)
+		{
+			e->lerptime = paliashdr->frames[frame].interval;
+			posenum += (int)(cl.time / e->lerptime) % numposes;
+		}
+		else
+			e->lerptime = 0.1;
+
+		if (e->lerpflags & LERP_RESETANIM) //kill any lerp in progress
 		{
 			e->lerpstart = 0;
 			e->previouspose = posenum;
 			e->currentpose = posenum;
-			e->lerpflags -= LERP_RESETANIM2;
+			e->lerpflags -= LERP_RESETANIM;
 		}
-		else
+		else if (e->currentpose != posenum) // pose changed, start new lerp
 		{
-			e->lerpstart = cl.time;
-			e->previouspose = e->currentpose;
-			e->currentpose = posenum;
+			if (e->lerpflags & LERP_RESETANIM2) //defer lerping one more time
+			{
+				e->lerpstart = 0;
+				e->previouspose = posenum;
+				e->currentpose = posenum;
+				e->lerpflags -= LERP_RESETANIM2;
+			}
+			else
+			{
+				e->lerpstart = cl.time;
+				e->previouspose = e->currentpose;
+				e->currentpose = posenum;
+			}
 		}
-	}
 
-	//set up values
-	if (r_lerpmodels.value && !(e->model->flags & MOD_NOLERP && r_lerpmodels.value != 2))
-	{
-		if (e->lerpflags & LERP_FINISH && numposes == 1)
-			lerpdata->blend = CLAMP (0, (cl.time - e->lerpstart) / (e->lerpfinish - e->lerpstart), 1);
-		else
-			lerpdata->blend = CLAMP (0, (cl.time - e->lerpstart) / e->lerptime, 1);
-		lerpdata->pose1 = e->previouspose;
-		lerpdata->pose2 = e->currentpose;
-	}
-	else //don't lerp
-	{
-		lerpdata->blend = 1;
-		lerpdata->pose1 = posenum;
-		lerpdata->pose2 = posenum;
+		//set up values
+		if (r_lerpmodels.value && !(e->model->flags & MOD_NOLERP && r_lerpmodels.value != 2))
+		{
+			if (e->lerpflags & LERP_FINISH && numposes == 1)
+				lerpdata->blend = CLAMP (0, (cl.time - e->lerpstart) / (e->lerpfinish - e->lerpstart), 1);
+			else
+				lerpdata->blend = CLAMP (0, (cl.time - e->lerpstart) / e->lerptime, 1);
+			lerpdata->pose1 = e->previouspose;
+			lerpdata->pose2 = e->currentpose;
+		}
+		else //don't lerp
+		{
+			lerpdata->blend = 1;
+			lerpdata->pose1 = posenum;
+			lerpdata->pose2 = posenum;
+		}
 	}
 }
 
