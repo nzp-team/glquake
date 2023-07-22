@@ -940,10 +940,11 @@ int CrossHairWeapon (void)
 			break;
 	}
 
-	i *= 0.75;
+	i *= 0.68;
+	i += 6;
 
     if (cl.perks & 64)
-        i *= 0.65;
+        i *= 0.75;
 
     return i;
 }
@@ -1016,10 +1017,11 @@ int CrossHairMaxSpread (void)
 			break;
 	}
 
-	i *= 0.75;
+	i *= 0.68;
+	i += 6;
 
     if (cl.perks & 64)
-        i *= 0.65;
+        i *= 0.75;
 
     return i;
 }
