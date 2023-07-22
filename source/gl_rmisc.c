@@ -194,6 +194,7 @@ void R_Envmap_f (void)
 R_Init
 ===============
 */
+extern bool new3ds_flag;
 void R_Init (void)
 {	
 	extern byte *hunk_base;
@@ -269,6 +270,11 @@ void R_Init (void)
 
 	playertextures = texture_extension_number;
 	texture_extension_number += 16;
+
+	if (new3ds_flag == true)
+		Cvar_SetValue("r_dynamic", 1);
+	else
+		Cvar_SetValue("r_dynamic", 0);
 }
 
 /*
