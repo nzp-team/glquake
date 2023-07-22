@@ -72,7 +72,7 @@ do {											\
 } while(0)
 
 int VectorCompare (vec3_t v1, vec3_t v2);
-vec_t Length (vec3_t v);
+#define Length(v) (sqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]))
 void CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross);
 float VectorLength (vec3_t v);
 float VecLength2(vec3_t v1, vec3_t v2);

@@ -430,19 +430,6 @@ void CrossProduct (vec3_t v1, vec3_t v2, vec3_t cross)
 
 double sqrt(double x);
 
-vec_t Length(vec3_t v)
-{
-	int		i;
-	float	length;
-	
-	length = 0;
-	for (i=0 ; i< 3 ; i++)
-		length += v[i]*v[i];
-	length = sqrt (length);		// FIXME
-
-	return length;
-}
-
 float VecLength2(vec3_t v1, vec3_t v2)
 {
 	vec3_t k;
