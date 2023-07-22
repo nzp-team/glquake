@@ -736,7 +736,7 @@ void Serial_SearchForHosts (qboolean xmit)
 
 	// see if we've already answered
 	for (n = 0; n < hostCacheCount; n++)
-		if (Q_strcmp (hostcache[n].cname, "#") == 0)
+		if (strcmp (hostcache[n].cname, "#") == 0)
 			return;
 
 	for (n = 0; n < NUM_COM_PORTS; n++)
@@ -901,7 +901,7 @@ static qsocket_t *_Serial_CheckNewConnections (SerialLine *p)
 
 	if (command == CCREQ_SERVER_INFO)
 	{
-		if (Q_strcmp(MSG_ReadString(), "QUAKE") != 0)
+		if (strcmp(MSG_ReadString(), "QUAKE") != 0)
 			return NULL;
 
 		if (MSG_ReadByte() != SERIAL_PROTOCOL_VERSION)
@@ -921,7 +921,7 @@ static qsocket_t *_Serial_CheckNewConnections (SerialLine *p)
 	if (command != CCREQ_CONNECT)
 		return NULL;
 
-	if (Q_strcmp(MSG_ReadString(), "QUAKE") != 0)
+	if (strcmp(MSG_ReadString(), "QUAKE") != 0)
 		return NULL;
 
 	// send him back the info about the server connection he has been allocated

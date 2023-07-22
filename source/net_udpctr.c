@@ -97,7 +97,7 @@ int UDP_Init (void)
 	myAddr = gethostid();
 
 	// if the quake hostname isn't set, set it to the machine name
-	if (Q_strcmp(hostname.string, "UNNAMED") == 0)
+	if (strcmp(hostname.string, "UNNAMED") == 0)
 	{
 		Cvar_Set ("hostname", "3ds");
 	}
