@@ -224,6 +224,8 @@ void R_Init (void)
 	Cvar_RegisterVariable (&gl_clear);
 	Cvar_RegisterVariable (&gl_texsort);
 
+	Cvar_SetValue("gl_clear", 1);
+
  	if (gl_mtexable)
 		Cvar_SetValue ("gl_texsort", 0.0);
 

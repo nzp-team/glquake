@@ -57,7 +57,8 @@ void GL_Init (void)
 	gl_version = glGetString (GL_VERSION);
 	gl_extensions = glGetString (GL_EXTENSIONS);
 
-	glClearColor (1,0,0,0);
+	glClearDepth (1.0f);
+	glClearColor ((float)(16/255),(float)(32/255),(float)(64/255),1);
 	glCullFace(GL_FRONT);
 	glEnable(GL_TEXTURE_2D);
 
