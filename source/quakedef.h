@@ -48,6 +48,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdlib.h>
 #include <setjmp.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 #if defined(_WIN32) && !defined(WINDED)
 
@@ -446,7 +447,7 @@ typedef struct
 } waypoint_ai;
 
 extern waypoint_ai waypoints[MAX_WAYPOINTS];
-
+extern short closest_waypoints[MAX_EDICTS];
 
 extern func_t	EndFrame;
 
