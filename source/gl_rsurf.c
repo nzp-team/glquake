@@ -1391,6 +1391,60 @@ void R_RecursiveWorldNode (mnode_t *node)
 }
 
 
+void R_AddBrushModelToChains (entity_t * e)
+{
+	model_t * clmodel = e->model;
+	vec3_t mins, maxs;
+	VectorAdd (e->origin, clmodel->mins, mins);
+	VectorAdd (e->origin, clmodel->maxs, maxs);
+
+	if (R_CullBox(mins, maxs))
+	{
+		return;
+	}
+
+	msurface_t * psurf = &clmodel->surfaces[clmodel->firstmodelsurface];
+
+	/*
+	if (clmodel->firstmodelsurface != 0)
+	{
+		for (int k = 0; k < MAX_DLIGHTS; k++)
+		{
+			if ((cl_dlights[k].die < cl.time) ||
+				(!cl_dlights[k].radius))
+				continue;
+			R_MarkLights (&cl_dlights[k], 1<<k,	clmodel->nodes + clmodel->hulls[0].firstclipnode);
+		}
+	}
+	*/
+
+	for (int j = 0; j < clmodel->nummodelsurfaces; j++, psurf++)
+	{
+		// find which side of the node we are on
+		mplane_t * pplane = psurf->plane;
+		float dot = DotProduct (modelorg, pplane->normal) - pplane->dist;
+		// draw the polygon
+		if (((psurf->flags & SURF_PLANEBACK) && (dot < -BACKFACE_EPSILON)) ||
+			(!(psurf->flags & SURF_PLANEBACK) && (dot > BACKFACE_EPSILON)))
+		{
+			// psurf->flags &= ~SURF_NEEDSCLIPPING;
+			// psurf->flags |= SURF_NEEDSCLIPPING * (frustum_check > 1);
+
+			psurf->texturechain = psurf->texinfo->texture->texturechain;
+			psurf->texinfo->texture->texturechain = psurf;
+		}
+	}
+}
+
+void R_AddStaticBrushModelsToChains ()
+{
+	// Con_Printf("static models %d\n", cl_numstaticbrushmodels);
+	for (int i = 0; i < cl_numstaticbrushmodels; i++)
+	{
+		// if (i >= 1) return;
+		R_AddBrushModelToChains(cl_staticbrushmodels[i]);
+	}
+}
 
 /*
 =============
@@ -1417,6 +1471,8 @@ void R_DrawWorld (void)
 #endif
 
 	R_RecursiveWorldNode (cl.worldmodel->nodes);
+
+	R_AddStaticBrushModelsToChains (); // shpuld
 
 	DrawTextureChains ();
 
