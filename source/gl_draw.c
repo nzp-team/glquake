@@ -2228,6 +2228,26 @@ PixEncode:
 	return data;
 }
 
+/*small function to read files with stb_image - single-file image loader library.
+** downloaded from: https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
+** only use jpeg+png formats, because tbh there's not much need for the others.
+** */
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_ONLY_JPEG
+#define STBI_ONLY_PNG
+#include "stb_image.h"
+byte* LoadSTBI(FILE *f, int width, int height)
+{
+	int bpp;
+	int inwidth, inheight;
+	byte* image = stbi_load_from_file(f, &inwidth, &inheight, &bpp, 4);
+	// wtf?
+	image_width = inwidth;
+	image_height = inheight;
+	fclose(f);
+	return image;
+}
+
 byte* loadimagepixels (char* filename, qboolean complain, int matchwidth, int matchheight)
 
 {
@@ -2248,16 +2268,30 @@ byte* loadimagepixels (char* filename, qboolean complain, int matchwidth, int ma
 		c++;
 	}
 
-	//Try TGA
-	sprintf (name, "%s.tga", basename);
-	COM_FOpenFile (name, &f);
-	if (f)
-		return LoadTGA (f, matchwidth, matchheight);
 	//Try PCX
 	sprintf (name, "%s.pcx", basename);
 	COM_FOpenFile (name, &f);
 	if (f)
 		return LoadPCX (f, matchwidth, matchheight);
+	//Try TGA
+	sprintf (name, "%s.tga", basename);
+	COM_FOpenFile (name, &f);
+	if (f)
+		return LoadTGA (f, matchwidth, matchheight);
+	//Try PNG
+	sprintf (name, "%s.png", basename);
+	COM_FOpenFile (name, &f);
+	if (f)
+		return LoadSTBI (f, matchwidth, matchheight);
+	//Try JPEG
+	sprintf (name, "%s.jpeg", basename);
+	COM_FOpenFile (name, &f);
+	if (f)
+		return LoadSTBI (f, matchwidth, matchheight);
+	sprintf (name, "%s.jpg", basename);
+	COM_FOpenFile (name, &f);
+	if (f)
+		return LoadSTBI (f, matchwidth, matchheight);
 	
 	//if (complain)
 	//	Con_Printf ("Couldn't load %s.tga or %s.pcx \n", filename);
