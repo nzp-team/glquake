@@ -410,10 +410,10 @@ void GL_DrawAliasFrame (aliashdr_t *paliashdr, lerpdata_t lerpdata)
 
 			if (lerping)
 			{
-				vertcolor[0] = (shadedots[verts1->lightnormalindex]*iblend + shadedots[verts2->lightnormalindex]*blend) * lightcolor[0];
-				vertcolor[1] = (shadedots[verts1->lightnormalindex]*iblend + shadedots[verts2->lightnormalindex]*blend) * lightcolor[1];
-				vertcolor[2] = (shadedots[verts1->lightnormalindex]*iblend + shadedots[verts2->lightnormalindex]*blend) * lightcolor[2];
-				glColor4fv (vertcolor);
+				vertcolor[0] = ((shadedots[verts1->lightnormalindex]*iblend + shadedots[verts2->lightnormalindex]*blend) * lightcolor[0])/255;
+				vertcolor[1] = ((shadedots[verts1->lightnormalindex]*iblend + shadedots[verts2->lightnormalindex]*blend) * lightcolor[1])/255;
+				vertcolor[2] = ((shadedots[verts1->lightnormalindex]*iblend + shadedots[verts2->lightnormalindex]*blend) * lightcolor[2])/255;
+				glColor3f(vertcolor[0], vertcolor[1], vertcolor[2]);
 
 				glVertex3f (verts1->v[0]*iblend + verts2->v[0]*blend,
 							verts1->v[1]*iblend + verts2->v[1]*blend,
@@ -423,10 +423,10 @@ void GL_DrawAliasFrame (aliashdr_t *paliashdr, lerpdata_t lerpdata)
 			}
 			else
 			{
-				vertcolor[0] = shadedots[verts1->lightnormalindex] * lightcolor[0];
-				vertcolor[1] = shadedots[verts1->lightnormalindex] * lightcolor[1];
-				vertcolor[2] = shadedots[verts1->lightnormalindex] * lightcolor[2];
-				glColor4fv (vertcolor);
+				vertcolor[0] = (shadedots[verts1->lightnormalindex] * lightcolor[0])/255;
+				vertcolor[1] = (shadedots[verts1->lightnormalindex] * lightcolor[1])/255;
+				vertcolor[2] = (shadedots[verts1->lightnormalindex] * lightcolor[2])/255;
+				glColor3f(vertcolor[0], vertcolor[1], vertcolor[2]);
 
 				glVertex3f (verts1->v[0], verts1->v[1], verts1->v[2]);
 				verts1++;
@@ -524,13 +524,14 @@ void R_SetupAliasFrame (aliashdr_t *paliashdr, int frame, lerpdata_t *lerpdata)
 	}
 
 	// HACK: if we're a certain distance away, don't bother blending
-	// motolegacy -- Lets not care about Z (up).. chances are they're out of the frustum anyway
+	// cypress -- Lets not care about Z (up).. chances are they're out of the frustum anyway
 	int dist_x = (cl.viewent.origin[0] - e->origin[0]);
 	int dist_y = (cl.viewent.origin[1] - e->origin[1]);
 	int distance_from_client = (int)((dist_x) * (dist_x) + (dist_y) * (dist_y)); // no use sqrting, just slows us down.
 
 	// They're too far away from us to care about blending their frames.
-	if (distance_from_client >= 40000) { // 200 * 200
+	// cypress -- added an additional check not to lerp if there's only 1 frame
+	if (distance_from_client >= 40000 || paliashdr->numframes <= 1) { // 200 * 200
 		// Fix them from jumping from last lerp
 		lerpdata->pose1 = lerpdata->pose2 = paliashdr->frames[frame].firstpose;
 

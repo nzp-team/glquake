@@ -230,7 +230,7 @@ void Host_InitLocal (void)
 		if (new3ds_flag) {
 			Cvar_SetValue("host_maxfps", 60);
 		} else {
-			Cvar_SetValue("host_maxfps", 30);
+			Cvar_SetValue("host_maxfps", 20);
 		}
 	}
 
