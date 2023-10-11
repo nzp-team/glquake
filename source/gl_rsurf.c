@@ -706,7 +706,7 @@ R_BlendLightmaps
 ================
 */
 
-void R_BlendLightmaps (int specialrender)
+void R_BlendLightmaps ()
 {
 	int			i, j;
 	glpoly_t	*p;
@@ -721,14 +721,8 @@ void R_BlendLightmaps (int specialrender)
 	glColor4f(1,1,1,1);
 	glDepthMask(GL_FALSE);		// don't bother writing Z
 
-	// naievil -- stuff that starts with '{' is a special render
-	if (!specialrender) {
-		glBlendFunc (GL_ZERO, GL_SRC_COLOR);
-	} else {
-		glBlendFunc (GL_ZERO, GL_DST_ALPHA);
-	}
-
 	glEnable (GL_BLEND);
+	glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
 	
 	for (i=0 ; i<MAX_LIGHTMAPS ; i++)
 	{
@@ -1233,17 +1227,12 @@ void R_DrawBrushModel (entity_t *e)
 	//
 	// draw texture
 	//
-	int touched_transparent = 0; // naievil -- wow I cannot believe this works, fixes rendering on non transparent textures
 	for (i=0 ; i<clmodel->nummodelsurfaces ; i++, psurf++)
 	{
 	// find which side of the node we are on
 		pplane = psurf->plane;
 
 		dot = DotProduct (modelorg, pplane->normal) - pplane->dist;
-
-		if (!strncmp(psurf->texinfo->texture->name,"{",1)) {
-			touched_transparent = 1;
-		}
 
 	// draw the polygon
 		if (((psurf->flags & SURF_PLANEBACK) && (dot < -BACKFACE_EPSILON)) ||
@@ -1253,8 +1242,7 @@ void R_DrawBrushModel (entity_t *e)
 		}
 	}
 
-	R_BlendLightmaps (touched_transparent);
-
+	R_BlendLightmaps();
 	glPopMatrix ();
 }
 
@@ -1476,7 +1464,7 @@ void R_DrawWorld (void)
 
 	DrawTextureChains ();
 
-	R_BlendLightmaps (0);
+	R_BlendLightmaps();
 
 #ifdef QUAKE2
 	R_DrawSkyBox ();
