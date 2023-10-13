@@ -495,9 +495,9 @@ void Draw_CharacterRGBA(int x, int y, int num, float r, float g, float b, float 
 
 	GL_Bind (char_texture);
 
-	glEnable(GL_ALPHA_TEST);
+	glEnable(GL_BLEND);
 	glColor4f(r/255, g/255, b/255, a/255);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable (GL_ALPHA_TEST);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glBegin (GL_QUADS);
 	glTexCoord2f (fcol, frow);
@@ -510,7 +510,9 @@ void Draw_CharacterRGBA(int x, int y, int num, float r, float g, float b, float 
 	glVertex2f (x, y+(8*(scale)));
 	glEnd ();
 	glColor4f(1,1,1,1);
-	glDisable(GL_ALPHA_TEST);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glEnable(GL_ALPHA_TEST);
+	glDisable (GL_BLEND);
 }
 
 /*
@@ -850,7 +852,8 @@ Fills a box of pixels with a single color
 void Draw_Fill (int x, int y, int w, int h, float r, float g, float b, float a)
 {
 	glDisable (GL_TEXTURE_2D);
-	glEnable (GL_ALPHA_TEST);
+	glEnable (GL_BLEND); //johnfitz -- for alpha
+	glDisable (GL_ALPHA_TEST); //johnfitz -- for alpha
 	glColor4f (r/255, g/255, b/255, a/255);
 
 	glBegin (GL_QUADS);
@@ -862,7 +865,8 @@ void Draw_Fill (int x, int y, int w, int h, float r, float g, float b, float a)
 
 	glEnd ();
 	glColor4f (1,1,1,1);
-	glDisable (GL_ALPHA_TEST);
+	glDisable (GL_BLEND); //johnfitz -- for alpha
+	glEnable(GL_ALPHA_TEST); //johnfitz -- for alpha
 	glEnable (GL_TEXTURE_2D);
 }
 //=============================================================================
