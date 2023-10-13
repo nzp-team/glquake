@@ -395,7 +395,7 @@ void Mod_LoadTextures (lump_t *l)
 		memcpy ( tx+1, mt+1, pixels);
 		
 
-		if (!Q_strncmp(mt->name,"sky",3))
+		if (loadmodel->bspversion != HL_BSPVERSION && !Q_strncmp(mt->name,"sky",3))
 		{	
 			R_InitSky (tx);
 		} 

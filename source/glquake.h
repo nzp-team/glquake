@@ -332,6 +332,9 @@ void Fog_NewMap (void);
 void Fog_Init (void);
 void Fog_SetupState (void);
 
+void Sky_Init (void);
+void Sky_NewMap (void);
+
 qboolean VID_Is8bit(void);
 
 

@@ -793,7 +793,7 @@ SCR_DrawLoadScreen
 	* TheSmashers
 */
 
-// 50 character limit
+// 47 character limit
 
 double loadingtimechange;
 int loadingdot;
@@ -802,14 +802,14 @@ char *lodinglinetext;
 qpic_t *awoo;
 char *ReturnLoadingtex (void)
 {
-    int StringNum = Random_Int(74);
+    int StringNum = Random_Int(80);
     switch(StringNum)
     {
         case 1:
 			return  "Released in 1996, Quake is over 25 years old!";
             break;
         case 2:
-            return  "Use the Kar98-k to be the hero we want you to be!";
+            return  "Use the Kar98k to be the hero we need!";
             break;
         case 3:
             return  "Lots of modern engines are based on Quake!";
@@ -827,10 +827,10 @@ char *ReturnLoadingtex (void)
             return  "NZ:P has been downloaded over 500,000 times!";
             break;
         case 8:
-            return  "NZ:P was made mainly by 3 guys around the world!";
+            return  "A lot of people have worked on NZ:P!";
             break;
         case 9:
-            return  "Blubswillrule: known as \"blubs\", is from the USA.";
+            return  "Blubswillrule, or \"blubs\", is from the US.";
             break;
         case 10:
             return  "Jukki is from Finland.";
@@ -851,7 +851,7 @@ char *ReturnLoadingtex (void)
             return  "Try Retro Mode, it's in the Graphics Settings!";
             break;
         case 16:
-			return  "Tired of our maps? Make your own or download some!";
+			return  "Tired of our maps? Go make your own!";
             break;
         case 17:
             return  "Slay zombies & be grateful.";
@@ -866,7 +866,7 @@ char *ReturnLoadingtex (void)
             return  "Please surround yourself with zombies!";
             break;
         case 21:
-            return  "Don't play for too long, or zombies will eat you.";
+            return  "Don't play for too long.. zombies may eat you.";
             break;
         case 22:
             return  "That was epic... EPIC FOR THE WIIIN!"; //why
@@ -908,7 +908,7 @@ char *ReturnLoadingtex (void)
             return  "Also check out \"Halo Revamped\" for 3DS!";
             break;
         case 35:
-            return 	"MotoLegacy, or \"Ian\", is from the USA.";
+            return 	"CypressImplex, or \"Ivy\", is from the USA.";
             break;
         case 36:
             return  "Zombies don't like bullets.";
@@ -920,7 +920,7 @@ char *ReturnLoadingtex (void)
 			return 	"Removed Herobrine";
 			break;
 		case 39:
-			return 	"Pack-a-Punch the Kar98k to get to round infinity.";
+			return 	"Pack-a-Punch the Kar98k to get to round 100000.";
 			break;
 		case 40:
 			return 	"I feel like I'm being gaslit.";
@@ -1007,7 +1007,7 @@ char *ReturnLoadingtex (void)
 			return "i want that twink Obliterated";
 			break;
 		case 68:
-			return "i think he's started the femboy transition process";
+			return "i think he started the femboy transition process";
 			break;
 		case 69:
 			return "nice";
@@ -1019,10 +1019,28 @@ char *ReturnLoadingtex (void)
 			return "yeah pog female bikers";
 			break;
 		case 72:
-			return "This is either a stroke of genius or just a stroke";
+			return "Its either a stroke of genius or just a stroke";
 			break;
 		case 73:
 			return  "Play some Custom Maps!";
+			break;
+		case 74:
+			return  "Real OGs play on \"Old\" 3DS models!";
+			break;
+		case 75:
+			return  "Adding this tip improved framerate by 39%!";
+			break;
+		case 76:
+			return  "The NZ in NZP stands for New Zealand!";
+			break;
+		case 77:
+			return  "The P in NZP stands for Professional!";
+			break;
+		case 78:
+			return  "Remember to stay hydrated!";
+			break;
+		case 79:
+			return  "cofe";
 			break;
     }
     return "wut wut";

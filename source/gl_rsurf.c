@@ -21,8 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
-extern int			skytexturenum;
-
 #ifndef GL_RGBA4
 #define	GL_RGBA4	0
 #endif
@@ -57,6 +55,8 @@ byte		lightmaps[4*MAX_LIGHTMAPS*BLOCK_WIDTH*BLOCK_HEIGHT];
 // For gl_texsort 0
 msurface_t  *skychain = NULL;
 msurface_t  *waterchain = NULL;
+
+extern char	skybox_name[32];
 
 void R_RenderDynamicLightmaps (msurface_t *fa);
 
@@ -774,8 +774,9 @@ void R_RenderBrushPoly (msurface_t *fa)
 	c_brush_polys++;
 
 	if (fa->flags & SURF_DRAWSKY)
-	{	// warp texture, no lightmaps
-		EmitBothSkyLayers (fa);
+	{	
+		if (strcmp(skybox_name, "") == 0)
+			EmitBothSkyLayers (fa);
 		return;
 	}
 		
@@ -1065,7 +1066,7 @@ void DrawTextureChains (void)
 		GL_DisableMultitexture();
 
 		if (skychain) {
-			R_DrawSkyChain(skychain);
+			//R_DrawSkyChain(skychain);
 			skychain = NULL;
 		}
 
@@ -1080,8 +1081,6 @@ void DrawTextureChains (void)
 		s = t->texturechain;
 		if (!s)
 			continue;
-		if (i == skytexturenum)
-			R_DrawSkyChain (s);
 		else if (i == mirrortexturenum && r_mirroralpha.value != 1.0)
 		{
 			R_MirrorChain (s);
@@ -1360,14 +1359,14 @@ void R_RecursiveWorldNode (mnode_t *node)
 						surf->texturechain = surf->texinfo->texture->texturechain;
 						surf->texinfo->texture->texturechain = surf;
 					}
-				} else if (surf->flags & SURF_DRAWSKY) {
+				} /*else if (surf->flags & SURF_DRAWSKY) {
 					surf->texturechain = skychain;
 					skychain = surf;
 				} else if (surf->flags & SURF_DRAWTURB) {
 					surf->texturechain = waterchain;
 					waterchain = surf;
 				} else
-					R_DrawSequentialPoly (surf);
+					R_DrawSequentialPoly (surf);*/
 
 			}
 		}
@@ -1454,9 +1453,10 @@ void R_DrawWorld (void)
 
 	glColor3f (1,1,1);
 	memset (lightmap_polys, 0, sizeof(lightmap_polys));
-#ifdef QUAKE2
+
 	R_ClearSkyBox ();
-#endif
+	if (strcmp(skybox_name, "") != 0)
+		R_DrawSkyBox();
 
 	R_RecursiveWorldNode (cl.worldmodel->nodes);
 
@@ -1465,10 +1465,6 @@ void R_DrawWorld (void)
 	DrawTextureChains ();
 
 	R_BlendLightmaps();
-
-#ifdef QUAKE2
-	R_DrawSkyBox ();
-#endif
 
 	Fog_EnableGFog ();
 }
@@ -1789,10 +1785,10 @@ void GL_BuildLightmaps (void)
 			GL_CreateSurfaceLightmap (m->surfaces + i);
 			if ( m->surfaces[i].flags & SURF_DRAWTURB )
 				continue;
-#ifndef QUAKE2
+
 			if ( m->surfaces[i].flags & SURF_DRAWSKY )
 				continue;
-#endif
+
 			BuildSurfaceDisplayList (m->surfaces + i);
 		}
 	}
