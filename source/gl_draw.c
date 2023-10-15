@@ -1075,7 +1075,7 @@ void Draw_Crosshair (void)
 		Draw_FillByColor(0, vid.height/2, 400, 1, 0, 255, 0, 255);
 	}
 
-	if (cl.stats[STAT_HEALTH] < 20) 
+	if (!crosshair.value)
 		return;
 
 	if (!crosshair_opacity)
