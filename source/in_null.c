@@ -101,6 +101,9 @@ void IN_Move (usercmd_t *cmd)
 	//
 	speed = sensitivity.value;
 
+	if (!new3ds_flag)
+		speed -= 2;
+
 	// cut look speed in half when facing enemy, unless mag is empty
 	if ((in_aimassist.value) && (sv_player->v.facingenemy == 1) && cl.stats[STAT_CURRENTMAG] > 0) {
 		speed *= 0.5;
@@ -152,8 +155,6 @@ void IN_Move (usercmd_t *cmd)
 
 		cmd->sidemove += move_x;
 		cmd->forwardmove += move_y;
-
-		Con_Printf("%d\n", left.dx);
 
 		// crosshair stuff
 		if (left.dx < 50 && left.dx > -50 && left.dy < 50 && left.dy > -50) {

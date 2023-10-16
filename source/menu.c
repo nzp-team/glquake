@@ -222,6 +222,17 @@ void M_DrawTextBox (int x, int y, int width, int lines)
 
 //=============================================================================
 
+void M_Load_Menu_Pics ()
+{
+	menu_bk 	= Draw_CachePic("gfx/menu/menu_background");
+	menu_ndu 	= Draw_CachePic("gfx/menu/nacht_der_untoten");
+	//menu_kn 	= Draw_CachePic("gfx/menu/kino_der_toten");
+	menu_wh 	= Draw_CachePic("gfx/menu/warehouse");
+	//menu_wn 	= Draw_CachePic("gfx/menu/wahnsinn");
+	menu_ch 	= Draw_CachePic("gfx/menu/christmas_special");
+	menu_custom = Draw_CachePic("gfx/menu/custom");
+}
+
 int m_save_demonum;
 
 /*
@@ -390,24 +401,70 @@ void M_Menu_Main_f (void)
 
 void M_Main_Draw (void)
 {
+	// Background
 	menu_bk = Draw_CachePic("gfx/menu/menu_background");
-	Draw_Pic (0, 0, menu_bk);
+	Draw_StretchPic(0, 0, menu_bk, 400, 240);
+
+	// Fill black to make everything easier to see
+	Draw_FillByColor(0, 0, 400, 240, 0, 0, 0, 102);
 
 	// Version String
 	Draw_ColoredString((vid.width - (strlen(game_build_date) * 8)) + 4, 5, game_build_date, 255, 255, 255, 255, 1);
 
-	char *MAIN_MENU_ITEMS[MAIN_ITEMS];
-	MAIN_MENU_ITEMS[0] = "Single Player";
-	MAIN_MENU_ITEMS[1] = "Multi Player";
-	MAIN_MENU_ITEMS[2] = "Options";
-	MAIN_MENU_ITEMS[3] = "Quit";
+	// Header
+	Draw_ColoredString(5, 5, "MAIN MENU", 255, 255, 255, 255, 2);
 
-	for (int i = 0; i < MAIN_ITEMS; i++) {
-		Draw_String(vid.width/4, vid.height/4 + (16 * i), MAIN_MENU_ITEMS[i]);
+	// Solo
+	if (m_main_cursor == 0)
+		Draw_ColoredString(5, 40, "Solo", 255, 0, 0, 255, 1);
+	else
+		Draw_ColoredString(5, 40, "Solo", 255, 255, 255, 255, 1);
+
+
+	// Co-Op (Unfinished, so non-selectable)
+	Draw_ColoredString(5, 50, "Co-Op (Coming Soon!)", 128, 128, 128, 255, 1);
+
+	// Divider
+	Draw_FillByColor(5, 63, 160, 2, 130, 130, 130, 255);
+
+	if (m_main_cursor == 1)
+		Draw_ColoredString(5, 70, "Settings", 255, 0, 0, 255, 1);
+	else
+		Draw_ColoredString(5, 70, "Settings", 255, 255, 255, 255, 1);
+
+	Draw_ColoredString(5, 80, "Achievements", 128, 128, 128, 255, 1);
+
+	// Divider
+	Draw_FillByColor(5, 93, 160, 2, 130, 130, 130, 255);
+
+	if (m_main_cursor == 2)
+		Draw_ColoredString(5, 100, "Credits", 255, 0, 0, 255, 1);
+	else
+		Draw_ColoredString(5, 100, "Credits", 255, 255, 255, 255, 1);
+
+	// Divider
+	Draw_FillByColor(5, 113, 160, 2, 130, 130, 130, 255);
+
+	if (m_main_cursor == 3)
+		Draw_ColoredString(5, 120, "Exit", 255, 0, 0, 255, 1);
+	else
+		Draw_ColoredString(5, 120, "Exit", 255, 255, 255, 255, 1);
+
+	// Descriptions
+	switch(m_main_cursor) {
+		case 0: // Solo
+			Draw_ColoredString(5, 220, "Take on the Hordes by yourself.", 255, 255, 255, 255, 1);
+			break;
+		case 1: // Settings
+			Draw_ColoredString(5, 220, "Adjust your Settings to Optimize your Experience.", 255, 255, 255, 255, 1);
+			break;
+		case 2: // Credits
+			Draw_ColoredString(5, 220, "See who made NZ:P possible.", 255, 255, 255, 255, 1);
+			break;
+		case 3: // Exit
+			Draw_ColoredString(5, 220, "Return to Home Menu.", 255, 255, 255, 255, 1);
+			break;
 	}
-
-	Draw_Fill(vid.width/4, vid.height/4 - 3 + (16 * m_main_cursor), strlen(MAIN_MENU_ITEMS[m_main_cursor])*8, 1, 255, 255, 255, 255);
-	Draw_Fill(vid.width/4, vid.height/4 + 2 + 8 + (16 * m_main_cursor), strlen(MAIN_MENU_ITEMS[m_main_cursor])*8, 1, 255, 255, 255, 255);
 }
 
 
@@ -417,13 +474,13 @@ void M_Main_Key (int key)
 	{
 
 	case K_DOWNARROW:
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound ("sounds/menu/navigate.wav");
 		if (++m_main_cursor >= MAIN_ITEMS)
 			m_main_cursor = 0;
 		break;
 
 	case K_UPARROW:
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound ("sounds/menu/navigate.wav");
 		if (--m_main_cursor < 0)
 			m_main_cursor = MAIN_ITEMS - 1;
 		break;
@@ -439,10 +496,11 @@ void M_Main_Key (int key)
 			break;
 
 		case 1:
+			M_Menu_Options_f ();
 			break;
 
 		case 2:
-			M_Menu_Options_f ();
+			//M_Menu_Credits_f ();
 			break;
 
 		case 3:
@@ -2034,6 +2092,7 @@ void M_Init (void)
 		game_build_date = "version.txt not found.";
 	}
 
+	//M_Load_Menu_Pics();
 	Map_Finder();
 }
 
@@ -2119,7 +2178,7 @@ void M_Draw (void)
 
 	if (m_entersound)
 	{
-		S_LocalSound ("misc/menu2.wav");
+		S_LocalSound ("sounds/menu/enter.wav");
 		m_entersound = false;
 	}
 

@@ -791,10 +791,12 @@ void R_RenderBrushPoly (msurface_t *fa)
 	//Diabolickal start
 	if(!Q_strncmp(fa->texinfo->texture->name,"nodraw",6) || !Q_strncmp(fa->texinfo->texture->name,"NODRAW",6))		//Diabolickal nodraw support
 		return;
-	if (!strncmp(fa->texinfo->texture->name,"{",1))			//Diabolickal Alpha pixel support
-	{
-		glEnable(GL_ALPHA_TEST);
-	}
+	// if (!strncmp(fa->texinfo->texture->name,"{",1))			//Diabolickal Alpha pixel support
+	// {
+	// 	glEnable(GL_ALPHA_TEST);
+	// 	glEnable(GL_BLEND);
+	// 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// }
 	if (strstr(fa->texinfo->texture->name,"light")) // Any texture with light in the name ignore lightmaps
     {
 		DrawGLPoly (fa->polys);
@@ -807,11 +809,11 @@ void R_RenderBrushPoly (msurface_t *fa)
 		DrawGLPoly (fa->polys);
 	
 	//Diabolickal start
-	if (!strncmp(fa->texinfo->texture->name,"{",1))			//Diabolickal Alpha pixel support
-	{
-		glDisable(GL_ALPHA_TEST);
-		//glDisable(GL_BLEND);
-	}
+	// if (!strncmp(fa->texinfo->texture->name,"{",1))			//Diabolickal Alpha pixel support
+	// {
+	// 	glDisable(GL_ALPHA_TEST);
+	// 	glDisable(GL_BLEND);
+	// }
 	//Diabolickal end
 
 	// add the poly to the proper lightmap chain
@@ -1073,6 +1075,9 @@ void DrawTextureChains (void)
 		return;
 	} 
 
+	glEnable(GL_ALPHA_TEST);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
 	for (i=0 ; i<cl.worldmodel->numtextures ; i++)
 	{
 		t = cl.worldmodel->textures[i];
@@ -1096,6 +1101,8 @@ void DrawTextureChains (void)
 
 		t->texturechain = NULL;
 	}
+
+	glDisable(GL_ALPHA_TEST);
 }
 /*
 =================
