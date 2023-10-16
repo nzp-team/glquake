@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "quakedef.h"
 
 extern qboolean domaxammo;
+qboolean crosshair_pulse_grenade;
 
 char *svc_strings[] =
 {
@@ -75,7 +76,8 @@ char *svc_strings[] =
     "svc_bspdecal", //42     // [string] name [byte] decal_size [coords] pos
     "svc_achievement", //43
 	"svc_songegg", //44 			[string] track name
-	"svc_maxammo" //45
+	"svc_maxammo", //45
+	"svc_pulse" //46
 };
 
 //=============================================================================
@@ -1107,6 +1109,10 @@ void CL_ParseServerMessage (void)
 
 		case svc_maxammo:
 			domaxammo = true;
+			break;
+
+		case svc_pulse:
+			crosshair_pulse_grenade = true;
 			break;
 			
 		case svc_stufftext:
