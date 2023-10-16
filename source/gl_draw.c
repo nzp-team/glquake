@@ -1068,6 +1068,7 @@ Draw_Crosshair
 
 extern float crosshair_opacity;
 extern cvar_t cl_crosshair_debug;
+extern qboolean crosshair_pulse_grenade;
 void Draw_Crosshair (void)
 {	
 	if (cl_crosshair_debug.value) {
@@ -1075,7 +1076,16 @@ void Draw_Crosshair (void)
 		Draw_FillByColor(0, vid.height/2, 400, 1, 0, 255, 0, 255);
 	}
 
-	if (!crosshair.value)
+	if (cl.stats[STAT_HEALTH] <= 20)
+		return;
+
+	if (cl.stats[STAT_ZOOM] == 2)
+		Draw_Pic (-39, -15, sniper_scope);
+   	if (Hitmark_Time > sv.time)
+        Draw_Pic ((vid.width - hitmark->width)/2,(vid.height - hitmark->height)/2, hitmark);
+
+	// Make sure to do this after hitmark drawing.
+	if (cl.stats[STAT_ZOOM] == 2 || cl.stats[STAT_ZOOM] == 1)
 		return;
 
 	if (!crosshair_opacity)
@@ -1110,14 +1120,12 @@ void Draw_Crosshair (void)
 		}
     }
 
-	if (cl.stats[STAT_ACTIVEWEAPON] == W_M2 || cl.stats[STAT_ACTIVEWEAPON] == W_TESLA || cl.stats[STAT_ACTIVEWEAPON] == W_DG3)
-	{
-		Draw_CharacterRGBA((vid.width)/2-4, (vid.height)/2, 'O', 255, col, col, crosshair_opacity, 1);
-	}
-	else if (crosshair.value == 1 && cl.stats[STAT_ZOOM] != 1 && cl.stats[STAT_ZOOM] != 2 && cl.stats[STAT_ACTIVEWEAPON] != W_PANZER)
-    {
-        int x_value, y_value;
-        int crosshair_offset = CrossHairWeapon() + cur_spread;
+	int x_value, y_value;
+    int crosshair_offset;
+
+	// Standard crosshair (+)
+	if (crosshair.value == 1) {
+		crosshair_offset = CrossHairWeapon() + cur_spread;
 		if (CrossHairMaxSpread() < crosshair_offset || croshhairmoving)
 			crosshair_offset = CrossHairMaxSpread();
 
@@ -1144,13 +1152,43 @@ void Draw_Crosshair (void)
 		x_value = (vid.width - 1)/2;
 		y_value = (vid.height - 3)/2 + crosshair_offset_step;
 		Draw_FillByColor(x_value, y_value, 1, 3, 255, (int)col, (int)col, 255);
-    }
-    else if (crosshair.value && cl.stats[STAT_ZOOM] != 1 && cl.stats[STAT_ZOOM] != 2)
+	}
+	// Area of Effect (o)
+	else if (crosshair.value == 2) {
+		Draw_CharacterRGBA((vid.width)/2-4, (vid.height)/2, 'O', 255, col, col, crosshair_opacity, 1);
+	}
+	// Dot crosshair (.)
+	else if (crosshair.value == 3) {
 		Draw_CharacterRGBA((vid.width - 8)/2, (vid.height - 8)/2, '.', 255, col, col, crosshair_opacity, 1);
-	if (cl.stats[STAT_ZOOM] == 2)
-		Draw_Pic (-39, -15, sniper_scope);
-   	if (Hitmark_Time > sv.time)
-        Draw_Pic ((vid.width - hitmark->width)/2,(vid.height - hitmark->height)/2, hitmark);
+	}
+	// Grenade crosshair
+	else if (crosshair.value == 4) {
+		if (crosshair_pulse_grenade) {
+			crosshair_offset_step = 0;
+			cur_spread = 2;
+		}
+
+		crosshair_pulse_grenade = false;
+
+		crosshair_offset = 12 + cur_spread;
+		crosshair_offset_step += (crosshair_offset - crosshair_offset_step) * 0.5;
+
+		x_value = (vid.width - 3)/2 - crosshair_offset_step;
+		y_value = (vid.height - 1)/2;
+		Draw_FillByColor(x_value, y_value, 3, 1, 255, 255, 255, 255);
+
+		x_value = (vid.width - 3)/2 + crosshair_offset_step;
+		y_value = (vid.height - 1)/2;
+		Draw_FillByColor(x_value, y_value, 3, 1, 255, 255, 255, 255);
+
+		x_value = (vid.width - 1)/2;
+		y_value = (vid.height - 3)/2 - crosshair_offset_step;
+		Draw_FillByColor(x_value, y_value, 1, 3, 255, 255, 255, 255);
+
+		x_value = (vid.width - 1)/2;
+		y_value = (vid.height - 3)/2 + crosshair_offset_step;
+		Draw_FillByColor(x_value, y_value, 1, 3, 255, 255, 255, 255);
+	}
 }
 
 

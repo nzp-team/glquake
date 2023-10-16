@@ -3206,6 +3206,29 @@ void PF_MaxAmmo(void)
 	MSG_WriteByte(&sv.reliable_datagram, svc_maxammo);
 }
 
+/*
+=================
+PF_GrenadePulse
+
+pulses crosshair for grenades
+
+grenade_pulse()
+=================
+*/
+void PF_GrenadePulse(void)
+{
+	client_t	*client;
+	int			entnum;
+
+	entnum = G_EDICTNUM(OFS_PARM0);
+
+	if (entnum < 1 || entnum > svs.maxclients)
+		return;
+
+	client = &svs.clients[entnum-1];
+	MSG_WriteByte (&client->message,svc_pulse);
+}
+
 
 /*
 =================
@@ -3804,7 +3827,7 @@ PF_Fixme,
 PF_Fixme, 
 PF_SongEgg, // #500
 PF_MaxAmmo, // #501
-PF_Fixme, 
+PF_GrenadePulse, // #502 
 PF_Fixme, 
 PF_Fixme,
 };
