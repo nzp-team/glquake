@@ -35,7 +35,7 @@ cvar_t	cl_nolerp = {"cl_nolerp","0"};
 
 cvar_t	lookspring = {"lookspring","0", true};
 cvar_t	lookstrafe = {"lookstrafe","0", true};
-cvar_t	sensitivity = {"sensitivity","3", true};
+cvar_t	sensitivity = {"sensitivity","8", true};
 cvar_t	in_tolerance = {"tolerance","0.25", true};
 cvar_t	in_acceleration = {"acceleration","1.0", true};
 cvar_t	in_analog_strafe = {"in_analog_strafe", "0", true};

@@ -25,6 +25,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern int bind_grab;
 
 extern bool new3ds_flag;
+extern bool croshhairmoving;
+extern float crosshair_opacity;
 
 extern cvar_t in_analog_strafe;
 extern cvar_t in_x_axis_adjust;
@@ -137,18 +139,36 @@ void IN_Move (usercmd_t *cmd)
 	if (new3ds_flag) {
 		float move_x, move_y;
 
-		cl_backspeed = cl_forwardspeed = cl_sidespeed = sv_player->v.maxspeed*1.2;
+		cl_backspeed = cl_forwardspeed = cl_sidespeed = sv_player->v.maxspeed;
 		cl_sidespeed *= 0.8;
 		cl_backspeed *= 0.7;
 
-		if (left.dx > 0)
-			move_x = IN_CalcInput(left.dx, cl_forwardspeed, deadZone, acceleration);
+		move_x = IN_CalcInput(left.dx, cl_sidespeed, deadZone, acceleration);
+
+		if (left.dy > 0)
+			move_y = IN_CalcInput(left.dy, cl_forwardspeed, deadZone, acceleration);
 		else
-			move_x = IN_CalcInput(left.dx, cl_backspeed, deadZone, acceleration);
-		move_y = IN_CalcInput(left.dy, cl_sidespeed, deadZone, acceleration);
+			move_y = IN_CalcInput(left.dy, cl_backspeed, deadZone, acceleration);
 
 		cmd->sidemove += move_x;
 		cmd->forwardmove += move_y;
+
+		Con_Printf("%d\n", left.dx);
+
+		// crosshair stuff
+		if (left.dx < 50 && left.dx > -50 && left.dy < 50 && left.dy > -50) {
+			croshhairmoving = false;
+
+			crosshair_opacity += 22;
+
+			if (crosshair_opacity >= 255)
+				crosshair_opacity = 255;
+		} else {
+			croshhairmoving = true;
+			crosshair_opacity -= 8;
+			if (crosshair_opacity <= 128)
+				crosshair_opacity = 128;
+		}
 	}
 }
 
