@@ -3229,6 +3229,20 @@ void PF_GrenadePulse(void)
 	MSG_WriteByte (&client->message,svc_pulse);
 }
 
+/*
+=================
+PF_MaxZombies
+
+Returns the total number of zombies
+the platform can have out at once.
+
+nzp_maxai()
+=================
+*/
+void PF_MaxZombies(void)
+{
+	G_FLOAT(OFS_RETURN) = 12;
+}
 
 /*
 =================
@@ -3828,7 +3842,7 @@ PF_Fixme,
 PF_SongEgg, // #500
 PF_MaxAmmo, // #501
 PF_GrenadePulse, // #502 
-PF_Fixme, 
+PF_MaxZombies, // #503 
 PF_Fixme,
 };
 
