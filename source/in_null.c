@@ -137,12 +137,18 @@ void IN_Move (usercmd_t *cmd)
 	if (new3ds_flag) {
 		float move_x, move_y;
 
-		speed = sv_player->v.maxspeed/210;
-		move_x = IN_CalcInput(left.dx, speed, deadZone, acceleration);
-		move_y = IN_CalcInput(left.dy, speed, deadZone, acceleration);
+		cl_backspeed = cl_forwardspeed = cl_sidespeed = sv_player->v.maxspeed*1.2;
+		cl_sidespeed *= 0.8;
+		cl_backspeed *= 0.7;
 
-		cmd->sidemove += cl_sidespeed * move_x;
-		cmd->forwardmove += cl_forwardspeed * move_y;
+		if (left.dx > 0)
+			move_x = IN_CalcInput(left.dx, cl_forwardspeed, deadZone, acceleration);
+		else
+			move_x = IN_CalcInput(left.dx, cl_backspeed, deadZone, acceleration);
+		move_y = IN_CalcInput(left.dy, cl_sidespeed, deadZone, acceleration);
+
+		cmd->sidemove += move_x;
+		cmd->forwardmove += move_y;
 	}
 }
 
