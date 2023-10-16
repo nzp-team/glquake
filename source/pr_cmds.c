@@ -23,6 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define PR_MAX_TEMPSTRING 2048	// 2001-10-25 Enhanced temp string handling by Maddes
 #define	RETURN_EDICT(e) (((int *)pr_globals)[OFS_RETURN] = EDICT_TO_PROG(e))
 
+extern bool new3ds_flag;
+
 /*
 ===============================================================================
 
@@ -3241,7 +3243,10 @@ nzp_maxai()
 */
 void PF_MaxZombies(void)
 {
-	G_FLOAT(OFS_RETURN) = 12;
+	if (new3ds_flag)
+		G_FLOAT(OFS_RETURN) = 18;
+	else
+		G_FLOAT(OFS_RETURN) = 12;
 }
 
 /*
