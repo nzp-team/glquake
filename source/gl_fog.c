@@ -1,6 +1,7 @@
 /*
 
 Fogging system based on FitzQuake's implementation
+Now with Quakespasm bits thrown into it!
 
 */
 
@@ -12,8 +13,19 @@ Fogging system based on FitzQuake's implementation
 //
 //==============================================================================
 
-extern refdef_t	r_refdef;
+#define DEFAULT_DENSITY 1.0
+#define DEFAULT_GRAY 0.3
 
+float density = 1.0;
+float fog_density_gl;
+
+float 		fog_start;
+float 		fog_end;
+float 		fog_red;
+float 		fog_green;
+float 		fog_blue;
+
+float old_density;
 float old_start;
 float old_end;
 float old_red;
@@ -41,29 +53,32 @@ void Fog_Update (float start, float end, float red, float green, float blue, flo
 			float f;
 
 			f = (fade_done - cl.time) / fade_time;
-			old_start = f * old_start + (1.0 - f) * r_refdef.fog_start;
-			old_end = f * old_end + (1.0 - f) * r_refdef.fog_end;
-			old_red = f * old_red + (1.0 - f) * r_refdef.fog_red;
-			old_green = f * old_green + (1.0 - f) * r_refdef.fog_green;
-			old_blue = f * old_blue + (1.0 - f) * r_refdef.fog_blue;
+			old_start = f * old_start + (1.0 - f) * fog_start;
+			old_end = f * old_end + (1.0 - f) * fog_end;
+			old_red = f * old_red + (1.0 - f) * fog_red;
+			old_green = f * old_green + (1.0 - f) * fog_green;
+			old_blue = f * old_blue + (1.0 - f) * fog_blue;
+			old_density = f * old_density + (1.0 - f) * fog_density_gl;
 		}
 		else
 		{
-			old_start = r_refdef.fog_start;
-			old_end = r_refdef.fog_end;
-			old_red = r_refdef.fog_red;
-			old_green = r_refdef.fog_green;
-			old_blue = r_refdef.fog_blue;
+			old_start = fog_start;
+			old_end = fog_end;
+			old_red = fog_red;
+			old_green = fog_green;
+			old_blue = fog_blue;
+			old_density = fog_density_gl;
 		}
 	}
 
-	r_refdef.fog_start = start;
-	r_refdef.fog_end = end;
-	r_refdef.fog_red = red;
-	r_refdef.fog_green = green;
-	r_refdef.fog_blue = blue;
+	fog_start = start;
+	fog_end = end;
+	fog_red = red;
+	fog_green = green;
+	fog_blue = blue;
 	fade_time = time;
 	fade_done = cl.time + time;
+	fog_density_gl = ((fog_start / fog_end))/3.5;
 }
 
 /*
@@ -108,40 +123,40 @@ void Fog_FogCommand_f (void)
 		Con_Printf("   fog <start> <end> <red> <green> <blue>\n");
 		Con_Printf("   fog <start> <end> <red> <green> <blue> <fade>\n");
 		Con_Printf("current values:\n");
-		Con_Printf("   \"start\" is \"%f\"\n", r_refdef.fog_start);
-		Con_Printf("   \"end\" is \"%f\"\n", r_refdef.fog_end);
-		Con_Printf("   \"red\" is \"%f\"\n", r_refdef.fog_red);
-		Con_Printf("   \"green\" is \"%f\"\n", r_refdef.fog_green);
-		Con_Printf("   \"blue\" is \"%f\"\n", r_refdef.fog_blue);
+		Con_Printf("   \"start\" is \"%f\"\n", fog_start);
+		Con_Printf("   \"end\" is \"%f\"\n", fog_end);
+		Con_Printf("   \"red\" is \"%f\"\n", fog_red);
+		Con_Printf("   \"green\" is \"%f\"\n", fog_green);
+		Con_Printf("   \"blue\" is \"%f\"\n", fog_blue);
 		Con_Printf("   \"fade\" is \"%f\"\n", fade_time);
 		break;
 	case 2: //TEST
-		Fog_Update(r_refdef.fog_start,
-				   r_refdef.fog_end,
-				   r_refdef.fog_red,
-				   r_refdef.fog_green,
-				   r_refdef.fog_blue,
+		Fog_Update(fog_start,
+				   fog_end,
+				   fog_red,
+				   fog_green,
+				   fog_blue,
 				   atof(Cmd_Argv(1)));
 		break;
 	case 3:
 		Fog_Update(atof(Cmd_Argv(1)),
 				   atof(Cmd_Argv(2)),
-				   r_refdef.fog_red,
-				   r_refdef.fog_green,
-				   r_refdef.fog_blue,
+				   fog_red,
+				   fog_green,
+				   fog_blue,
 				   0.0);
 		break;
 	case 4:
-		Fog_Update(r_refdef.fog_start,
-				   r_refdef.fog_end,
+		Fog_Update(fog_start,
+				   fog_end,
 				   CLAMP(0.0, atof(Cmd_Argv(1)), 100.0),
 				   CLAMP(0.0, atof(Cmd_Argv(2)), 100.0),
 				   CLAMP(0.0, atof(Cmd_Argv(3)), 100.0),
 				   0.0);
 		break;
 	case 5: //TEST
-		Fog_Update(r_refdef.fog_start,
-				   r_refdef.fog_end,
+		Fog_Update(fog_start,
+				   fog_end,
 				   CLAMP(0.0, atof(Cmd_Argv(1)), 100.0),
 				   CLAMP(0.0, atof(Cmd_Argv(2)), 100.0),
 				   CLAMP(0.0, atof(Cmd_Argv(3)), 100.0),
@@ -176,22 +191,23 @@ called at map load
 void Fog_ParseWorldspawn (void)
 {
 	char key[128], value[4096];
-	char *data;
+	const char *data;
 
+	fog_density_gl = DEFAULT_DENSITY;
 	//initially no fog
-	r_refdef.fog_start = 0;
+	fog_start = 0;
 	old_start = 0;
 
-	r_refdef.fog_end = -1;
+	fog_end = -1;
 	old_end = -1;
 
-	r_refdef.fog_red = 0.0;
+	fog_red = 0.0;
 	old_red = 0.0;
 
-	r_refdef.fog_green = 0.0;
+	fog_green = 0.0;
 	old_green = 0.0;
 
-	r_refdef.fog_blue = 0.0;
+	fog_blue = 0.0;
 	old_blue = 0.0;
 
 	fade_time = 0.0;
@@ -222,9 +238,72 @@ void Fog_ParseWorldspawn (void)
 
 		if (!strcmp("fog", key))
 		{
-			sscanf(value, "%f %f %f %f %f", &r_refdef.fog_start, &r_refdef.fog_end, &r_refdef.fog_red, &r_refdef.fog_green, &r_refdef.fog_blue);
+			sscanf(value, "%f %f %f %f %f", &fog_start, &fog_end, &fog_red, &fog_green, &fog_blue);
 		}
+
+		fog_density_gl = ((fog_start / fog_end))/3.5;
 	}
+}
+
+/*
+=============
+Fog_GetColor
+
+calculates fog color for this frame, taking into account fade times
+=============
+*/
+float *Fog_GetColor (void)
+{
+	static float c[4]; // = {0.1f, 0.1f, 0.1f, 1.0f}
+
+	float f;
+	int i;
+
+	if (fade_done > cl.time)
+	{
+		f = (fade_done - cl.time) / fade_time;
+		c[0] = f * old_red + (1.0 - f) * fog_red;
+		c[1] = f * old_green + (1.0 - f) * fog_green;
+		c[2] = f * old_blue + (1.0 - f) * fog_blue;
+		c[3] = 1.0;
+	}
+	else
+	{
+		c[0] = fog_red;
+		c[1] = fog_green;
+		c[2] = fog_blue;
+		c[3] = 1.0;
+	}
+
+	//find closest 24-bit RGB value, so solid-colored sky can match the fog perfectly
+	for (i=0;i<3;i++)
+		c[i] = (float)(Q_rint(c[i] * 255)) / 255.0f;
+
+	for (i = 0; i < 3; i++)
+		c[i] /= 64.0;
+
+	return c;
+}
+
+/*
+=============
+Fog_GetDensity
+
+returns current density of fog
+
+=============
+*/
+float Fog_GetDensity (void)
+{
+	float f;
+
+	if (fade_done > cl.time)
+	{
+		f = (fade_done - cl.time) / fade_time;
+		return f * old_density + (1.0 - f) * fog_density_gl;
+	}
+	else
+		return fog_density_gl;
 }
 
 /*
@@ -236,42 +315,10 @@ called at the beginning of each frame
 */
 void Fog_SetupFrame (void)
 {
-	float c[4];
-	float f, s, e;
-
-	if (fade_done > cl.time)
-	{
-		f = (fade_done - cl.time) / fade_time;
-		s = f * old_start + (1.0 - f) * r_refdef.fog_start;
-		e = f * old_end + (1.0 - f) * r_refdef.fog_end;
-		c[0] = f * old_red + (1.0 - f) * r_refdef.fog_red;
-		c[1] = f * old_green + (1.0 - f) * r_refdef.fog_green;
-		c[2] = f * old_blue + (1.0 - f) * r_refdef.fog_blue;
-        c[3] = r_skyfog.value;
-	}
-	else
-	{
-		s = r_refdef.fog_start;
-		e = r_refdef.fog_end;
-		c[0] = r_refdef.fog_red;
-		c[1] = r_refdef.fog_green;
-		c[2] = r_refdef.fog_blue;
-		c[3] = 1.0;
-        c[3] = r_skyfog.value;
-	}
-
-	if(e == 0)
-		e = -1;
-
-	glFogf(GL_FOG_DENSITY, 0.6);
-	c[0] = 1;
-	c[1] = 0;
-	c[2] = 0;
-	glFogf(GL_FOG_COLOR, *c);
-	//sceGuFog ( s, e, GU_COLOR( c[0]* 0.01f, c[1]* 0.01f, c[2]* 0.01f, c[3] ) );
-
-	if(s == 0 || e < 0)
-		glDisable(GL_FOG);
+	glFogfv(GL_FOG_COLOR, Fog_GetColor());
+	glFogf(GL_FOG_DENSITY, (float)(1.0f / (18.0f * 1024.0f)));
+	glFogf(GL_FOG_START, fog_start);
+	glFogf(GL_FOG_END, fog_end);
 }
 
 /*
@@ -283,12 +330,12 @@ Crow_bar*
 */
 void Fog_SetColorForSkyS (void)
 {
-	/*if (r_refdef.fog_end > 0.0f && r_skyfog.value)
+	if (fog_end > 0.0f && r_skyfog.value)
 	{
-		float a = r_refdef.fog_end * 0.00025f;
-		float r = r_refdef.fog_red * 0.01f + (a * 0.25f);
-		float g = r_refdef.fog_green * 0.01f + (a * 0.25f);
-		float b = r_refdef.fog_blue * 0.01f + (a * 0.25f);
+		float a = fog_end * 0.00025f;
+		float r = fog_red * 0.01f + (a * 0.25f);
+		float g = fog_green * 0.01f + (a * 0.25f);
+		float b = fog_blue * 0.01f + (a * 0.25f);
 		
 		if (a > 1.0f)
 			a = 1.0f;
@@ -298,15 +345,47 @@ void Fog_SetColorForSkyS (void)
 			g = 1.0f;
 		if (b > 1.0f)
 			b = 1.0f;
-		
-		//sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
-		//glCle
-		//sceGuColor(GU_COLOR(r,g,b,a));
-		glEnable(GL_BLEND);
-		
-		//sceGuEnable(GU_BLEND);
-		//sceGuBlendFunc(GU_ADD, GU_FIX, GU_FIX, GU_COLOR(r,g,b,a), GU_COLOR(r,g,b,a));
-	}*/
+
+		glColor4f(r, g, b, a);
+	}
+}
+
+/*
+=============
+Fog_GetStart
+returns current start of fog
+=============
+*/
+float Fog_GetStart (void)
+{
+	float f;
+
+	if (fade_done > cl.time)
+	{
+		f = (fade_done - cl.time) / fade_time;
+		return f * old_start + (1.0 - f) * fog_start;
+	}
+	else
+		return fog_start;
+}
+
+/*
+=============
+Fog_GetEnd
+returns current end of fog
+=============
+*/
+float Fog_GetEnd (void)
+{
+	float f;
+
+	if (fade_done > cl.time)
+	{
+		f = (fade_done - cl.time) / fade_time;
+		return f * old_start + (1.0 - f) * fog_end;
+	}
+	else
+		return fog_end;
 }
 
 /*
@@ -318,53 +397,10 @@ Crow_bar*
 */
 void Fog_SetColorForSkyE (void)
 {
-	/*if (r_refdef.fog_end > 0.0f && r_skyfog.value)
+	if (fog_end > 0.0f && r_skyfog.value)
 	{
-		sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
-		sceGuColor(0xffffffff);
-		//sceGuDisable(GU_BLEND);
-		//sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
-	}*/
-}
-
-/*
-=============
-Fog_GetStart
-
-returns current start of fog
-=============
-*/
-float Fog_GetStart (void)
-{
-	float f;
-
-	if (fade_done > cl.time)
-	{
-		f = (fade_done - cl.time) / fade_time;
-		return f * old_start + (1.0 - f) * r_refdef.fog_start;
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-	else
-		return r_refdef.fog_start;
-}
-
-/*
-=============
-Fog_GetEnd
-
-returns current end of fog
-=============
-*/
-float Fog_GetEnd (void)
-{
-	float f;
-
-	if (fade_done > cl.time)
-	{
-		f = (fade_done - cl.time) / fade_time;
-		return f * old_start + (1.0 - f) * r_refdef.fog_end;
-	}
-	else
-		return r_refdef.fog_end;
 }
 
 /*
@@ -376,10 +412,9 @@ called before drawing stuff that should be fogged
 */
 void Fog_EnableGFog (void)
 {
-	if (!Fog_GetStart() == 0 || !Fog_GetEnd() <= 0) {
-		glFogf(GL_FOG_MODE, GL_EXP2);
-		glEnable(GL_FOG);
-	}	
+	// if (!Fog_GetStart() == 0 || !Fog_GetEnd() <= 0) {
+	// 	glEnable(GL_FOG);
+	// }	
 }
 
 /*
@@ -391,8 +426,8 @@ called after drawing stuff that should be fogged
 */
 void Fog_DisableGFog (void)
 {
-	if (!Fog_GetStart() == 0 || !Fog_GetEnd() <= 0)
-		glDisable(GL_FOG);
+	// if (!Fog_GetStart() == 0 || !Fog_GetEnd() <= 0)
+	// 	glDisable(GL_FOG);
 }
 
 /*
@@ -455,7 +490,6 @@ called whenever a map is loaded
 void Fog_NewMap (void)
 {
 	Fog_ParseWorldspawn (); //for global fog
-//	Fog_MarkModels (); //for volumetric fog
 }
 
 /*
@@ -470,10 +504,14 @@ void Fog_Init (void)
 	Cmd_AddCommand ("fog",Fog_FogCommand_f);
 
 	//set up global fog
-	r_refdef.fog_start = 0;
-	r_refdef.fog_end = -1;
-	r_refdef.fog_red = 0.5;
-	r_refdef.fog_green = 0.5;
-	r_refdef.fog_blue = 0.5;
+	fog_start = 0;
+	fog_end = -1;
+	fog_red = 0.5;
+	fog_green = 0.5;
+	fog_blue = 0.5;
 	fade_time = 1;
+	fog_density_gl = DEFAULT_DENSITY;
+	fade_time = 1;
+
+	glFogi(GL_FOG_MODE, GL_EXP2);
 }

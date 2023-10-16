@@ -628,6 +628,9 @@ void R_DrawSkyBox (void)
 	vec3_t	v;
 	float	s, t;
 
+	Fog_DisableGFog();
+	Fog_SetColorForSkyS();
+
 	glDisable(GL_BLEND);
 	glDisable(GL_ALPHA_TEST);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -707,22 +710,9 @@ void R_DrawSkyBox (void)
 
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
-/*
-	for (i=0 ; i<5 ; i++)
-	{
-		if (skymins[0][i] >= skymaxs[0][i]
-		|| skymins[1][i] >= skymaxs[1][i])
-			continue;
 
-		GL_Bind (skyimage[skytexorder[i]]);
-
-		glBegin (GL_QUADS);
-		MakeSkyVec (skymins[0][i], skymins[1][i], i);
-		MakeSkyVec (skymins[0][i], skymaxs[1][i], i);
-		MakeSkyVec (skymaxs[0][i], skymaxs[1][i], i);
-		MakeSkyVec (skymaxs[0][i], skymins[1][i], i);
-		glEnd ();
-	}*/
+	Fog_SetColorForSkyE(); //setup for Sky
+	Fog_EnableGFog(); //setup for Sky
 }
 
 //===============================================================

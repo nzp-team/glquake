@@ -279,13 +279,13 @@ void R_DrawSpriteModel (entity_t *e)
 		right = vright;
 	}
 
-	//Fog_DisableGFog ();
-
 	glColor3f (1,1,1);
 
 	GL_DisableMultitexture();
 
     GL_Bind(frame->gl_texturenum);
+
+	Fog_DisableGFog ();
 
 	glEnable (GL_ALPHA_TEST);
 	glBegin (GL_QUADS);
@@ -314,7 +314,7 @@ void R_DrawSpriteModel (entity_t *e)
 
 	glDisable (GL_ALPHA_TEST);
 
-	//Fog_EnableGFog ();
+	Fog_EnableGFog ();
 }
 
 /*
@@ -754,6 +754,7 @@ void R_DrawAliasModel (entity_t *e)
 	float		s, t, an;
 	int			anim;
 	lerpdata_t	lerpdata;
+	qboolean force_fullbright = qfalse;
 
 	clmodel = currententity->model;
 
@@ -795,6 +796,12 @@ void R_DrawAliasModel (entity_t *e)
 	*/
 
 	specChar = clmodel->name[strlen(clmodel->name) - 5];
+
+	if(specChar == '!' || currententity->effects & EF_FULLBRIGHT)
+	{
+		lightcolor[0] = lightcolor[1] = lightcolor[2] = 256;
+		force_fullbright = qtrue;
+	}
 
 	VectorCopy (currententity->origin, r_entorigin);
 	VectorSubtract (r_origin, r_entorigin, modelorg);
@@ -949,7 +956,11 @@ void R_DrawAliasModel (entity_t *e)
 
 	if (gl_smoothmodels.value)
 		glShadeModel (GL_SMOOTH);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	if (force_fullbright == qtrue)
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	else
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 	if (gl_affinemodels.value)
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
@@ -1313,8 +1324,6 @@ void R_SetupFrame (void)
 	if (cl.maxclients > 1)
 		Cvar_Set ("r_fullbright", "0");
 
-	//Fog_SetupFrame (); //johnfitz
-
 	R_AnimateLight ();
 
 	r_framecount++;
@@ -1454,6 +1463,7 @@ void R_RenderScene (void)
 
 	R_MarkLeaves ();	// done here so we know if we're in water
 
+	Fog_EnableGFog (); //johnfitz
 	R_DrawWorld ();		// adds static entities to the list
 
 	S_ExtraUpdate ();	// don't let sound get messed up if going slow
@@ -1466,10 +1476,7 @@ void R_RenderScene (void)
 
 	R_DrawParticles ();
 
-#ifdef GLTEST
-	Test_Draw ();
-#endif
-
+	Fog_DisableGFog (); //johnfitz
 }
 
 
