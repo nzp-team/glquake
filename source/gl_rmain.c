@@ -382,7 +382,7 @@ void GL_DrawAliasFrame (aliashdr_t *paliashdr, lerpdata_t lerpdata)
 
 	commands = (int *)((byte *)paliashdr + paliashdr->commands);
 
-	vertcolor[3] = 255; //never changes, so there's no need to put this inside the loop
+	glColor4f(lightcolor[0]/255, lightcolor[1]/255, lightcolor[2]/255, 1.0f);
 
 	while (1)
 	{
@@ -408,26 +408,13 @@ void GL_DrawAliasFrame (aliashdr_t *paliashdr, lerpdata_t lerpdata)
 
 			commands += 2;
 
-			if (lerping)
-			{
-				vertcolor[0] = ((shadedots[verts1->lightnormalindex]*iblend + shadedots[verts2->lightnormalindex]*blend) * lightcolor[0])/255;
-				vertcolor[1] = ((shadedots[verts1->lightnormalindex]*iblend + shadedots[verts2->lightnormalindex]*blend) * lightcolor[1])/255;
-				vertcolor[2] = ((shadedots[verts1->lightnormalindex]*iblend + shadedots[verts2->lightnormalindex]*blend) * lightcolor[2])/255;
-				glColor3f(vertcolor[0], vertcolor[1], vertcolor[2]);
-
+			if (lerping) {
 				glVertex3f (verts1->v[0]*iblend + verts2->v[0]*blend,
 							verts1->v[1]*iblend + verts2->v[1]*blend,
 							verts1->v[2]*iblend + verts2->v[2]*blend);
 				verts1++;
 				verts2++;
-			}
-			else
-			{
-				vertcolor[0] = (shadedots[verts1->lightnormalindex] * lightcolor[0])/255;
-				vertcolor[1] = (shadedots[verts1->lightnormalindex] * lightcolor[1])/255;
-				vertcolor[2] = (shadedots[verts1->lightnormalindex] * lightcolor[2])/255;
-				glColor3f(vertcolor[0], vertcolor[1], vertcolor[2]);
-
+			} else {
 				glVertex3f (verts1->v[0], verts1->v[1], verts1->v[2]);
 				verts1++;
 			}
