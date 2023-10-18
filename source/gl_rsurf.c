@@ -788,33 +788,18 @@ void R_RenderBrushPoly (msurface_t *fa)
 		EmitWaterPolys (fa);
 		return;
 	}
-	//Diabolickal start
-	if(!Q_strncmp(fa->texinfo->texture->name,"nodraw",6) || !Q_strncmp(fa->texinfo->texture->name,"NODRAW",6))		//Diabolickal nodraw support
+
+	if (fa->flags & TEXFLAG_NODRAW)
 		return;
-	// if (!strncmp(fa->texinfo->texture->name,"{",1))			//Diabolickal Alpha pixel support
-	// {
-	// 	glEnable(GL_ALPHA_TEST);
-	// 	glEnable(GL_BLEND);
-	// 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	// }
-	if (strstr(fa->texinfo->texture->name,"light")) // Any texture with light in the name ignore lightmaps
-    {
-		DrawGLPoly (fa->polys);
+	else if (fa->flags & TEXFLAG_LIGHT) {
+		DrawGLPoly(fa->polys);
 		return;
-    }
-	//Diabolickal end
+	}
+
 	if (fa->flags & SURF_UNDERWATER)
 		DrawGLWaterPoly (fa->polys);
 	else
 		DrawGLPoly (fa->polys);
-	
-	//Diabolickal start
-	// if (!strncmp(fa->texinfo->texture->name,"{",1))			//Diabolickal Alpha pixel support
-	// {
-	// 	glDisable(GL_ALPHA_TEST);
-	// 	glDisable(GL_BLEND);
-	// }
-	//Diabolickal end
 
 	// add the poly to the proper lightmap chain
 

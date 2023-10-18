@@ -381,10 +381,10 @@ void Draw_Init (void)
 	Cvar_RegisterVariable (&gl_max_size);
 	Cvar_RegisterVariable (&gl_picmip);
 
-	// 3dfx can only handle 256 wide textures
-	if (!Q_strncasecmp ((char *)gl_renderer, "3dfx",4) ||
-		strstr((char *)gl_renderer, "Glide"))
+	if (!new3ds_flag) {
+		Cvar_SetValue("gl_picmip", 1);
 		Cvar_Set ("gl_max_size", "256");
+	}
 
 	Cmd_AddCommand ("gl_texturemode", &Draw_TextureMode_f);
 
@@ -1143,27 +1143,27 @@ void Draw_Crosshair (void)
 
 		x_value = (vid.width - 3)/2 - crosshair_offset_step;
 		y_value = (vid.height - 1)/2;
-		Draw_FillByColor(x_value, y_value, 3, 1, 255, (int)col, (int)col, crosshair_opacity);
+		Draw_FillByColor(x_value, y_value, 3, 1, 255, (int)col, (int)col, (int)crosshair_opacity);
 
 		x_value = (vid.width - 3)/2 + crosshair_offset_step;
 		y_value = (vid.height - 1)/2;
-		Draw_FillByColor(x_value, y_value, 3, 1, 255, (int)col, (int)col, crosshair_opacity);
+		Draw_FillByColor(x_value, y_value, 3, 1, 255, (int)col, (int)col, (int)crosshair_opacity);
 
 		x_value = (vid.width - 1)/2;
 		y_value = (vid.height - 3)/2 - crosshair_offset_step;
-		Draw_FillByColor(x_value, y_value, 1, 3, 255, (int)col, (int)col, crosshair_opacity);
+		Draw_FillByColor(x_value, y_value, 1, 3, 255, (int)col, (int)col, (int)crosshair_opacity);
 
 		x_value = (vid.width - 1)/2;
 		y_value = (vid.height - 3)/2 + crosshair_offset_step;
-		Draw_FillByColor(x_value, y_value, 1, 3, 255, (int)col, (int)col, crosshair_opacity);
+		Draw_FillByColor(x_value, y_value, 1, 3, 255, (int)col, (int)col, (int)crosshair_opacity);
 	}
 	// Area of Effect (o)
 	else if (crosshair.value == 2) {
-		Draw_CharacterRGBA((vid.width)/2-4, (vid.height)/2, 'O', 255, col, col, crosshair_opacity, 1);
+		Draw_CharacterRGBA((vid.width)/2-4, (vid.height)/2, 'O', 255, (int)col, (int)col, (int)crosshair_opacity, 1);
 	}
 	// Dot crosshair (.)
 	else if (crosshair.value == 3) {
-		Draw_CharacterRGBA((vid.width - 8)/2, (vid.height - 8)/2, '.', 255, col, col, crosshair_opacity, 1);
+		Draw_CharacterRGBA((vid.width - 8)/2, (vid.height - 8)/2, '.', 255, (int)col, (int)col, (int)crosshair_opacity, 1);
 	}
 	// Grenade crosshair
 	else if (crosshair.value == 4) {

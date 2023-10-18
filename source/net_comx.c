@@ -607,9 +607,9 @@ static void Modem_Init(ComPort *p)
 			response = Modem_Response(p);
 			if (!response)
 				continue;
-			if (Q_strncmp(response, "OK", 2) == 0)
+			if (strncmp(response, "OK", 2) == 0)
 				break;
-			if (Q_strncmp(response, "ERROR", 5) == 0)
+			if (strncmp(response, "ERROR", 5) == 0)
 			{
 				p->enabled = false;
 				goto failed;
@@ -632,9 +632,9 @@ static void Modem_Init(ComPort *p)
 			response = Modem_Response(p);
 			if (!response)
 				continue;
-			if (Q_strncmp(response, "OK", 2) == 0)
+			if (strncmp(response, "OK", 2) == 0)
 				break;
-			if (Q_strncmp(response, "ERROR", 5) == 0)
+			if (strncmp(response, "ERROR", 5) == 0)
 			{
 				p->enabled = false;
 				goto failed;
@@ -819,7 +819,7 @@ int TTY_Connect(int handle, char *host)
 			response = Modem_Response(p);
 			if (!response)
 				continue;
-			if (Q_strncmp(response, "CONNECT", 7) == 0)
+			if (strncmp(response, "CONNECT", 7) == 0)
 			{
 				disable();
 				p->modemRang = true;
@@ -832,17 +832,17 @@ int TTY_Connect(int handle, char *host)
 				m_return_onerror = false;
 				return 0;
 			}
-			if (Q_strncmp(response, "NO CARRIER", 10) == 0)
+			if (strncmp(response, "NO CARRIER", 10) == 0)
 				break;
-			if (Q_strncmp(response, "NO DIALTONE", 11) == 0)
+			if (strncmp(response, "NO DIALTONE", 11) == 0)
 				break;
-			if (Q_strncmp(response, "NO DIAL TONE", 12) == 0)
+			if (strncmp(response, "NO DIAL TONE", 12) == 0)
 				break;
-			if (Q_strncmp(response, "NO ANSWER", 9) == 0)
+			if (strncmp(response, "NO ANSWER", 9) == 0)
 				break;
-			if (Q_strncmp(response, "BUSY", 4) == 0)
+			if (strncmp(response, "BUSY", 4) == 0)
 				break;
-			if (Q_strncmp(response, "ERROR", 5) == 0)
+			if (strncmp(response, "ERROR", 5) == 0)
 				break;
 		}
 		key_dest = save_key_dest;
@@ -887,7 +887,7 @@ qboolean TTY_CheckForConnection(int handle)
 			if (!Modem_Response(p))
 				return false;
 
-			if (Q_strncmp(p->buffer, "RING", 4) == 0)
+			if (strncmp(p->buffer, "RING", 4) == 0)
 			{
 				Modem_Command (p, "ATA");
 				p->modemRang = true;
@@ -907,7 +907,7 @@ qboolean TTY_CheckForConnection(int handle)
 			if (!Modem_Response(p))
 				return false;
 
-			if (Q_strncmp (p->buffer, "CONNECT", 7) != 0)
+			if (strncmp (p->buffer, "CONNECT", 7) != 0)
 				return false;
 
 			disable();

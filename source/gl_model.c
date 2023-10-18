@@ -395,7 +395,7 @@ void Mod_LoadTextures (lump_t *l)
 		memcpy ( tx+1, mt+1, pixels);
 		
 
-		if (loadmodel->bspversion != HL_BSPVERSION && !Q_strncmp(mt->name,"sky",3))
+		if (loadmodel->bspversion != HL_BSPVERSION && !strncmp(mt->name,"sky",3))
 		{	
 			R_InitSky (tx);
 		} 
@@ -889,7 +889,7 @@ void Mod_LoadFaces (lump_t *l)
 		
 	// set the drawing flags flag
 		
-		if (!Q_strncmp(out->texinfo->texture->name,"sky",3))	// sky
+		if (!strncmp(out->texinfo->texture->name,"sky",3))	// sky
 		{
 			out->flags |= (SURF_DRAWSKY | SURF_DRAWTILED);
 #ifndef QUAKE2
@@ -897,8 +897,18 @@ void Mod_LoadFaces (lump_t *l)
 #endif
 			continue;
 		}
+
+		if (!strncmp(out->texinfo->texture->name,"nodraw",6) || !strncmp(out->texinfo->texture->name,"NODRAW",6)) {
+			out->flags |= TEXFLAG_NODRAW;
+			continue;
+		}
+
+		if (strstr(fa->texinfo->texture->name,"light")) {
+			out->flags |= TEXFLAG_LIGHT;
+			continue;
+		}
 		
-		if (!Q_strncmp(out->texinfo->texture->name,"*",1))		// turbulent
+		if (!strncmp(out->texinfo->texture->name,"*",1))		// turbulent
 		{
 			out->flags |= (SURF_DRAWTURB | SURF_DRAWTILED);
 			for (i=0 ; i<2 ; i++)
