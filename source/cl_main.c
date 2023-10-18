@@ -753,24 +753,6 @@ void CL_RelinkEntities (void)
 	        dl->type = SetDlightColor (2, lt_rocket, true);
 		}
 
-		if (!strcmp(ent->model->name, "progs/flame2.mdl"))
-		{
-			if (qmb_initialized && r_part_flames.value)
-			{
-				//QMB_BigTorchFlame (ent->origin);
-				if (qmb_initialized && r_part_trails.value)
-					R_RocketTrail (oldorg, ent->origin, LAVA_TRAIL);
-			}
-		}
-
-		if ((!strcmp(ent->model->name, "progs/s_spike.mdl"))||(!strcmp(ent->model->name, "progs/spike.mdl")))
-		{
-			if (qmb_initialized && r_part_trails.value)
-			{
-				R_RocketTrail (oldorg, ent->origin, NAIL_TRAIL);
-			}
-		}
-
         if (ent->model->flags)
 		{
 			if (ent->model->flags & EF_GIB)

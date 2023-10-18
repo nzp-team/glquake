@@ -903,7 +903,7 @@ void Mod_LoadFaces (lump_t *l)
 			continue;
 		}
 
-		if (strstr(fa->texinfo->texture->name,"light")) {
+		if (strstr(out->texinfo->texture->name,"light")) {
 			out->flags |= TEXFLAG_LIGHT;
 			continue;
 		}

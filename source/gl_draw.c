@@ -371,6 +371,7 @@ void Draw_TextureMode_f (void)
 Draw_Init
 ===============
 */
+extern bool new3ds_flag;
 void Draw_Init (void)
 {
 	int		start;

@@ -170,7 +170,7 @@ void Sys_Error (char *error, ...)
 	Host_Shutdown();
 
 	gfxExit();
-	exit(1);
+	Sys_Quit();
 }
 
 void Sys_Printf (char *fmt, ...)

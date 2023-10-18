@@ -741,7 +741,6 @@ void R_DrawAliasModel (entity_t *e)
 	float		s, t, an;
 	int			anim;
 	lerpdata_t	lerpdata;
-	qboolean force_fullbright = qfalse;
 
 	clmodel = currententity->model;
 
@@ -752,43 +751,7 @@ void R_DrawAliasModel (entity_t *e)
 	if (R_CullBox (mins, maxs))
 		return;
 
-	// naievil -- fixme: need to translate
-	/*
-	if(ISADDITIVE(e))
-	{
-		float deg = e->renderamt;
-		float alpha_val  = deg;
-		float alpha_val2 = 1 - deg;
-
-		if(deg <= 0.7)
-		 sceGuDepthMask(GU_TRUE);
-
-		sceGuEnable (GU_BLEND);
-		sceGuBlendFunc(GU_ADD, GU_FIX, GU_FIX,
-		GU_COLOR(alpha_val,alpha_val,alpha_val,alpha_val),
-		GU_COLOR(alpha_val2,alpha_val2,alpha_val2,alpha_val2));
-	}
-	else if(ISGLOW(e))
-	{
-		sceGuDepthMask(GU_TRUE);
-		sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_FIX, 0, 0xFFFFFFFF);
-		sceGuTexFunc(GU_TFX_MODULATE , GU_TCC_RGBA);
-	}
-	else if (ISSOLID(e))
-	{
-		sceGuEnable(GU_ALPHA_TEST);
-		float c = (e->renderamt) * 255.0f;
-		sceGuAlphaFunc(GU_GREATER, 0x88, c);
-	}
-	*/
-
 	specChar = clmodel->name[strlen(clmodel->name) - 5];
-
-	if(specChar == '!' || currententity->effects & EF_FULLBRIGHT)
-	{
-		lightcolor[0] = lightcolor[1] = lightcolor[2] = 256;
-		force_fullbright = qtrue;
-	}
 
 	VectorCopy (currententity->origin, r_entorigin);
 	VectorSubtract (r_origin, r_entorigin, modelorg);
@@ -878,9 +841,22 @@ void R_DrawAliasModel (entity_t *e)
 	//Shpuld
 	if(r_model_brightness.value)
 	{
-		lightcolor[0] += 48;
-		lightcolor[1] += 48;
-		lightcolor[2] += 48;
+		lightcolor[0] += 60;
+		lightcolor[1] += 60;
+		lightcolor[2] += 60;
+	}
+
+	if(specChar == '!' || (e->effects & EF_FULLBRIGHT))
+	{
+		lightcolor[0] = lightcolor[1] = lightcolor[2] = 256;
+	}
+
+	add = 72.0f - (lightcolor[0] + lightcolor[1] + lightcolor[2]);
+	if (add > 0.0f)
+	{
+		lightcolor[0] += add / 3.0f;
+		lightcolor[1] += add / 3.0f;
+		lightcolor[2] += add / 3.0f;
 	}
 
     glPushMatrix ();
@@ -944,10 +920,7 @@ void R_DrawAliasModel (entity_t *e)
 	if (gl_smoothmodels.value)
 		glShadeModel (GL_SMOOTH);
 
-	if (force_fullbright == qtrue)
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	else
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 	if (gl_affinemodels.value)
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
