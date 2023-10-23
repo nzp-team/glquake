@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 #include "errno.h"
+#include "touch_ctr.h"
 
 #include <3ds.h>
 
@@ -322,6 +323,7 @@ int main (int argc, char **argv)
 
 	Host_Init (&parms);
 	Touch_Init();
+	Touch_DrawOverlay();
 
 	oldtime = Sys_FloatTime();
 

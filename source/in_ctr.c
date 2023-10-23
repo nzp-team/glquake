@@ -17,7 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
-// in_null.c -- for systems without a mouse
+// in_ctr.c -- for the Nintendo 3DS
 
 #include "quakedef.h"
 #include <3ds.h>
@@ -77,8 +77,25 @@ float IN_CalcInput(int axis, float speed, float tolerance, float acceleration) {
 
 extern cvar_t scr_fov;
 extern int original_fov, final_fov;
+touchPosition oldtouch2, touch2;
+extern uint8_t keyboardToggled;
 void IN_Move (usercmd_t *cmd)
 {
+	// Change look direction with stylus on touch screen
+	// From vanilla ctrQuake.
+	if(hidKeysDown() & KEY_TOUCH) {
+		hidTouchRead(&touch2);
+		oldtouch2 = touch2;
+	} else if(hidKeysHeld() & KEY_TOUCH && !keyboardToggled){
+		hidTouchRead(&touch2);
+		touch2.px =  (touch2.px + oldtouch2.px) / 2.5;
+		touch2.py =  (touch2.py + oldtouch2.py) / 2.5;
+		cl.viewangles[YAW] -= (touch2.px - oldtouch2.px) * sensitivity.value/2.5;
+		cl.viewangles[PITCH] += (touch2.py - oldtouch2.py) * sensitivity.value/2.5;
+		oldtouch2 = touch2;
+		V_StopPitchDrift ();
+	}
+
 	// TODO: Detect circle pad pro?
 	circlePosition left;
 	circlePosition right;

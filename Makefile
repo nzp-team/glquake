@@ -102,7 +102,7 @@ COMMON_OBJS =	chase.c \
 				snd_mix.c \
 				snd_mem.c \
 				snd_ctr.c \
-				in_null.c \
+				in_ctr.c \
 				cd_null.c \
 				gl_qmb.c \
 				gl_decal.c \
