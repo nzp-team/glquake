@@ -604,7 +604,7 @@ void CL_RelinkEntities (void)
 
 				AngleVectors (tempangles, v_forward, v_right, v_up);
 				VectorCopy (cl_entities[cl.viewentity].origin, smokeorg);
-				smokeorg[2] += 32;
+				smokeorg[2] += cl.viewheight;
 				VectorCopy(smokeorg,start);
 
 				right_offset	 = sv_player->v.Flash_Offset[0];
@@ -619,12 +619,7 @@ void CL_RelinkEntities (void)
 				VectorMA (smokeorg, up_offset, v_up ,smokeorg);
 				VectorMA (smokeorg, right_offset, v_right ,smokeorg);
 				VectorAdd(smokeorg,CWeaponOffset,smokeorg);
-
-				if (sv_player->v.weapon != W_RAY && sv_player->v.weapon != W_PORTER) {
-					QMB_MuzzleFlash (smokeorg);
-				} else {
-					QMB_RayFlash(smokeorg, sv_player->v.weapon);
-				}
+				QMB_MuzzleFlash (smokeorg);
 			}
 		}
 
@@ -729,7 +724,7 @@ void CL_RelinkEntities (void)
 
 		if (ent->effects & EF_RAYGREEN)
 		{
-			R_RocketTrail (oldorg, ent->origin, 12);
+			QMB_RocketTrail(oldorg, ent->origin, RAYGREEN_TRAIL);
 			dl = CL_AllocDlight (i);
 			VectorCopy (ent->origin, dl->origin);
 			dl->radius = 25;
@@ -742,7 +737,7 @@ void CL_RelinkEntities (void)
 
 		if (ent->effects & EF_RAYRED)
 		{
-			R_RocketTrail (oldorg, ent->origin, 13);
+			QMB_RocketTrail(oldorg, ent->origin, RAYRED_TRAIL);
 			dl = CL_AllocDlight (i);
 			VectorCopy (ent->origin, dl->origin);
 			dl->radius = 25;

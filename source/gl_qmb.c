@@ -24,11 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 //#define	DEFAULT_NUM_PARTICLES		8192
 #define	ABSOLUTE_MIN_PARTICLES      64
-#ifdef SLIM
-#define	ABSOLUTE_MAX_PARTICLES		12288
-#else
 #define	ABSOLUTE_MAX_PARTICLES      6144
-#endif
+
 extern int decal_blood1, decal_blood2, decal_blood3, decal_q3blood, decal_burn, decal_mark, decal_glow;
 
 typedef	enum
@@ -40,7 +37,6 @@ typedef	enum
 	p_fire,
 	p_fire2,
 	p_bubble,
-	p_lavasplash,
 	p_gunblast,
 	p_chunk,
 	p_shockwave,
@@ -56,7 +52,6 @@ typedef	enum
 	p_blood2,
 	p_blood3,
 	p_bloodcloud,
-    p_q3blood,
 	p_flame,
 	p_lavatrail,
 	p_bubble2,
@@ -73,16 +68,7 @@ typedef	enum
 	p_muzzleflash,
 	p_muzzleflash2,
 	p_muzzleflash3,
-	p_muzzleflash8,
-	p_fly,
-    p_q3blood_trail,
-	p_q3blood_decal,
-	p_q3rocketsmoke,
-	p_q3grenadesmoke,
-	p_q3explosion,
 	p_q3flame,
-	p_q3gunshot,
-	p_q3teleport,
 	num_particletypes
 } part_type_t;
 
@@ -103,11 +89,8 @@ typedef	enum
 {
 	ptex_none,
 	ptex_smoke,
-	ptex_bubble,
 	ptex_generic,
 	ptex_dpsmoke,
-	ptex_lava,
-	ptex_blueflare,
 	ptex_blood1,
 	ptex_blood2,
 	ptex_blood3,
@@ -116,13 +99,7 @@ typedef	enum
 	ptex_muzzleflash,
 	ptex_muzzleflash2,
 	ptex_muzzleflash3,
-	ptex_muzzleflash8,
 	ptex_bloodcloud,
-	ptex_fly,
-   	ptex_q3blood,
-	ptex_q3blood_trail,
-	ptex_q3smoke,
-	ptex_q3explosion,
 	ptex_q3flame,
 	num_particletextures
 } part_tex_t;
@@ -198,11 +175,7 @@ qboolean OnChange_gl_particle_count (cvar_t *var, char *string)
 }
 
 extern cvar_t	cl_gun_offset;
-#ifdef SLIM
-cvar_t	r_particle_count	= {"r_particle_count", "4096", qtrue};
-#else
-cvar_t	r_particle_count	= {"r_particle_count", "2048", qtrue};
-#endif
+cvar_t	r_particle_count	= {"r_particle_count", "1024", qtrue};
 cvar_t	r_bounceparticles	= {"r_bounceparticles", "1",qtrue};
 cvar_t	r_decal_blood		= {"r_decal_blood", "1",qtrue};
 cvar_t	r_decal_bullets	    = {"r_decal_bullets","1",qtrue};
@@ -238,15 +211,7 @@ static byte *ColorForParticle (part_type_t type)
 		color[3] = 64;
 		break;
 
-	case p_q3rocketsmoke:
-	case p_q3grenadesmoke:
-		color[0] = color[1] = color[2] = 160;
-		break;
-
-	case p_q3explosion:
 	case p_q3flame:
-	case p_q3gunshot:	// not used
-	case p_q3teleport:	// not used
 		color[0] = color[1] = color[2] = 255;
 		break;
 
@@ -269,7 +234,6 @@ static byte *ColorForParticle (part_type_t type)
 		break;
 
 	case p_teleflare:
-	case p_lavasplash:
 		color[0] = color[1] = color[2] = 128 + (rand() & 127);
 		break;
 
@@ -323,13 +287,6 @@ static byte *ColorForParticle (part_type_t type)
 		color[0] = (50 + (rand() & 31));
 		color[1] = color[2] = 0;
 		color[3] = 200;
-		break;
-
-	case p_q3blood:
-	case p_q3blood_trail:
-	case p_q3blood_decal:
-		color[0] = 180;
-		color[1] = color[2] = 0;
 		break;
 
 	case p_flame:
@@ -425,46 +382,19 @@ void QMB_InitParticles (void)
 	strcpy(loading_name, "Particles");
 	SCR_UpdateScreen ();
 
-	max_s = max_t = 256.0;
+	max_s = max_t = 128.0;
+
+	// LAST 4 PARAMS = START X, START Y, END X, END Y
 	ADD_PARTICLE_TEXTURE(ptex_none, 0, 0, 1, 0, 0, 0, 0);
 	ADD_PARTICLE_TEXTURE(ptex_blood1, particleimage, 0, 1, 0, 0, 64, 64);
 	ADD_PARTICLE_TEXTURE(ptex_blood2, particleimage, 0, 1, 64, 0, 128, 64);
-	ADD_PARTICLE_TEXTURE(ptex_lava, particleimage, 0, 1, 128, 0, 192, 64);
-	ADD_PARTICLE_TEXTURE(ptex_blueflare, particleimage, 0, 1, 192, 0, 256, 64);
-	ADD_PARTICLE_TEXTURE(ptex_generic, particleimage, 0, 1, 0, 96, 96, 192);
-	ADD_PARTICLE_TEXTURE(ptex_smoke, particleimage, 0, 1, 96, 96, 192, 192);
-	ADD_PARTICLE_TEXTURE(ptex_blood3, particleimage, 0, 1, 192, 96, 256, 160);
-	ADD_PARTICLE_TEXTURE(ptex_bubble, particleimage, 0, 1, 192, 160, 224, 192);
+	ADD_PARTICLE_TEXTURE(ptex_generic, particleimage, 0, 1, 0, 64, 32, 96);
+	ADD_PARTICLE_TEXTURE(ptex_smoke, particleimage, 0, 1, 32, 64, 96, 128);
+	ADD_PARTICLE_TEXTURE(ptex_blood3, particleimage, 0, 1, 0, 96, 32, 128);
 	
 	for (i=0 ; i<8 ; i++)
 		ADD_PARTICLE_TEXTURE(ptex_dpsmoke, particleimage, i, 8, i * 32, 64, (i + 1) * 32, 96);
 
-	loading_cur_step++;
-	SCR_UpdateScreen ();
-
-	// load the rest of the images
-	if(!(particleimage = loadtextureimage("textures/particles/q3particlefont", 0, 0, qfalse, qtrue)))
-	{
-		//Clear_LoadingFill ();
-		return;
-	}
-	
-	max_s = 384.0; max_t = 192.0;
-	for (i = 0, ti = 0 ; i < 2 ; i++)
-		for (j = 0 ; j < 4 ; j++, ti++)
-			ADD_PARTICLE_TEXTURE(ptex_q3explosion, particleimage, ti, 8, j * 64, i * 64, (j + 1) * 64, (i + 1) * 64);
-		
-	
-	loading_cur_step++;
-	SCR_UpdateScreen ();
-
-	for (i = 0 ; i < 5 ; i++) {
-		ADD_PARTICLE_TEXTURE(ptex_q3blood, particleimage, i, 5, i * 64, 128, (i + 1) * 64, 192);
-	}
-
-	ADD_PARTICLE_TEXTURE(ptex_q3smoke, particleimage, 0, 1, 256, 0, 384, 128);
-	ADD_PARTICLE_TEXTURE(ptex_q3blood_trail, particleimage, 0, 1, 320, 128, 384, 192);
-	
 	loading_cur_step++;
 	SCR_UpdateScreen ();
 	
@@ -475,15 +405,12 @@ void QMB_InitParticles (void)
 		//Clear_LoadingFill ();
 		return;
 	}
-	
-	/*max_s = max_t = 128.0;
-	for (i = 0, ti = 0 ; i < 2 ; i++)
-		for (j = 0 ; j < 2 ; j++, ti++)
-			ADD_PARTICLE_TEXTURE(ptex_q3flame, particleimage, ti, 8, j * 64, i * 64, (j + 1) * 64, (i + 1) * 64);*/
-	max_s = max_t = 64.0;
+
 	ADD_PARTICLE_TEXTURE(ptex_q3flame, particleimage, 0, 1, 0, 0, 64, 64);
     loading_cur_step++;
 	SCR_UpdateScreen ();
+
+	max_s = max_t = 64.0;
 
 	if (!(particleimage = loadtextureimage("textures/particles/inferno", 0, 0, qfalse, qtrue)))
 	{
@@ -540,17 +467,6 @@ void QMB_InitParticles (void)
 
     loading_cur_step++;
 	SCR_UpdateScreen ();
-
-	if (!(particleimage = loadtextureimage("textures/mzfl/muzzleflash8", 0, 0, qfalse, qtrue)))
-	{
-		//Clear_LoadingFill ();
-		return;
-	}
-	//max_s = max_t = 256.0;
-	ADD_PARTICLE_TEXTURE(ptex_muzzleflash8, particleimage, 0, 1, 0, 0, 128, 128);
-
-    loading_cur_step++;
-	SCR_UpdateScreen ();
 	
 	max_s = max_t = 64.0;
 	if (!(particleimage = loadtextureimage("textures/particles/bloodcloud", 0, 0, qfalse, qtrue)))
@@ -563,53 +479,18 @@ void QMB_InitParticles (void)
 
 	loading_cur_step++;
 	SCR_UpdateScreen ();
-/*
-	if (!(particleimage = loadtextureimage("textures/particles/blood1", 0, 0, qfalse, qtrue)))
-	{
-        Clear_LoadingFill ();
-		return;
-	}
-
-    max_s = max_t = 256.0;
-	ADD_PARTICLE_TEXTURE(ptex_blood1, particleimage, 0, 1, 0, 0, 256, 256);
-
-    loading_cur_step++;
-	SCR_UpdateScreen ();
-
-	if (!(particleimage = loadtextureimage("textures/particles/blood2", 0, 0, qfalse, qtrue)))
-	{
-        Clear_LoadingFill ();
-		return;
-	}
-    max_s = max_t = 256.0;
-	ADD_PARTICLE_TEXTURE(ptex_blood2, particleimage, 0, 1, 0, 0, 256, 256);
-
-    loading_cur_step++;
-	SCR_UpdateScreen ();
-
-*/
-	if (!(particleimage = loadtextureimage("textures/particles/fly", 0, 0, qfalse, qtrue)))
-	{
-		//Clear_LoadingFill ();
-		return;
-	}
-	max_s = max_t = 256.0;
-	ADD_PARTICLE_TEXTURE(ptex_fly, particleimage, 0, 1, 0, 0, 256, 256);
-
-    loading_cur_step++;
-	SCR_UpdateScreen ();
 
 	QMB_AllocParticles ();
 
-	ADD_PARTICLE_TYPE(p_spark, pd_spark, GL_SRC_ALPHA, GL_CONSTANT_COLOR, ptex_none, 255, -8, 0, pm_normal, 1.3);
+	ADD_PARTICLE_TYPE(p_spark, pd_spark, GL_SRC_ALPHA, GL_ONE, ptex_none, 255, -8, 0, pm_normal, 1.3);
 	ADD_PARTICLE_TYPE(p_gunblast, pd_spark, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_none, 255, 0, 0, pm_normal, 1.3);
 	ADD_PARTICLE_TYPE(p_sparkray, pd_sparkray, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_none,	255, -0, 0, pm_nophysics, 0);
-	ADD_PARTICLE_TYPE(p_fire, pd_billboard, GL_SRC_ALPHA, GL_CONSTANT_COLOR, ptex_smoke, 204, 0, -2.95, pm_die, 0);
+	ADD_PARTICLE_TYPE(p_fire, pd_billboard, GL_SRC_ALPHA, GL_ONE, ptex_smoke, 204, 0, -2.95, pm_die, 0);
 
     loading_cur_step++;
 	SCR_UpdateScreen ();
 
-	ADD_PARTICLE_TYPE(p_fire2,	pd_billboard, GL_SRC_ALPHA, GL_CONSTANT_COLOR, ptex_smoke, 204, 0, -2.95, pm_die, 0);
+	ADD_PARTICLE_TYPE(p_fire2,	pd_billboard, GL_SRC_ALPHA, GL_ONE, ptex_smoke, 204, 0, -2.95, pm_die, 0);
 	ADD_PARTICLE_TYPE(p_chunk, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_generic, 255, -16, 0, pm_bounce, 1.475);
 	ADD_PARTICLE_TYPE(p_shockwave, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_generic, 255, 0, -4.85, pm_nophysics, 0);
 	ADD_PARTICLE_TYPE(p_inferno_flame, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_generic,	153, 0, 0, pm_static, 0);
@@ -619,17 +500,14 @@ void QMB_InitParticles (void)
 
 	ADD_PARTICLE_TYPE(p_inferno_trail, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_generic, 204, 0, 0, pm_die, 0);
 	ADD_PARTICLE_TYPE(p_trailpart, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_generic, 230, 0, 0, pm_static, 0);
-	ADD_PARTICLE_TYPE(p_smoke, pd_billboard, GL_SRC_ALPHA, GL_CONSTANT_COLOR, ptex_smoke, 140, 3, 0, pm_normal, 0);
-	ADD_PARTICLE_TYPE(p_raysmoke, pd_billboard, GL_SRC_ALPHA, GL_CONSTANT_COLOR, ptex_smoke, 140, 3, 0, pm_normal, 0);
+	ADD_PARTICLE_TYPE(p_smoke, pd_billboard, GL_SRC_ALPHA, GL_ONE, ptex_smoke, 140, 3, 0, pm_normal, 0);
+	ADD_PARTICLE_TYPE(p_raysmoke, pd_billboard, GL_SRC_ALPHA, GL_ONE, ptex_smoke, 140, 3, 0, pm_normal, 0);
 	ADD_PARTICLE_TYPE(p_dpfire, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_dpsmoke, 144, 0, 0, pm_die, 0);
 
 	loading_cur_step++;
 	SCR_UpdateScreen ();
 
 	ADD_PARTICLE_TYPE(p_dpsmoke, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_dpsmoke, 85, 3, 0, pm_die, 0);
-	ADD_PARTICLE_TYPE(p_teleflare, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_blueflare, 255, 0, 0, pm_die, 0);
-	ADD_PARTICLE_TYPE(p_flare, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_bubble, 255, 0, 0, pm_die, 0);
-	ADD_PARTICLE_TYPE(p_fly, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_fly, 255, 0, 0, pm_die, 0);
 	
 	loading_cur_step++;
 	SCR_UpdateScreen();
@@ -642,16 +520,12 @@ void QMB_InitParticles (void)
 	loading_cur_step++;
 	SCR_UpdateScreen();
 	
-	ADD_PARTICLE_TYPE(p_lavasplash, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_lava, 170, 0, 0, pm_nophysics, 0);
-	ADD_PARTICLE_TYPE(p_bubble, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_bubble, 204, 8, 0, pm_float, 0);
-	ADD_PARTICLE_TYPE(p_staticbubble, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_bubble, 204, 0, 0, pm_static, 0);
 	ADD_PARTICLE_TYPE(p_flame, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_generic, 200, 10, 0, pm_die, 0);
 	
 	loading_cur_step++;
 	SCR_UpdateScreen();
 	
 	ADD_PARTICLE_TYPE(p_lavatrail, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_dpsmoke, 255, 3, 0, pm_normal, 0);//R00k
-	ADD_PARTICLE_TYPE(p_bubble2, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_bubble, 204, 1, 0, pm_float, 0);
 	ADD_PARTICLE_TYPE(p_glow, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_generic, 204, 0, 0, pm_die, 0);
 	ADD_PARTICLE_TYPE(p_alphatrail, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_generic, 100, 0, 0, pm_static, 0);
 	
@@ -667,10 +541,9 @@ void QMB_InitParticles (void)
 	SCR_UpdateScreen();
 	
 	ADD_PARTICLE_TYPE(p_lightningbeam, pd_beam, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_lightning, 255, 0, 0, pm_die, 0);
-	ADD_PARTICLE_TYPE(p_muzzleflash, pd_billboard, GL_SRC_ALPHA, GL_CONSTANT_COLOR, ptex_muzzleflash, 255, 0, 0, pm_static, 0);
-	ADD_PARTICLE_TYPE(p_muzzleflash2, pd_billboard, GL_SRC_ALPHA, GL_CONSTANT_COLOR, ptex_muzzleflash2, 255, 0, 0, pm_static, 0);
-	ADD_PARTICLE_TYPE(p_muzzleflash3, pd_billboard, GL_SRC_ALPHA, GL_CONSTANT_COLOR, ptex_muzzleflash3, 255, 0, 0, pm_static, 0);
-	ADD_PARTICLE_TYPE(p_muzzleflash8, pd_billboard, GL_SRC_ALPHA, GL_CONSTANT_COLOR, ptex_muzzleflash8, 220, 0, 0, pm_static, 0);
+	ADD_PARTICLE_TYPE(p_muzzleflash, pd_billboard, GL_SRC_ALPHA, GL_ONE, ptex_muzzleflash, 255, 0, 0, pm_static, 0);
+	ADD_PARTICLE_TYPE(p_muzzleflash2, pd_billboard, GL_SRC_ALPHA, GL_ONE, ptex_muzzleflash2, 255, 0, 0, pm_static, 0);
+	ADD_PARTICLE_TYPE(p_muzzleflash3, pd_billboard, GL_SRC_ALPHA, GL_ONE, ptex_muzzleflash3, 255, 0, 0, pm_static, 0);
 	ADD_PARTICLE_TYPE(p_rain, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_generic, 255, -16, 0, pm_rain, 0);
 	
 	loading_cur_step++;
@@ -678,19 +551,12 @@ void QMB_InitParticles (void)
 	
 	//shpuldeditedthis(GI_ONE_MINUS_DST_ALPHA->GL_ONE_MINUS_SRC_ALPHA) (edited one right after this comment)
 	ADD_PARTICLE_TYPE(p_bloodcloud, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_bloodcloud, 255, -2, 0, pm_normal, 0);
-	ADD_PARTICLE_TYPE(p_q3blood, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_q3blood, 255, 0, 0, pm_static, -1);
-	ADD_PARTICLE_TYPE(p_q3blood_trail, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_q3blood_trail, 255, -1.5, 0, pm_die, -1);
-	ADD_PARTICLE_TYPE(p_q3rocketsmoke, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_q3smoke, 80, 0, 0, pm_die, 0);
 	
 	loading_cur_step++;
 	SCR_UpdateScreen();
 	
-	ADD_PARTICLE_TYPE(p_q3grenadesmoke, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, ptex_q3smoke, 80, 0, 0, pm_die, 0);
-	ADD_PARTICLE_TYPE(p_q3explosion, pd_billboard, GL_SRC_ALPHA, GL_ONE_MINUS_DST_ALPHA, ptex_q3explosion, 204, 0, 0, pm_static, -1);
 	//old: ADD_PARTICLE_TYPE(p_q3flame, pd_q3flame, GL_SRC_ALPHA, GL_ONE_MINUS_DST_ALPHA, ptex_q3flame, 204, 0, 0, pm_static, -1);
-	ADD_PARTICLE_TYPE(p_q3flame, pd_billboard, GL_SRC_ALPHA, GL_CONSTANT_COLOR, ptex_q3flame, 180, 0.66, 0, pm_nophysics, 0);
-	ADD_PARTICLE_TYPE(p_q3gunshot, pd_q3gunshot, GL_SRC_ALPHA, GL_ONE_MINUS_DST_ALPHA, ptex_none, 255, 0, 0, pm_static, -1);
-	ADD_PARTICLE_TYPE(p_q3teleport, pd_q3teleport, GL_SRC_ALPHA, GL_ONE_MINUS_DST_ALPHA, ptex_none, 255, 0, 0, pm_static, -1);
+	ADD_PARTICLE_TYPE(p_q3flame, pd_billboard, GL_SRC_ALPHA, GL_ONE, ptex_q3flame, 180, 0.66, 0, pm_nophysics, 0);
 
 	loading_cur_step++;
 	strcpy(loading_name, "particles");
@@ -804,11 +670,9 @@ __inline static void AddParticle (part_type_t type, vec3_t org, int count, float
 			VectorClear (p->vel);
 			break;
 
-		case p_lavasplash:
 		case p_streak:
 		case p_streakwave:
 		case p_shockwave:
-		case p_q3teleport:
 			VectorCopy (org, p->org);
 			VectorCopy (dir, p->vel);
 			break;
@@ -849,24 +713,6 @@ __inline static void AddParticle (part_type_t type, vec3_t org, int count, float
 			p->growth = -30;
 			break;
 
-		case p_q3explosion:
-				p->texindex = 0;
-				VectorCopy (org, p->org);
-				VectorClear (p->vel);
-				p->growth = 50;
-				for (j=1 ; j<8 ; j++)
-				{
-					INIT_NEW_PARTICLE(pt, p, color, size, time);
-					p->size = size + j * 2;
-					p->start = cl.time + (j * time / 2.0);
-					p->die = p->start + time;
-					p->texindex = j;
-					VectorCopy (org, p->org);
-					VectorClear (p->vel);
-					p->growth = 50;
-				}
-				break;
-
 		case p_sparkray:
 			VectorCopy (org, p->endorg);
 			VectorCopy (dir, p->org);
@@ -891,15 +737,15 @@ __inline static void AddParticle (part_type_t type, vec3_t org, int count, float
 		case p_muzzleflash:
 		case p_muzzleflash2:
 		case p_muzzleflash3:
-		case p_muzzleflash8:
+
 			VectorCopy (org, p->org);
 			p->rotspeed = (rand() & 45) - 90;
+			//p->size = size * (rand() % 6) / 4;//r00k
 			p->size = size * (0.75 +((0.05 * (rand() % 20)) * 0.5));//blubs: resultant size range: [size * 0.75, size * 1.25)
 			break;
 
 		case p_teleflare:
 		case p_flare:
-		case p_fly:
 			VectorCopy (org, p->org);
 			VectorCopy (dir, p->vel);
 			p->growth = 1.75;
@@ -928,23 +774,6 @@ __inline static void AddParticle (part_type_t type, vec3_t org, int count, float
 				p->vel[j] = (rand() % 40) - 20;
 			break;
 
-		case p_q3blood:
-			p->texindex = q3blood_texindex++ % 5;
-			for (k=0 ; k<3 ; k++)
-				p->org[k] = org[k] + (rand() & 15) - 8;
-			VectorClear (p->vel);
-			for (j=1 ; j<3 ; j++)
-			{
-				INIT_NEW_PARTICLE(pt, p, color, size, time);
-				p->start = cl.time + (j * time);
-				p->die = p->start + time;
-				p->texindex = q3blood_texindex++ % 5;
-				for (k=0 ; k<3 ; k++)
-					p->org[k] = org[k] + (rand() & 15) - 8;
-				VectorClear (p->vel);
-			}
-			break;
-
 		case p_flame:
 			VectorCopy (org, p->org);
 			p->growth = -p->size / 2;
@@ -959,19 +788,6 @@ __inline static void AddParticle (part_type_t type, vec3_t org, int count, float
 			p->vel[1] = (rand() & 3) - 2;
 			p->vel[2] = (rand() & 2);
 			p->growth = 6;
-			break;
-
-		case p_q3gunshot:
-			p->texindex = 0;	// used for animation here
-			VectorCopy (org, p->org);
-			for (j=1 ; j<3 ; j++)
-			{
-				INIT_NEW_PARTICLE(pt, p, color, size, time);
-				p->start = cl.time + (j * time / 2.0);
-				p->die = p->start + time;
-				p->texindex = j + 1;
-				VectorCopy (org, p->org);
-			}
 			break;
 
 		case p_torch_flame:
@@ -1034,16 +850,6 @@ __inline static void AddParticleTrail (part_type_t type, vec3_t start, vec3_t en
 
 	switch (type)
 	{
-
-    case p_q3blood_trail:
-	case p_q3rocketsmoke:
-		count = length / 40.0;
-		break;
-
-	case p_q3grenadesmoke:
-		count = length / 12.0;
-		break;
-
 	case p_alphatrail:
 	case p_trailpart:
 	case p_lavatrail:
@@ -1105,15 +911,6 @@ __inline static void AddParticleTrail (part_type_t type, vec3_t start, vec3_t en
 			p->growth = 6;
 			break;
 
-		case p_q3blood_trail:
-			VectorCopy (point, p->org);
-			for (j=0 ; j<3 ; j++)
-				p->org[j] += ((rand() & 15) - 8) / 8.0;
-			for (j=0 ; j<3 ; j++)
-				p->vel[j] = ((rand() & 15) - 8) / 2.0;
-			p->growth = 6;
-			break;
-
 		case p_bubble2:
 			VectorCopy(point, p->org);
 			for (j=0 ; j<3 ; j++)
@@ -1142,19 +939,6 @@ __inline static void AddParticleTrail (part_type_t type, vec3_t start, vec3_t en
 			p->vel[2] = rand() & 3;
 			p->growth = 4.5;
 			p->rotspeed = (rand() & 63) + 96;
-			break;
-
-        case p_q3rocketsmoke:
-		case p_q3grenadesmoke:
-			VectorCopy (point, p->org);
-			for (j=0 ; j<3 ; j++)
-				p->org[j] += ((rand() & 7) - 4) / 8.0;
-			VectorClear (p->vel);
-			p->growth = 30;
-			if (rotangle >= 360)
-				rotangle = 0;
-			p->rotangle = rotangle;
-			rotangle += 30;
 			break;
 
 		case p_dpsmoke:
@@ -1276,25 +1060,6 @@ inline static void QMB_UpdateParticles(void)
 
 			switch (pt->id)
 			{
-
-			case p_q3blood:	// avoid alpha for q3blood
-				p->color[3] = 255;
-				break;
-
-			case p_q3explosion:
-			case p_q3gunshot:
-				if (particle_time < (p->start + (p->die - p->start) / 2.0))
-				{
-					if (pt->id == p_q3gunshot && !p->texindex)
-						p->color[3] = 255;
-					else
-						p->color[3] = pt->startalpha * ((particle_time - p->start) / (p->die - p->start) * 2);
-				}
-				else
-				{
-					p->color[3] = pt->startalpha * ((p->die - particle_time) / (p->die - p->start) * 2);
-				}
-				break;
 			case p_streaktrail://R00k
 			case p_lightningbeam:
 					p->color[3] = p->bounces * ((p->die - particle_time) / (p->die - p->start));
@@ -1535,84 +1300,54 @@ void R_CalcBeamVerts (float *vert, vec3_t org1, vec3_t org2, float width)
 	vert[14] = org2[2] + width * right2[2];
 }
 
-/*
-#define DRAW_PARTICLE_BILLBOARD(_ptex, _p, _coord)		\
-	glPushMatrix ();									\
-    glTranslatef(_p->org[0], _p->org[1], _p->org[2]);   \
-	glScalef(_p->size, _p->size, _p->size);			    \
-	if (_p->rotspeed || pt->id == p_q3rocketsmoke || pt->id == p_q3grenadesmoke) \
-	{                                                   \
-	    glRotatef(	0,									\
-	    			vpn[0] * (M_PI / 180.0f),           \
-		 			vpn[1] * (M_PI / 180.0f),           \
-		    		vpn[2] * (M_PI / 180.0f));   		\
-	}													\
-	glColor4f(_p->color[0]/255, _p->color[1]/255, _p->color[2]/255, _p->color[3]/255); \
-	struct vertex                                       \
-	{                                                   \
-	  float u, v;                                       \
-	  float x, y, z;                                    \
-	};                                                  \
-	struct vertex* const df = (struct vertex*)(malloc(sizeof(struct vertex) * 4)); \
-	df[0].u = _ptex->coords[_p->texindex][0]; df[0].v = _ptex->coords[_p->texindex][3]; \
-	df[0].x = _coord[0][0]; df[0].y = _coord[0][1]; df[0].z = _coord[0][2];             \
-	df[1].u = _ptex->coords[_p->texindex][0]; df[1].v = _ptex->coords[_p->texindex][1]; \
-	df[1].x = _coord[1][0]; df[1].y = _coord[1][1]; df[1].z = _coord[1][2];             \
-	df[2].u = _ptex->coords[_p->texindex][2]; df[2].v = _ptex->coords[_p->texindex][1]; \
-	df[2].x = _coord[2][0]; df[2].y = _coord[2][1]; df[2].z = _coord[2][2];             \
-	df[3].u = _ptex->coords[_p->texindex][2]; df[3].v = _ptex->coords[_p->texindex][3]; \
-	df[3].x = _coord[3][0]; df[3].y = _coord[3][1]; df[3].z = _coord[3][2];             \
-	glBegin (GL_TRIANGLE_FAN); 							\
-	glVertex4fv (df);									\
-	glEnd ();											\
-    glColor4f(1,1,1,1);           						\
-	glPopMatrix ();                                		
-*/
-
 // naievil -- hacky particle drawing...NOT OPTIMIZED -- from NX
 void DRAW_PARTICLE_BILLBOARD(particle_texture_t *ptex, particle_t *p, vec3_t *coord) {
+	float            scale;
+    vec3_t            up, right, p_downleft, p_upleft, p_downright, p_upright;
+    GLubyte            color[4], *c;
 
-	float			scale;
-	vec3_t			up, right, p_up, p_right, p_upright;
-	GLubyte			color[4], *c;
+    VectorScale (vup, 1.5, up);
+    VectorScale (vright, 1.5, right);
 
-	VectorScale (vup, 1.5, up);
-	VectorScale (vright, 1.5, right);
+    glEnable (GL_BLEND);
+    glDepthMask (GL_FALSE);
+    glBegin (GL_QUADS);
 
-	//glEnable (GL_BLEND);
-	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	//glDepthMask (GL_FALSE);
-	glBegin (GL_QUADS);
+    scale = p->size;
+    color[0] = p->color[0];
+    color[1] = p->color[1];
+    color[2] = p->color[2];
+    color[3] = p->color[3];
+    glColor4ubv(color);
 
-	scale = p->size;
-	color[0] = p->color[0];
-	color[1] = p->color[1];
-	color[2] = p->color[2];
-	color[3] = p->color[3];
-	glColor4ubv(color);
+    float subTexLeft = ptex->coords[p->texindex][0];
+    float subTexTop = ptex->coords[p->texindex][1];
+    float subTexRight = ptex->coords[p->texindex][2];
+    float subTexBottom = ptex->coords[p->texindex][3];
 
-	glTexCoord2f (0,0);
-	glVertex3fv (p->org);
+    glTexCoord2f(subTexLeft, subTexTop);
+    VectorMA(p->org, -scale * 0.5, up, p_downleft);
+    VectorMA(p_downleft, -scale * 0.5, right, p_downleft);
+    glVertex3fv (p_downleft);
 
-	glTexCoord2f (1,0);
-	VectorMA (p->org, scale, up, p_up);
-	glVertex3fv (p_up);
+    glTexCoord2f(subTexRight, subTexTop);
+    VectorMA (p_downleft, scale, up, p_upleft);
+    glVertex3fv (p_upleft);
 
-	glTexCoord2f (1,1);
-	VectorMA (p_up, scale, right, p_upright);
-	glVertex3fv (p_upright);
+    glTexCoord2f(subTexRight, subTexBottom);
+    VectorMA (p_upleft, scale, right, p_upright);
+    glVertex3fv (p_upright);
 
-	glTexCoord2f (0,1);
-	VectorMA (p->org, scale, right, p_right);
-	glVertex3fv (p_right);
+    glTexCoord2f(subTexLeft, subTexBottom);
+    VectorMA (p_downleft, scale, right, p_downright);
+    glVertex3fv (p_downright);
 
-	glEnd ();
+    glEnd ();
 
 
-	//glDepthMask (GL_TRUE);
-	//glDisable (GL_BLEND);
-	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	//glColor3f(1,1,1);
+    glDepthMask (GL_TRUE);
+    glDisable (GL_BLEND);
+    glColor3f(1,1,1);
 }
 
 void QMB_DrawParticles (void)
@@ -1639,7 +1374,7 @@ void QMB_DrawParticles (void)
 	VectorNegate (billboard[2], billboard[0]);
 	VectorNegate (billboard[3], billboard[1]);
 
-   	glDepthMask (GL_TRUE);
+   	//glDepthMask (GL_TRUE);
 	glEnable (GL_BLEND);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glShadeModel (GL_SMOOTH);
@@ -1657,7 +1392,7 @@ void QMB_DrawParticles (void)
 
 		switch (pt->drawtype)
 		{
-			case pd_hide:
+			/*case pd_hide:
 				break;
 			case pd_beam:
 				ptex = &particle_textures[pt->texture];
@@ -1809,8 +1544,7 @@ void QMB_DrawParticles (void)
 
 				}
 				glEnable (GL_TEXTURE_2D);
-				break;
-
+				break;*/
 			case pd_billboard:
 				ptex = &particle_textures[pt->texture];
 				GL_Bind (ptex->texnum);
@@ -1829,17 +1563,13 @@ void QMB_DrawParticles (void)
 						}
 					}
 					
-					if(pt->texture == ptex_muzzleflash || pt->texture == ptex_muzzleflash2 || pt->texture == ptex_muzzleflash3) {
-						glDepthRange(0, 19660);
-						glEnable(GL_ALPHA_TEST);
-					}
+					if(pt->texture == ptex_muzzleflash || pt->texture == ptex_muzzleflash2 || pt->texture == ptex_muzzleflash3)
+						glDepthRange (0, 0.3);
 					
 					DRAW_PARTICLE_BILLBOARD(ptex, p, billboard);
 					
-					if(pt->texture == ptex_muzzleflash || pt->texture == ptex_muzzleflash2 || pt->texture == ptex_muzzleflash3) {
-						glDepthRange(0, 65535);
-						glDisable(GL_ALPHA_TEST);
-					}
+					if(pt->texture == ptex_muzzleflash || pt->texture == ptex_muzzleflash2 || pt->texture == ptex_muzzleflash3)
+						glDepthRange(0, 1);
 				}
 				break;
 
@@ -1864,7 +1594,7 @@ void QMB_DrawParticles (void)
 				}
 				break;
 
-			case pd_q3flame:
+			/*case pd_q3flame:
 				ptex = &particle_textures[pt->texture];
 				GL_Bind (ptex->texnum);
 				for (p = pt->start ; p ; p = p->next)
@@ -1959,7 +1689,7 @@ void QMB_DrawParticles (void)
 			case pd_q3teleport:
 				for (p = pt->start ; p ; p = p->next)
 					QMB_Q3Teleport (p->org, (float)p->color[3] / 255.0);
-				break;
+				break;*/
 			default:
 					//assert (!"QMB_DrawParticles: unexpected drawtype");
 					break;
@@ -1989,55 +1719,7 @@ void QMB_Shockwave_Splash(vec3_t org, int radius)
 }
 
 extern sfx_t		*cl_sfx_thunder;
-#if 0 // naievil -- midpoint is causing rendering issue for some reason
-void QMB_LetItRain(void)
-{
-	int			i;
-	msurface_t	*surf;
-	glpoly_t	*p;
-	col_t		color;
-	float		distance[3], point[3];
-	float		frametime = fabs(cl.ctime - cl.oldtime);
 
-	color[0] =  color[1] = color[2] = + (rand() % 25 + 15);
-	color[2] += 5;
-
-	if (!qmb_initialized)
-		return;
-
-	if (!particle_mode)
-		return;
-
-	if (frametime)
-	{
-		for (i = 0, surf = cl.worldmodel->surfaces; i < cl.worldmodel->numsurfaces; i++, surf++)
-		{
-			if (!(surf->flags & SURF_DRAWSKY)) continue;
-
-			for (p = surf->polys; p; p = p->next)
-			{
-				VectorSubtract(r_refdef.vieworg,p->midpoint, distance);
-
-				if (VectorLength(distance) > r_farclip.value)
-					continue;
-
-				//R00k let's make some thunder...
-				/*if (cl.time > cl.thundertime)
-				{
-					S_StartSound (-1, 0, cl_sfx_thunder, p->midpoint, 1, 1);
-					cl.thundertime = cl.time + (rand()% 60 + 1);
-				}*/
-
-				point[0] = p->midpoint[0] + (rand() % 80 - 40);
-				point[1] = p->midpoint[1] + (rand() % 80 - 40);
-				point[2] = p->midpoint[2];
-
-				AddParticle(p_rain, point, 1, 0.75, 5, color, zerodir);
-			}
-		}
-	}
-};
-#endif 
 //R00k: revamped to coincide with classic particle style...
 
 void QMB_ParticleExplosion (vec3_t org)
@@ -2050,28 +1732,15 @@ void QMB_ParticleExplosion (vec3_t org)
 		AddParticle (p_bubble, org, 6, 3.0, 2.5, NULL, zerodir);
 		AddParticle (p_bubble, org, 4, 2.35, 2.5, NULL, zerodir);
 
-		if (r_part_explosions.value == 2)
+		AddParticle (p_fire, org, 16, 120, 1, NULL, zerodir);
+		if (r_explosiontype.value != 1)
 		{
-			AddParticle (p_q3explosion, org, 1, 36, 0.2, NULL, zerodir);
-		}
-		else
-		{
-			if (r_part_explosions.value == 2)
-		    {
-			AddParticle (p_q3explosion, org, 1, 36, 0.2, NULL, zerodir);
-		    }
-		    else
-		    {
-			   AddParticle (p_fire, org, 16, 120, 1, NULL, zerodir);
-			   if (r_explosiontype.value != 1)
-			   {
-				 AddParticle (p_spark, org, 50, 250, 0.925f, NULL, zerodir);
-				 AddParticle (p_spark, org, 25, 150, 0.925f, NULL, zerodir);
-			   }
-		    }
+			AddParticle (p_spark, org, 50, 250, 0.925f, NULL, zerodir);
+			AddParticle (p_spark, org, 25, 150, 0.925f, NULL, zerodir);
 		}
 	}
 	else
+
 	{
 		/*	original
 		if (r_explosiontype.value != 3)
@@ -2312,10 +1981,7 @@ void QMB_RunParticleEffect (vec3_t org, vec3_t dir, int col, int count)
 		{
 			color[0] = 200;	color[1] = 200;	color[2] = 125;
 
-			if (r_part_spikes.value == 2)
-				AddParticle (p_q3gunshot, org, 1, 1, 0.3, NULL, zerodir);
-			else
-				AddParticle (p_spark, org, 6, 70, 0.6, NULL, zerodir);
+			AddParticle (p_spark, org, 6, 70, 0.6, NULL, zerodir);
 
 			AddParticle (p_chunk, org, 3, 1, 0.75, NULL, zerodir);
 
@@ -2336,11 +2002,7 @@ void QMB_RunParticleEffect (vec3_t org, vec3_t dir, int col, int count)
 	case 20://super nailgun
 		color[0] = 200;	color[1] = 200;	color[2] = 125;
 
-		if (r_part_spikes.value == 2)
-			AddParticle (p_q3gunshot, org, 1, 1, 0.3, NULL, zerodir);
-		else
-		    //AddParticle (p_spark, org, 2, 85, 0.4, color, zerodir);
-            AddParticle (p_spark, org, 22, 100, 0.2, NULL, zerodir);
+        AddParticle (p_spark, org, 22, 100, 0.2, NULL, zerodir);
 
 		//AddParticle (p_chunk, org, 6, 2, 0.75, NULL, zerodir);
 
@@ -2358,12 +2020,6 @@ void QMB_RunParticleEffect (vec3_t org, vec3_t dir, int col, int count)
 		break;
 
 	case 24:// gunshot
-      if (r_part_gunshots.value == 2)
-	  {
-		AddParticle (p_q3gunshot, org, 1, 1, 0.3, NULL, zerodir);
-	  }
-	  else
-	  {
 		particlecount = count >> 1;
 		AddParticle (p_gunblast, org, 1, 1.04, 0.2, NULL, zerodir);
 		for (i=0 ; i<particlecount ; i++)
@@ -2388,19 +2044,11 @@ void QMB_RunParticleEffect (vec3_t org, vec3_t dir, int col, int count)
 			}
 
 		}
-	  }
 		break;
 
 	case 30:
-		if (r_part_spikes.value == 2)
-		{
-			AddParticle (p_q3gunshot, org, 1, 1, 0.3, NULL, zerodir);
-		}
-		else
-		{
-			AddParticle (p_chunk, org, 10, 1, 4, NULL, zerodir);
-			AddParticle (p_spark, org, 8, 105, 0.9, NULL, zerodir);
-		}
+		AddParticle (p_chunk, org, 10, 1, 4, NULL, zerodir);
+		AddParticle (p_spark, org, 8, 105, 0.9, NULL, zerodir);
 		break;
 
 	case 128:	// electric sparks (R00k added from QMB)
@@ -2412,14 +2060,16 @@ void QMB_RunParticleEffect (vec3_t org, vec3_t dir, int col, int count)
 		}
 		break;
 	case 256:
-		color[2] = 1.0f;
+		color[0] = 0;
+		color[1] = 255;
+		color[2] = 0;
 		AddParticle (p_raysmoke, org, 3, 25, 1.225f + ((rand() % 10) - 2) / 40.0, color, zerodir);
 		AddParticle (p_rayspark, org, 12, 75, 0.6f,  color, zerodir);
 		break;
 	case 512:
-		color[1] = 1.0f;
+		color[0] = 255;
+		color[1] = 0;
 		color[2] = 0;
-		color[3] = 0;
 		AddParticle (p_raysmoke, org, 3, 25, 1.225f + ((rand() % 10) - 2) / 40.0, color, zerodir);
 		AddParticle (p_rayspark, org, 12, 75, 0.6f,  color, zerodir);
 		break;
@@ -2468,246 +2118,140 @@ float pap_detr(int weapon)
 	switch (weapon)
 	{
 		case W_COLT:
-			return 0;
-			break;
-		case W_BIATCH:
-			return 1;
-			break;
 		case W_KAR:
-			return 0;
-			break;
 		case W_THOMPSON:
-			return 0;
-			break;
 		case W_357:
-			return 0;
-			break;
-		case W_KILLU:
-			return 1;
-			break;
 		case W_BAR:
-			return 0;
-			break;
 		case W_BK:
-			return 0;
-			break;
 		case W_BROWNING:
-			return 0;
-			break;
 		case W_DB:
-			return 0;
-			break;
 		case W_FG:
-			return 0;
-			break;
 		case W_GEWEHR:
-			return 0;
-			break;
 		case W_KAR_SCOPE:
-			return 0;
-			break;
 		case W_M1:
-			return 0;
-			break;
 		case W_M1A1:
-			return 0;
-			break;
 		case W_MP40:
-			return 0;
-			break;
 		case W_MG:
-			return 0;
-			break;
 		case W_PANZER:
-			return 0;
-			break;
 		case W_PPSH:
-			return 0;
-			break;
 		case W_PTRS:
-			return 0;
-			break;
 		case W_RAY:
-			return 0;
-			break;
 		case W_SAWNOFF:
-			return 0;
-			break;
 		case W_STG:
-			return 0;
-			break;
 		case W_TRENCH:
-			return 0;
-			break;
 		case W_TYPE:
-			return 0;
-			break;
 		case W_M2:
+		case W_MP5:
+	    case W_TESLA:
+	      	return 0;
+	    case W_BIATCH:
+		case W_COMPRESSOR:  	
+	    case W_M1000:  	
+	    case W_GIBS:
+	    case W_SAMURAI:
+	    case W_AFTERBURNER:
+	    case W_SPATZ:
+	    case W_SNUFF:
+	    case W_BORE:
+	    case W_IMPELLER:
+	    case W_BARRACUDA:
+	    case W_ACCELERATOR:
+	    case W_GUT:
+	    case W_REAPER:
+	    case W_HEADCRACKER:
+	    case W_LONGINUS:
+	    case W_PENETRATOR:
+	    case W_WIDOW:
+	    case W_PORTER:
+	    case W_ARMAGEDDON:
+	    case W_WIDDER:
+	    case W_KILLU:
+			return 1;
+		default:
 			return 0;
-			break;
-		case W_COMPRESSOR:
-      return 1;
-      break;
-    case W_M1000:
-      return 1;
-      break;
-    case W_GIBS:
-      return 1;
-      break;
-    case W_SAMURAI:
-      return 1;
-      break;
-    case W_AFTERBURNER:
-      return 1;
-      break;
-    case W_SPATZ:
-      return 1;
-      break;
-    case W_SNUFF:
-      return 1;
-      break;
-    case W_BORE:
-      return 1;
-      break;
-    case W_IMPELLER:
-      return 1;
-      break;
-    case W_BARRACUDA:
-      return 1;
-      break;
-    case W_ACCELERATOR:
-      return 1;
-      break;
-    case W_GUT:
-      return 1;
-      break;
-    case W_REAPER:
-      return 1;
-      break;
-    case W_HEADCRACKER:
-      return 1;
-      break;
-    case W_LONGINUS:
-      return 1;
-      break;
-    case W_PENETRATOR:
-      return 1;
-      break;
-    case W_WIDOW:
-      return 1;
-      break;
-    case W_PORTER:
-      return 1;
-      break;
-    case W_ARMAGEDDON:
-      return 1;
-      break;
-    case W_WIDDER:
-      return 1;
-      break;
-    case W_MP5:
-      return 0;
-      break;
-    case W_TESLA:
-      return 0;
-      break;
 	}
-	return 0;
-}
-
-// MotoLegacy - Raygun barrel trail
-void QMB_RayFlash(vec3_t org, float weapon)
-{
-	// if we're ADS, just flat out end here to avoid useless calcs/defs
-	if (cl.stats[STAT_ZOOM] || !qmb_initialized)
-		return;
-
-	col_t 	color;
-	vec3_t 	endorg;
-
-	// green trail
-	if (weapon == W_RAY) {
-		color[0] = 0;
-		color[1] = 255;
-	} else { // red trail
-		color[0] = 255;
-		color[1] = 0;
-	}
-	color[2] = 0;
-
-	QMB_MuzzleFlash(org);
 }
 
 //R00k added particle muzzleflashes
+qboolean red_or_blue_pap;
 void QMB_MuzzleFlash(vec3_t org)
 {
-	if (!qmb_initialized) {
-		return;
-	}
-
-	float	frametime = fabs(cl.ctime - cl.oldtime);
+	double	frametime = fabs(cl.time - cl.oldtime);
 	col_t	color;
 
-	// change color if PaP
-	if (pap_detr(cl.stats[STAT_ACTIVEWEAPON]) == 0) {
-    	color[0] = color[1] = color[2] = 255;
-	} else {
-	  color[0] = 132;
-	  color[1] = 44;
-	  color[2] = 139;
+	// No muzzleflash for the Panzerschreck or the Flamethrower
+	if (cl.stats[STAT_ACTIVEWEAPON] == W_PANZER || cl.stats[STAT_ACTIVEWEAPON] == W_LONGINUS ||
+	cl.stats[STAT_ACTIVEWEAPON] == W_M2 || cl.stats[STAT_ACTIVEWEAPON] == W_FIW)
+		return;
+
+	// Start fully colored
+	color[0] = color[1] = color[2] = 255;
+
+	// Alternate red and blue if it's a Pack-a-Punched weapon
+	if (pap_detr(cl.stats[STAT_ACTIVEWEAPON])) {
+		if (red_or_blue_pap) {
+			color[0] = 255;
+			color[1] = 10;
+			color[2] = 22;
+		} else {
+			color[0] = 22;
+			color[1] = 10;
+			color[2] = 255;
+		}
+
+		red_or_blue_pap = !red_or_blue_pap;
 	}
 
-	// lower origin based on player stance
-	if (sv_player->v.view_ofs[2] >= 0)
-		org[2] -= 32 - sv_player->v.view_ofs[2];
-	else
-		org[2] -= 32 + abs(sv_player->v.view_ofs[2]);
+	// Weapon overrides for muzzleflash color
+	switch(cl.stats[STAT_ACTIVEWEAPON]) {
+		case W_RAY:
+			color[0] = 0;
+			color[1] = 255;
+			color[2] = 0;
+			break;
+		case W_PORTER:
+			color[0] = 255;
+			color[1] = 0;
+			color[2] = 0;
+			break;
+		case W_TESLA:
+			color[0] = 22;
+			color[1] = 139;
+			color[2] = 255;
+			break;
+		case W_DG3:
+			color[0] = 255;
+			color[1] = 89;
+			color[2] = 22;
+			break;
+	}
 
-	float size;
+	float size, timemod;
+
+	timemod = 0.04;
 
 	if(!(ISUNDERWATER(TruePointContents(org))))
 	{
 		size = sv_player->v.Flash_Size;
-		
-		if(size == 0 || cl.stats[STAT_ZOOM] == 2)   {
+
+		if(size == 0 || cl.stats[STAT_ZOOM] == 2)
 			return;
-		}
 
         switch(rand() % 3 + 1)
         {
             case 1:
-                AddParticle (p_muzzleflash, org, 1, size, 0.04 * frametime, color, zerodir);
+                AddParticle (p_muzzleflash, org, 1, size, timemod * frametime, color, zerodir);
                 break;
             case 2:
-                AddParticle (p_muzzleflash2, org, 1, size, 0.04 * frametime, color, zerodir);
+                AddParticle (p_muzzleflash2, org, 1, size, timemod * frametime, color, zerodir);
                 break;
             case 3:
-                AddParticle (p_muzzleflash3, org, 1, size, 0.04 * frametime, color, zerodir);
+                AddParticle (p_muzzleflash3, org, 1, size, timemod * frametime, color, zerodir);
                 break;
             default:
-                AddParticle (p_muzzleflash, org, 1, size, 0.04 * frametime, color, zerodir);
+                AddParticle (p_muzzleflash, org, 1, size, timemod * frametime, color, zerodir);
                 break;
         }
-	}
-}
-
-void QMB_MuzzleFlashLG(vec3_t org)
-{
-	float	frametime = fabs(cl.ctime - cl.oldtime);
-	col_t	color;
-
-	color[0] = color[1] = 20;
-	color[2] = 200;
-
-	if (!qmb_initialized)
-		return;
-
-	if (!particle_mode)
-		return;
-
-	if (!(ISUNDERWATER(TruePointContents(org))))
-	{
-		AddParticle (p_muzzleflash8, org, 1, 8, 0.4 * frametime, color, zerodir);
 	}
 }
 
@@ -2738,10 +2282,7 @@ void QMB_RocketTrail (vec3_t start, vec3_t end, trail_type_t type)
 
 	case BLOOD_TRAIL:
 	case SLIGHT_BLOOD_TRAIL:
-		if (r_part_trails.value == 2)
-			AddParticleTrail (p_q3blood_trail, start, end, 15, 2, NULL);
-		else
-			AddParticleTrail (p_blood3, start, end, type == BLOOD_TRAIL ? 1.35 : 2.4, 2, NULL);
+		AddParticleTrail (p_blood3, start, end, type == BLOOD_TRAIL ? 1.35 : 2.4, 2, NULL);
 		break;
 
 	case TRACER1_TRAIL:
@@ -2854,27 +2395,6 @@ void QMB_RocketTrail (vec3_t start, vec3_t end, trail_type_t type)
 		break;
 	}
 }
-/*
-void QMB_AxeSwoosh(vec3_t start)
-{
-		col_t		color;
-		vec3_t		end, mid;
-
-		mid[0] = 15;mid[1] = 15;mid[2] = 15;
-		VectorSubtract(start,mid,end);
-
-		if (ISUNDERWATER(TruePointContents(start)))
-		{
-			AddParticleTrail (p_bubble, start, end, 0.25, 0.50, NULL);
-		}
-		else
-		{
-			color[0] = 255; color[1] = 255; color[2] = 255;
-			AddParticleTrail (p_alphatrail, start, end, 50, 0.5, color);
-		//	AddParticle (p_spark, start, 50, 250, 0.925f, NULL, zerodir);
-		}
-};
-*/
 
 void QMB_BlobExplosion (vec3_t org)
 {
@@ -2950,8 +2470,6 @@ void QMB_LavaSplash (vec3_t org)
 			VectorNormalizeFast (dir);
 			vel = 50 + (rand() & 63);
 			VectorScale (dir, vel, dir);
-
-			AddParticle (p_lavasplash, neworg, 1, 4.5, 2.6 + (rand() & 31) * 0.02, NULL, dir);
 		}
 	}
 }
@@ -2961,12 +2479,6 @@ void QMB_TeleportSplash (vec3_t org)
 	int		i, j, k;
 	vec3_t		neworg, angle;
 	col_t		color;
-
-	if (r_part_telesplash.value == 2)
-	{
-		AddParticle (p_q3teleport, org, 1, 1, 1.0, NULL, zerodir);
-		return;
-	}
 
 	//QMB_Shockwave_Splash(org, 120);
 	for (i=-12 ; i<=12 ; i+=6)
@@ -3371,8 +2883,6 @@ void QMB_FlyParticles (vec3_t origin, int count)
 			org[0] = origin[0] + r_avertexnormals[i][0]*dist + forward[0]*32;
 			org[1] = origin[1] + r_avertexnormals[i][1]*dist + forward[1]*32;
 			org[2] = origin[2] + r_avertexnormals[i][2]*dist + forward[2]*32;
-
-			AddParticle (p_fly, org, 1, 1,0.01, color, forward);
 		}
 	}
 }

@@ -63,8 +63,7 @@ void R_InitParticles (void)
 	particles = (particle_t *)
 			Hunk_AllocName (r_numparticles * sizeof(particle_t), "particles");
 
-	// naievil -- particles are not drawn correctly, making it look bad
-	//QMB_InitParticles();
+	QMB_InitParticles();
 }
 
 void R_DarkFieldParticles (entity_t *ent)
@@ -405,7 +404,7 @@ R_RunParticleEffect
 ===============
 */
 
-#define RunParticleEffect(var, org, dir, color, count)		\
+#define RunParticleEffect(org, dir, color, count)		\
 	if (qmb_initialized)				\
 		QMB_RunParticleEffect (org, dir, color, count);		\
 	else													\
@@ -415,7 +414,7 @@ void R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 {
 	if (color == 73 || color == 225)
 	{
-		RunParticleEffect(/*blood*/0, org, dir, color, count);
+		RunParticleEffect(org, dir, color, count);
 		return;
 	}
 
@@ -424,10 +423,10 @@ void R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 		case 10:
 		case 20:
 		case 30:
-			RunParticleEffect(/*sparks*/0, org, dir, color, count);
+			RunParticleEffect(org, dir, color, count);
 			break;
 		default:
-			RunParticleEffect(/*gunshots*/0, org, dir, color, count);
+			RunParticleEffect(org, dir, color, count);
 	}
 }
 
