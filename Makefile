@@ -12,7 +12,7 @@ include $(DEVKITARM)/3ds_rules
 TARGET		:=	nzportable
 BUILD		:=	build
 SOURCES		:=	source
-DATA		:=	data
+#DATA		:=	data
 INCLUDES	:=	include
 ICON		:= 	icon.png
 #ROMFS		:=	romfs
@@ -56,8 +56,7 @@ ifneq ($(BUILD),$(notdir $(CURDIR)))
 export OUTPUT	:=	$(CURDIR)/$(TARGET)
 export TOPDIR	:=	$(CURDIR)
 
-export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir))
 
 export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 
@@ -126,7 +125,7 @@ CPPFILES	:=
 SFILES		:=	
 PICAFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.v.pica)))
 SHLISTFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.shlist)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+#BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
