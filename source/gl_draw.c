@@ -383,7 +383,7 @@ void Draw_Init (void)
 	Cvar_RegisterVariable (&gl_picmip);
 
 	if (!new3ds_flag) {
-		Cvar_SetValue("gl_picmip", 1);
+		//Cvar_SetValue("gl_picmip", 1);
 		Cvar_Set ("gl_max_size", "256");
 	}
 
