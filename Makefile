@@ -17,9 +17,9 @@ INCLUDES	:=	include
 ICON		:= 	icon.png
 #ROMFS		:=	romfs
 
-APP_AUTHOR 		:= NZP Team
-APP_TITLE 		:= Nazi Zombies Portable
-APP_DESCRIPTION := WiP Call of Duty Zombies demake powered by ctrQuake
+APP_AUTHOR 		:= NZ:P Team
+APP_TITLE 		:= Nazi Zombies: Portable
+APP_DESCRIPTION := Call of Duty Zombies remake, ctrQuake based.
 
 #---------------------------------------------------------------------------------
 # options for code generation
