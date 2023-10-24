@@ -85,12 +85,14 @@ void AddLightBlend (float r, float g, float b, float a2)
 
 void R_RenderDlight (dlight_t *light)
 {
+#if 0
 	int		i, j;
 	float	a;
 	vec3_t	v;
 	float	rad;
 
 	rad = light->radius * 0.35;
+
 
 	VectorSubtract (light->origin, r_origin, v);
 	if (VectorLength (v) < rad)
@@ -100,11 +102,13 @@ void R_RenderDlight (dlight_t *light)
 	}
 
 	glBegin (GL_TRIANGLE_FAN);
-	glColor3f (light->color[0],light->color[1],light->color[2]);
+	//glColor4f(lightcolor[0]/255, lightcolor[1]/255, lightcolor[2]/255, 1.0f);
+	glColor4f (light->color[0]*0.2f,light->color[1]*0.2f,light->color[2]*0.2f, 1.0f);
+	//glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
 	for (i=0 ; i<3 ; i++)
 		v[i] = light->origin[i] - vpn[i]*rad;
 	glVertex3fv (v);
-	glColor3f (0,0,0);
+	//glColor3f (0,0,0);
 	for (i=16 ; i>=0 ; i--)
 	{
 		a = i/16.0 * M_PI*2;
@@ -114,6 +118,7 @@ void R_RenderDlight (dlight_t *light)
 		glVertex3fv (v);
 	}
 	glEnd ();
+#endif
 }
 
 /*
@@ -123,6 +128,7 @@ R_RenderDlights
 */
 void R_RenderDlights (void)
 {
+#if 0
 	int		i;
 	dlight_t	*l;
 
@@ -131,7 +137,7 @@ void R_RenderDlights (void)
 
 	r_dlightframecount = r_framecount + 1;	// because the count hasn't
 											//  advanced yet for this frame
-	glDepthMask (0);
+	glDepthMask (GL_FALSE);
 	glDisable (GL_TEXTURE_2D);
 	glShadeModel (GL_SMOOTH);
 	glEnable (GL_BLEND);
@@ -149,7 +155,8 @@ void R_RenderDlights (void)
 	glDisable (GL_BLEND);
 	glEnable (GL_TEXTURE_2D);
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDepthMask (1);
+	glDepthMask (GL_TRUE);
+#endif 
 }
 
 
@@ -238,9 +245,6 @@ void R_PushDlights (void)
 {
 	int		i;
 	dlight_t	*l;
-
-	if (gl_flashblend.value)
-		return;
 
 	r_dlightframecount = r_framecount + 1;	// because the count hasn't
 											//  advanced yet for this frame

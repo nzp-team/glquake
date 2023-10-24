@@ -2228,7 +2228,7 @@ void QMB_MuzzleFlash(vec3_t org)
 
 	float size, timemod;
 
-	timemod = 0.04;
+	timemod = 0.08;
 
 	if(!(ISUNDERWATER(TruePointContents(org))))
 	{
