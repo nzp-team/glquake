@@ -287,7 +287,10 @@ void R_DrawSpriteModel (entity_t *e)
 
 	Fog_DisableGFog ();
 
-	glEnable (GL_ALPHA_TEST);
+	glDisable (GL_ALPHA_TEST);
+	glEnable (GL_BLEND);
+	glDepthMask(GL_FALSE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBegin (GL_QUADS);
 
 	glTexCoord2f (0, 1);
@@ -311,8 +314,8 @@ void R_DrawSpriteModel (entity_t *e)
 	glVertex3fv (point);
 	
 	glEnd ();
-
-	glDisable (GL_ALPHA_TEST);
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
 
 	Fog_EnableGFog ();
 }
@@ -720,6 +723,147 @@ void R_DrawZombieLimb (entity_t *e, int which)
 
 /*
 =================
+R_DrawTransparentAliasModel
+
+=================
+*/
+void R_DrawTransparentAliasModel (entity_t *e)
+{
+	int			i, j;
+	int			lnum;
+	vec3_t		dist;
+	float		add;
+	model_t		*clmodel;
+	vec3_t		mins, maxs;
+	aliashdr_t	*paliashdr;
+	trivertx_t	*verts, *v;
+	int			index;
+	float		s, t, an;
+	int			anim;
+	lerpdata_t	lerpdata;
+
+	clmodel = currententity->model;
+
+	VectorAdd (currententity->origin, clmodel->mins, mins);
+	VectorAdd (currententity->origin, clmodel->maxs, maxs);
+
+// naievil -- fixme: on psp this is == 2 ? 
+	if (R_CullBox (mins, maxs))
+		return;
+
+	VectorCopy (currententity->origin, r_entorigin);
+	VectorSubtract (r_origin, r_entorigin, modelorg);
+
+	// for(int g = 0; g < 3; g++)
+	// {
+	// 	if(lightcolor[g] < 8)
+	// 		lightcolor[g] = 8;
+	// 	if(lightcolor[g] > 125)
+	// 		lightcolor[g] = 125;
+	// }
+
+	// //
+	// // get lighting information
+	// //
+
+	// ambientlight = shadelight = R_LightPoint (currententity->origin);
+	// for (lnum=0 ; lnum<MAX_DLIGHTS ; lnum++)
+	// {
+	// 	if (cl_dlights[lnum].die >= cl.time)
+	// 	{
+	// 		VectorSubtract (currententity->origin,
+	// 						cl_dlights[lnum].origin,
+	// 						dist);
+	// 		add = cl_dlights[lnum].radius - Length(dist);
+
+	// 		if (add > 0) {
+	// 			ambientlight += add;
+	// 			//ZOID models should be affected by dlights as well
+	// 			shadelight += add;
+	// 		}
+	// 	}
+	// }
+
+	// // clamp lighting so it doesn't overbright as much
+	// if (ambientlight > 128)
+	// 	ambientlight = 128;
+	// if (ambientlight + shadelight > 192)
+	// 	shadelight = 192 - ambientlight;
+
+	// shadedots = r_avertexnormal_dots[((int)(e->angles[1] * (SHADEDOT_QUANT / 360.0))) & (SHADEDOT_QUANT - 1)];
+	// shadelight = shadelight / 200.0;
+	
+	// an = e->angles[1]/180*M_PI;
+	// shadevector[0] = cos(-an);
+	// shadevector[1] = sin(-an);
+	// shadevector[2] = 1;
+	// VectorNormalize (shadevector);
+
+	//
+	// locate the proper data
+	//
+	paliashdr = (aliashdr_t *)Mod_Extradata (e->model);
+	c_alias_polys += paliashdr->numtris;
+
+	//
+	// draw all the triangles
+	//
+
+	GL_DisableMultitexture();
+	lightcolor[0] = lightcolor[1] = lightcolor[2] = 256.0f;
+
+    glPushMatrix ();
+	R_RotateForEntity (e);
+
+	glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
+	glScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+
+	anim = (int)(cl.time*10) & 3;
+	GL_Bind(paliashdr->gl_texturenum[e->skinnum][anim]);
+
+	if (gl_smoothmodels.value)
+		glShadeModel (GL_SMOOTH);
+
+	glEnable(GL_BLEND);
+	glDisable (GL_ALPHA_TEST);
+	glDepthMask(GL_FALSE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	if (gl_affinemodels.value)
+		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+
+	R_SetupAliasFrame (paliashdr, e->frame, &lerpdata);
+	R_SetupEntityTransform (e, &lerpdata);
+	GL_DrawAliasFrame(paliashdr, lerpdata);
+
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
+
+	glShadeModel (GL_FLAT);
+	if (gl_affinemodels.value)
+		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+	glPopMatrix ();
+
+	if (r_shadows.value)
+	{
+		glPushMatrix ();
+		R_RotateForEntity (e);
+		glDisable (GL_TEXTURE_2D);
+		glEnable (GL_BLEND);
+		glColor4f (0,0,0,0.5);
+		GL_DrawAliasShadow (paliashdr, lastposenum);
+		glEnable (GL_TEXTURE_2D);
+		glDisable (GL_BLEND);
+		glColor4f (1,1,1,1);
+		glPopMatrix ();
+	}
+}
+
+/*
+=================
 R_DrawAliasModel
 
 =================
@@ -1008,10 +1152,10 @@ void R_DrawEntitiesOnList (void)
 		switch (currententity->model->type)
 		{
 		case mod_alias:
-			/*if(specChar == '$')//This is for smooth alpha, draw in the following loop, not this one
+			if(specChar == '$')//This is for smooth alpha, draw in the following loop, not this one
 			{
 				continue;
-			}*/
+			}
 			R_DrawAliasModel (currententity);
 			break;
 
@@ -1029,11 +1173,25 @@ void R_DrawEntitiesOnList (void)
 	{
 		currententity = cl_visedicts[i];
 
+		if(!(currententity->model))
+		{
+			continue;
+		}
+
+		specChar = currententity->model->name[strlen(currententity->model->name)-5];
+
 		switch (currententity->model->type)
 		{
 		case mod_sprite:
 			R_DrawSpriteModel (currententity);
 			break;
+		case mod_alias:
+			if(specChar == '$')//mdl model with blended alpha
+			{
+					R_DrawTransparentAliasModel(currententity);
+			}
+			break;
+		default: break;
 		}
 	}
 }

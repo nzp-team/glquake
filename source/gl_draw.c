@@ -649,10 +649,9 @@ void Draw_ColorPic (int x, int y, qpic_t *pic, float r, float g , float b, float
 		Scrap_Upload ();
 	gl = (glpic_t *)pic->data;
 
-	// naievil -- this was breaking blood hud
-	//glEnable(GL_ALPHA_TEST);
+	glDisable(GL_ALPHA_TEST);
 	glEnable(GL_BLEND);
-	glColor4f(r/255.0,g/255.0,b/255.0,a/255.0);
+	glColor4f(r/255.0f,g/255.0f,b/255.0f,a/255.0f);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	GL_Bind (gl->texnum);
@@ -669,6 +668,7 @@ void Draw_ColorPic (int x, int y, qpic_t *pic, float r, float g , float b, float
 	glEnd ();
 
 	glDisable(GL_BLEND);
+	//glDisable(GL_ALPHA_TEST);
 	glColor4f(1,1,1,1);
 }
 
