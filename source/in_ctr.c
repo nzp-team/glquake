@@ -120,6 +120,8 @@ void IN_Move (usercmd_t *cmd)
 
 	if (!new3ds_flag)
 		speed -= 2;
+	else
+		speed += 8;
 
 	// cut look speed in half when facing enemy, unless mag is empty
 	if ((in_aimassist.value) && (sv_player->v.facingenemy == 1) && cl.stats[STAT_CURRENTMAG] > 0) {

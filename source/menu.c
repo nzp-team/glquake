@@ -1410,7 +1410,7 @@ void M_Options_Draw (void)
 	M_DrawCharacter (200, 32 + options_cursor*8, 12+((int)(realtime*4)&1));
 }
 
-
+extern qboolean console_enabled;
 void M_Options_Key (int k)
 {
 	switch (k)
@@ -1424,6 +1424,7 @@ void M_Options_Key (int k)
 			M_Menu_Keys_f ();
 			break;
 		case 1:
+			console_enabled = true;
 			m_state = m_none;
 			Con_ToggleConsole_f ();
 			break;

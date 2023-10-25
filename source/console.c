@@ -64,6 +64,7 @@ int			con_notifylines;		// scan lines to clear for notify lines
 
 extern void M_Menu_Main_f (void);
 
+extern qboolean console_enabled;
 /*
 ================
 Con_ToggleConsole_f
@@ -76,11 +77,13 @@ void Con_ToggleConsole_f (void)
 		if (cls.state == ca_connected)
 		{
 			key_dest = key_game;
+			console_enabled = false;
 			key_lines[edit_line][1] = 0;	// clear any typing
 			key_linepos = 1;
 		}
 		else
 		{
+			console_enabled = false;
 			M_Menu_Main_f ();
 		}
 	}
@@ -577,6 +580,7 @@ Draws the console with the solid background
 The typing input line at the bottom should only be drawn if typing is allowed
 ================
 */
+qboolean console_enabled;
 void Con_DrawConsole (int lines, qboolean drawinput)
 {
 	int				i, x, y;
@@ -589,6 +593,8 @@ void Con_DrawConsole (int lines, qboolean drawinput)
 
 // draw the background
 	Draw_ConsoleBackground (lines);
+	if (!console_enabled && !developer.value)
+		return;
 
 // draw the text
 	con_vislines = lines;
