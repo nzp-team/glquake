@@ -3233,6 +3233,31 @@ void PF_GrenadePulse(void)
 
 /*
 =================
+PF_BettyPrompt
+
+draws status on hud on
+how to use bouncing
+betty.
+
+nzp_bettyprompt()
+=================
+*/
+void PF_BettyPrompt(void)
+{
+	client_t	*client;
+	int			entnum;
+
+	entnum = G_EDICTNUM(OFS_PARM0);
+
+	if (entnum < 1 || entnum > svs.maxclients)
+		return;
+
+	client = &svs.clients[entnum-1];
+	MSG_WriteByte (&client->message, svc_bettyprompt);
+}
+
+/*
+=================
 PF_MaxZombies
 
 Returns the total number of zombies
@@ -3848,6 +3873,7 @@ PF_SongEgg, // #500
 PF_MaxAmmo, // #501
 PF_GrenadePulse, // #502 
 PF_MaxZombies, // #503 
+PF_BettyPrompt, // #504
 PF_Fixme,
 };
 

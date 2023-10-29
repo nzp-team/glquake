@@ -66,6 +66,7 @@ int  x_value, y_value;
 void M_DrawPic (int x, int y, qpic_t *pic);
 
 double HUD_Change_time;//hide hud when not chagned
+double bettyprompt_time;
 
 extern cvar_t waypoint_mode;
 
@@ -1350,6 +1351,28 @@ void HUD_Weapon (void)
 
 /*
 ===============
+HUD_BettyPrompt
+===============
+*/
+void HUD_BettyPrompt (void)
+{
+	char str[32];
+	char str2[32];
+
+	strcpy(str, va("Tap SWAP then press %s to\n", GetGrenadeButtonL()));
+	strcpy(str2, "place a Bouncing Betty\n");
+
+	int x, x2;
+	x = (vid.width - strlen(str)*8)/2;
+	x2 = (vid.width - strlen(str2)*8)/2;
+
+	Draw_String(x, 60, str);
+	Draw_String(x2, 72, str2);
+	Draw_Pic (x + 20*8 - 4, 56, GetButtonIcon("+grenade"));
+}
+
+/*
+===============
 HUD_Draw
 ===============
 */
@@ -1382,6 +1405,9 @@ void HUD_Draw (void)
 		HUD_EndScreen ();
 		return;
 	}
+
+	if (bettyprompt_time > sv.time)
+		HUD_BettyPrompt();
 
 	HUD_Blood();
 	HUD_Rounds();
