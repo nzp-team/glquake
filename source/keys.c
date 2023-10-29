@@ -208,6 +208,12 @@ extern qboolean console_enabled;
 void Key_Console (int key)
 {
 	char	*cmd;
+
+	if (key == K_SELECT)
+	{
+		IN_SwitchKeyboard();
+		return;
+	}
 	
 	if (key == K_JOY3 || key == K_ENTER)
 	{		
@@ -690,6 +696,7 @@ void Key_Init (void)
 	consolekeys[K_SHIFT] = true;
 	consolekeys[K_MWHEELUP] = true;
 	consolekeys[K_MWHEELDOWN] = true;
+	consolekeys[K_SELECT] = true;
 	consolekeys['`'] = false;
 	consolekeys['~'] = false;
 
