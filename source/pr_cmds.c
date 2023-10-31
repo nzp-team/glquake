@@ -1314,6 +1314,36 @@ void PF_strcat (void)
 
 /*
 =================
+PF_strtolower
+
+string strtolower (string)
+=================
+*/
+void PF_strtolower(void)
+{
+	char *s;
+
+	s = G_STRING(OFS_PARM0);
+
+	pr_string_temp[0] = 0;
+	if (strlen(s) < PR_MAX_TEMPSTRING)
+	{
+		strcpy(pr_string_temp, s);
+	}
+	else
+	{
+		strncpy(pr_string_temp, s, PR_MAX_TEMPSTRING);
+		pr_string_temp[PR_MAX_TEMPSTRING-1] = 0;
+	}
+
+	for(int i = 0; i < strlen(s); i++)
+  		pr_string_temp[i] = tolower(pr_string_temp[i]);
+
+	G_INT(OFS_RETURN) = pr_string_temp - pr_strings;
+}
+
+/*
+=================
 PF_substring
 
 string substring (string, float, float)
@@ -3849,7 +3879,7 @@ PF_Fixme,
 PF_Fixme, 
 PF_Fixme, 
 PF_Fixme, 
-PF_Fixme, 
+PF_strtolower, // #480 
 PF_Fixme, 
 PF_Fixme, 
 PF_Fixme, 
