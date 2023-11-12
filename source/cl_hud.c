@@ -66,6 +66,7 @@ int  x_value, y_value;
 void M_DrawPic (int x, int y, qpic_t *pic);
 
 double HUD_Change_time;//hide hud when not chagned
+double bettyprompt_time;
 
 extern cvar_t waypoint_mode;
 
@@ -573,6 +574,7 @@ float 	color_shift_end[3];
 float 	color_shift_steps[3];
 int		color_shift_init;
 int 	blinking;
+float 	endroundchange;
 int 	textstate;
 int 	value, value2;
 
@@ -753,8 +755,16 @@ void HUD_Rounds (void)
 	}
 	else if (cl.stats[STAT_ROUNDCHANGE] == 4)//blink white
 	{
-		blinking = ((int)(realtime*1000)&510) - 255;
-		blinking = abs(blinking);
+		if (endroundchange > cl.time) {
+			blinking = (((int)(realtime*475)&510) - 255);
+			blinking = abs(blinking);
+		} else {
+			if (blinking)
+				blinking = blinking - 1;
+			else
+				blinking = 0;
+		}
+
 		if (cl.stats[STAT_ROUNDS] > 0 && cl.stats[STAT_ROUNDS] < 11)
 		{
 			for (i = 0; i < cl.stats[STAT_ROUNDS]; i++)
@@ -803,6 +813,11 @@ void HUD_Rounds (void)
 			num[0] = cl.stats[STAT_ROUNDS] - num[2]*100 - num[1]*10;
 			Draw_ColorPic (2 + x_offset, vid.height - sb_round_num[num[0]]->height - 4, sb_round_num[num[0]], 255, 255, 255, blinking);
 			x_offset = x_offset + sb_round_num[num[0]]->width - 8;
+		}
+
+		if (endroundchange == 0) {
+			endroundchange = cl.time + 7.5;
+			blinking = 0;
 		}
 	}
 	else if (cl.stats[STAT_ROUNDCHANGE] == 5)//blink white
@@ -863,9 +878,16 @@ void HUD_Rounds (void)
 	}
 	else if (cl.stats[STAT_ROUNDCHANGE] == 6)//blink white while fading back
 	{
+		if (endroundchange) {
+			endroundchange = 0;
+			blinking = 0;
+		}
+
 		color_shift_init = 0;
-		blinking = ((int)(realtime*1000)&510) - 255;
-		blinking = abs(blinking);
+
+		blinking += (int)(host_frametime*475);
+		if (blinking > 255) blinking = 255;
+
 		if (cl.stats[STAT_ROUNDS] > 0 && cl.stats[STAT_ROUNDS] < 11)
 		{
 			for (i = 0; i < cl.stats[STAT_ROUNDS]; i++)
@@ -1350,6 +1372,28 @@ void HUD_Weapon (void)
 
 /*
 ===============
+HUD_BettyPrompt
+===============
+*/
+void HUD_BettyPrompt (void)
+{
+	char str[32];
+	char str2[32];
+
+	strcpy(str, va("Tap SWAP then press %s to\n", GetGrenadeButtonL()));
+	strcpy(str2, "place a Bouncing Betty\n");
+
+	int x, x2;
+	x = (vid.width - strlen(str)*8)/2;
+	x2 = (vid.width - strlen(str2)*8)/2;
+
+	Draw_String(x, 60, str);
+	Draw_String(x2, 72, str2);
+	Draw_Pic (x + 20*8 - 4, 56, GetButtonIcon("+grenade"));
+}
+
+/*
+===============
 HUD_Draw
 ===============
 */
@@ -1382,6 +1426,9 @@ void HUD_Draw (void)
 		HUD_EndScreen ();
 		return;
 	}
+
+	if (bettyprompt_time > sv.time)
+		HUD_BettyPrompt();
 
 	HUD_Blood();
 	HUD_Rounds();
