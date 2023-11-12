@@ -1426,6 +1426,7 @@ void M_Options_Key (int k)
 		case 1:
 			console_enabled = true;
 			m_state = m_none;
+			Con_Printf("\nPress SELECT to open keyboard.\n\n");
 			Con_ToggleConsole_f ();
 			break;
 		case 2:
