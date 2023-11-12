@@ -218,7 +218,5 @@ void IN_SwitchKeyboard(void)
 	swkbdSetButton(&swkbd, SWKBD_BUTTON_RIGHT, "Send", true);
 	button = swkbdInputText(&swkbd, console_buffer, sizeof(console_buffer));
 
-	pglRestoreContext();
-
 	Cbuf_AddText(va("%s\n", console_buffer));
 }
