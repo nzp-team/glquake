@@ -1231,26 +1231,40 @@ string strtrim (string)
 */
 void PF_strtrim (void)
 {
-	char *m;
-	m = G_STRING(OFS_PARM0);
-	
-  char *c;
-  c = m; 
-  
-  while (c != '\0' && *c == ' ')
-    c++;
-  m = c;
-  
-  c = m + strlen (m) - 1;
-  while (c >= m)
-  {
-    if (*c == ' ')
-      *c = '\0';
-    else
-      break;
-      c--;
-  }
-	G_INT(OFS_RETURN) = m - pr_strings;
+		int		offset, length;
+	int		maxoffset;		// 2001-10-25 Enhanced temp string handling by Maddes
+	char	*str;
+	char 	*end;
+
+	str = G_STRING(OFS_PARM0);
+
+	// figure out the new start
+	while (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r') {
+		offset++;
+		str++;
+	}
+
+	// figure out the new end.
+	end = str + strlen (str);
+	while (end > str && (end[-1] == ' ' || end[-1] == '\t' || end[-1] == '\n' || end[-1] == '\r'))
+		end--;
+
+	length = end - str;
+
+	if (offset < 0)
+		offset = 0;
+// 2001-10-25 Enhanced temp string handling by Maddes  start
+	if (length >= PR_MAX_TEMPSTRING)
+		length = PR_MAX_TEMPSTRING-1;
+// 2001-10-25 Enhanced temp string handling by Maddes  end
+	if (length < 0)
+		length = 0;
+
+	//str += offset;
+	strncpy(pr_string_temp, str, length);
+	pr_string_temp[length] = 0;
+
+	G_INT(OFS_RETURN) = pr_string_temp - pr_strings;
 };
 
 /*
@@ -1308,6 +1322,36 @@ void PF_strcat (void)
 		}
 	}
 // 2001-10-25 Enhanced temp string handling by Maddes  end
+
+	G_INT(OFS_RETURN) = pr_string_temp - pr_strings;
+}
+
+/*
+=================
+PF_strtolower
+
+string strtolower (string)
+=================
+*/
+void PF_strtolower(void)
+{
+	char *s;
+
+	s = G_STRING(OFS_PARM0);
+
+	pr_string_temp[0] = 0;
+	if (strlen(s) < PR_MAX_TEMPSTRING)
+	{
+		strcpy(pr_string_temp, s);
+	}
+	else
+	{
+		strncpy(pr_string_temp, s, PR_MAX_TEMPSTRING);
+		pr_string_temp[PR_MAX_TEMPSTRING-1] = 0;
+	}
+
+	for(int i = 0; i < strlen(s); i++)
+  		pr_string_temp[i] = tolower(pr_string_temp[i]);
 
 	G_INT(OFS_RETURN) = pr_string_temp - pr_strings;
 }
@@ -3849,7 +3893,7 @@ PF_Fixme,
 PF_Fixme, 
 PF_Fixme, 
 PF_Fixme, 
-PF_Fixme, 
+PF_strtolower, // #480 
 PF_Fixme, 
 PF_Fixme, 
 PF_Fixme, 
