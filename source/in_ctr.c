@@ -34,9 +34,16 @@ extern cvar_t in_x_axis_adjust;
 extern cvar_t in_y_axis_adjust;
 extern cvar_t in_mlook; //Heffo - mlook cvar
 
+cvar_t in_anub_mode = {"in_anub_mode", "0", true};
+
 void IN_Init (void)
 {
 	Cvar_RegisterVariable (&in_analog_strafe);
+	Cvar_RegisterVariable (&in_anub_mode);
+
+	if (new3ds_flag) {
+		Cvar_SetValue("in_anub_mode", 1);
+	}
 }
 
 void IN_Shutdown (void)
@@ -129,7 +136,7 @@ void IN_Move (usercmd_t *cmd)
 	//
 	speed = sensitivity.value;
 
-	if (!new3ds_flag)
+	if (!in_anub_mode.value)
 		speed -= 2;
 	else
 		speed += 8;
@@ -145,7 +152,7 @@ void IN_Move (usercmd_t *cmd)
 		speed *= 0.25;
 	
 	// Are we using the left or right stick for looking?
-	if (!new3ds_flag) { // Left
+	if (!in_anub_mode.value) { // Left
 		look_x = IN_CalcInput(left.dx, speed, deadZone, acceleration);
 		look_y = IN_CalcInput(left.dy, speed, deadZone, acceleration);
 	} else { // Right
@@ -169,37 +176,44 @@ void IN_Move (usercmd_t *cmd)
 		cl.viewangles[PITCH] = -70.0f;
 
 	// Ability to move with the left nub on NEW model systems
-	if (new3ds_flag) {
-		float move_x, move_y;
+	float move_x, move_y;
+	float input_x, input_y;
 
-		cl_backspeed = cl_forwardspeed = cl_sidespeed = sv_player->v.maxspeed;
-		cl_sidespeed *= 0.8;
-		cl_backspeed *= 0.7;
+	if (in_anub_mode.value) {
+		input_x = left.dx;
+		input_y = left.dy;
+	} else {
+		input_x = right.dx;
+		input_y = right.dy;
+	}
 
-		move_x = IN_CalcInput(left.dx, cl_sidespeed, deadZone, acceleration);
+	cl_backspeed = cl_forwardspeed = cl_sidespeed = sv_player->v.maxspeed;
+	cl_sidespeed *= 0.8;
+	cl_backspeed *= 0.7;
 
-		if (left.dy > 0)
-			move_y = IN_CalcInput(left.dy, cl_forwardspeed, deadZone, acceleration);
-		else
-			move_y = IN_CalcInput(left.dy, cl_backspeed, deadZone, acceleration);
+	move_x = IN_CalcInput(input_x, cl_sidespeed, deadZone, acceleration);
 
-		cmd->sidemove += move_x;
-		cmd->forwardmove += move_y;
+	if (input_y > 0)
+		move_y = IN_CalcInput(input_y, cl_forwardspeed, deadZone, acceleration);
+	else
+		move_y = IN_CalcInput(input_y, cl_backspeed, deadZone, acceleration);
 
-		// crosshair stuff
-		if (left.dx < 50 && left.dx > -50 && left.dy < 50 && left.dy > -50) {
-			croshhairmoving = false;
+	cmd->sidemove += move_x;
+	cmd->forwardmove += move_y;
 
-			crosshair_opacity += 22;
+	// crosshair stuff
+	if (input_x < 50 && input_x > -50 && input_y < 50 && input_y > -50) {
+		croshhairmoving = false;
 
-			if (crosshair_opacity >= 255)
-				crosshair_opacity = 255;
-		} else {
-			croshhairmoving = true;
-			crosshair_opacity -= 8;
-			if (crosshair_opacity <= 128)
-				crosshair_opacity = 128;
-		}
+		crosshair_opacity += 22;
+
+		if (crosshair_opacity >= 255)
+			crosshair_opacity = 255;
+	} else {
+		croshhairmoving = true;
+		crosshair_opacity -= 8;
+		if (crosshair_opacity <= 128)
+			crosshair_opacity = 128;
 	}
 }
 

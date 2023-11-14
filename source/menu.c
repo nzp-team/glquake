@@ -34,6 +34,7 @@ extern cvar_t	crosshair;
 extern cvar_t	r_dithering;
 //extern cvar_t	r_retro;
 extern cvar_t	waypoint_mode;
+extern cvar_t   in_anub_mode;
 
 extern int loadingScreen;
 extern char* loadname2;
@@ -1327,6 +1328,10 @@ void M_AdjustSliders (int dir)
 	case 11:	// lookstrafe
 		Cvar_SetValue ("lookstrafe", !lookstrafe.value);
 		break;
+
+	case 12: // anub swap
+		Cvar_SetValue ("in_anub_mode", !in_anub_mode.value);
+		break;
 	}
 }
 
@@ -1402,6 +1407,9 @@ void M_Options_Draw (void)
 
 	M_Print (16, 120, "            Lookstrafe");
 	M_DrawCheckbox (220, 120, lookstrafe.value);
+
+	M_Print (16, 128, "Swap C-Nub and C-Stick");
+	M_DrawCheckbox (220, 128, in_anub_mode.value);
 
 	if (vid_menudrawfn)
 		M_Print (16, 136, "         Video Options");
