@@ -198,8 +198,8 @@ void Fog_ParseWorldspawn (void)
 	fog_start = 0;
 	old_start = 0;
 
-	fog_end = -1;
-	old_end = -1;
+	fog_end = 4000;
+	old_end = 4000;
 
 	fog_red = 0.0;
 	old_red = 0.0;
@@ -316,7 +316,7 @@ called at the beginning of each frame
 void Fog_SetupFrame (void)
 {
 	glFogfv(GL_FOG_COLOR, Fog_GetColor());
-	glFogf(GL_FOG_DENSITY, (float)(1.0f / (18.0f * 1024.0f)));
+	glFogf(GL_FOG_DENSITY, 0.2f);
 	glFogf(GL_FOG_START, fog_start);
 	glFogf(GL_FOG_END, fog_end);
 }
@@ -412,9 +412,9 @@ called before drawing stuff that should be fogged
 */
 void Fog_EnableGFog (void)
 {
-	// if (!Fog_GetStart() == 0 || !Fog_GetEnd() <= 0) {
-	// 	glEnable(GL_FOG);
-	// }	
+	if (!Fog_GetStart() == 0 || !Fog_GetEnd() <= 0) {
+		glEnable(GL_FOG);
+	}	
 }
 
 /*
@@ -426,8 +426,8 @@ called after drawing stuff that should be fogged
 */
 void Fog_DisableGFog (void)
 {
-	// if (!Fog_GetStart() == 0 || !Fog_GetEnd() <= 0)
-	// 	glDisable(GL_FOG);
+	if (!Fog_GetStart() == 0 || !Fog_GetEnd() <= 0)
+		glDisable(GL_FOG);
 }
 
 /*
@@ -504,8 +504,8 @@ void Fog_Init (void)
 	Cmd_AddCommand ("fog",Fog_FogCommand_f);
 
 	//set up global fog
-	fog_start = 0;
-	fog_end = -1;
+	fog_start = 300;
+	fog_end = 4000;
 	fog_red = 0.5;
 	fog_green = 0.5;
 	fog_blue = 0.5;
@@ -513,5 +513,5 @@ void Fog_Init (void)
 	fog_density_gl = DEFAULT_DENSITY;
 	fade_time = 1;
 
-	glFogi(GL_FOG_MODE, GL_EXP2);
+	glFogi(GL_FOG_MODE, GL_LINEAR);
 }
