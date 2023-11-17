@@ -1458,8 +1458,6 @@ void R_DrawWorld (void)
 	Fog_SetupFrame (/*false*/); //johnfitz
 
 	R_BlendLightmaps();
-
-	Fog_EnableGFog ();
 }
 
 

@@ -628,16 +628,16 @@ void R_DrawSkyBox (void)
 	vec3_t	v;
 	float	s, t;
 
-	Fog_DisableGFog();
-	Fog_SetColorForSkyS();
+	//Fog_DisableGFog();
+	//Fog_SetColorForSkyS();
 
 	glDisable(GL_BLEND);
 	glDisable(GL_ALPHA_TEST);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glDepthMask(GL_FALSE);
 	glDisable(GL_DEPTH_TEST);
 
-	float skydepth = 256.f;
+	float skydepth = 1000.0f;
 
 	for (i=0 ; i<5 ; i++)
 	{
@@ -711,8 +711,8 @@ void R_DrawSkyBox (void)
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 
-	Fog_SetColorForSkyE(); //setup for Sky
-	Fog_EnableGFog(); //setup for Sky
+	//Fog_SetColorForSkyE(); //setup for Sky
+	//Fog_EnableGFog(); //setup for Sky
 }
 
 //===============================================================

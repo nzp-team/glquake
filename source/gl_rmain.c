@@ -283,7 +283,7 @@ void R_DrawSpriteModel (entity_t *e)
 
 	GL_DisableMultitexture();
 
-    GL_Bind(frame->gl_texturenum);
+  GL_Bind(frame->gl_texturenum);
 
 	Fog_DisableGFog ();
 
@@ -1352,10 +1352,10 @@ void R_PolyBlend (void)
 	glDisable (GL_DEPTH_TEST);
 	glDisable (GL_TEXTURE_2D);
 
-    glLoadIdentity ();
+  glLoadIdentity ();
 
-    glRotatef (-90,  1, 0, 0);	    // put Z going up
-    glRotatef (90,  0, 0, 1);	    // put Z going up
+  glRotatef (-90,  1, 0, 0);	  // put Z going up
+  glRotatef (90,  0, 0, 1);	    // put Z going up
 
 	glColor4fv (v_blend);
 
@@ -1581,7 +1581,6 @@ void R_RenderScene (void)
 
 	R_MarkLeaves ();	// done here so we know if we're in water
 
-	Fog_EnableGFog (); //johnfitz
 	R_DrawWorld ();		// adds static entities to the list
 
 	S_ExtraUpdate ();	// don't let sound get messed up if going slow
@@ -1593,8 +1592,6 @@ void R_RenderScene (void)
 	//R_RenderDlights ();
 
 	R_DrawParticles ();
-
-	Fog_DisableGFog (); //johnfitz
 }
 
 
@@ -1752,22 +1749,14 @@ void R_RenderView (void)
 
 	// render normal view
 
-/***** Experimental silly looking fog ******
-****** Use r_fullbright if you enable ******
-	glFogi(GL_FOG_MODE, GL_LINEAR);
-	glFogfv(GL_FOG_COLOR, colors);
-	glFogf(GL_FOG_END, 512.0);
-	glEnable(GL_FOG);
-********************************************/
+	Fog_EnableGFog (); //johnfitz
 
 	R_RenderScene ();
 	R_DrawViewModel ();
 	R_DrawView2Model ();
 	R_DrawWaterSurfaces ();
 
-//  More fog right here :)
-//	glDisable(GL_FOG);
-//  End of all fog code...
+	Fog_DisableGFog (); //johnfitz
 
 	// render mirror view
 	R_Mirror ();
