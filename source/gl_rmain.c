@@ -697,6 +697,7 @@ void R_DrawZombieLimb (entity_t *e, int which)
 	}
 
 	glPushMatrix ();
+	R_RotateForEntity (e);
 
 	glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
 	glScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
