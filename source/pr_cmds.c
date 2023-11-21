@@ -3234,8 +3234,8 @@ void PF_SongEgg (void)
 	
 	trackname = G_STRING(OFS_PARM0);
 
-	MSG_WriteByte (&sv.reliable_datagram,   svc_songegg);
-	MSG_WriteString (&sv.reliable_datagram, trackname);
+	//MSG_WriteByte (&sv.reliable_datagram,   svc_songegg);
+	//MSG_WriteString (&sv.reliable_datagram, trackname);
 }
 
 /*
