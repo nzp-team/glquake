@@ -3302,6 +3302,35 @@ void PF_BettyPrompt(void)
 
 /*
 =================
+PF_SetPlayerName
+
+sends the name string to
+the client, avoids making
+a protocol extension and
+spamming strings.
+
+nzp_setplayername()
+=================
+*/
+void PF_SetPlayerName(void)
+{
+	client_t	*client;
+	int			entnum;
+	char* 		s;
+
+	entnum = G_EDICTNUM(OFS_PARM0);
+	s = G_STRING(OFS_PARM1);
+
+	if (entnum < 1 || entnum > svs.maxclients)
+		return;
+
+	client = &svs.clients[entnum-1];
+	MSG_WriteByte (&client->message, svc_playername);
+	MSG_WriteString (&client->message, s);
+}
+
+/*
+=================
 PF_MaxZombies
 
 Returns the total number of zombies
@@ -3918,6 +3947,7 @@ PF_MaxAmmo, // #501
 PF_GrenadePulse, // #502 
 PF_MaxZombies, // #503 
 PF_BettyPrompt, // #504
+PF_SetPlayerName, // #505
 PF_Fixme,
 };
 
