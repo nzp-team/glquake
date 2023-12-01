@@ -49,7 +49,7 @@ qpic_t *menu_bk;
 // Map screens
 qpic_t *menu_ndu;
 qpic_t *menu_wh;
-qpic_t *menu_wh2
+qpic_t *menu_wh2;
 //qpic_t *menu_kn;
 qpic_t *menu_ch;
 //qpic_t *menu_wn;
