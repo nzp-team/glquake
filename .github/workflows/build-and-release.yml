@@ -20,22 +20,10 @@ jobs:
         working-directory: ./
         run: |
           make -f Makefile
-      - name: Zip and Upload
-        id: zip
+      - name: Zip
         working-directory: ./
         run: |
           zip -r ctr-nzp-3dsx.zip nzportable.3dsx nzportable.smdh
-          curl --upload-file ./ctr-nzp-3dsx.zip https://transfer.sh/ctr-nzp-3dsx.zip > output-log.log
-          echo "::set-output name=zip::$(cat output-log.log)"
-  Unify-and-Release:
-    runs-on: ubuntu-latest
-    needs: Compile-3ds
-    steps:
-      - uses: actions/checkout@v2
-      - name: Download Archives
-        working-directory: ./
-        run: |
-          curl ${{ needs.Compile-3ds.outputs.o3ds_link }} -o ctr-nzp-3dsx.zip
       - name: Generate Build Date
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H-%M-%S')"
