@@ -514,6 +514,9 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 		if (ent->baseline.modelindex != ent->v.modelindex)
 			bits |= U_MODEL;
 
+		if (ent->v.scale != ENTSCALE_DEFAULT && ent->v.scale != 0)
+			bits |= U_SCALE;
+
         // Tomaz - QC Alpha Scale Glow Begin
 
 	{
@@ -626,6 +629,8 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 			MSG_WriteFloat(msg, rendercolor[2]);
 		// Tomaz - QC Alpha Scale Glow End
 
+		if (bits & U_SCALE)
+			MSG_WriteByte(msg, ENTSCALE_ENCODE(ent->v.scale));
 	}
 }
 

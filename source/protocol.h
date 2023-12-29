@@ -50,6 +50,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	U_EXTEND2	    (1<<21) // another byte to follow
 #define	U_FRAMETIME	    (1<<22) // another byte to follow
 // Tomaz - QC Alpha Scale Glow Control End
+#define U_SCALE 		(1<<23)
 
 #define	SU_VIEWHEIGHT	(1<<0)
 #define	SU_IDEALPITCH	(1<<1)
@@ -74,6 +75,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	SND_ATTENUATION	(1<<1)		// a byte
 #define	SND_LOOPING		(1<<2)		// a long
 
+#define ENTSCALE_DEFAULT	16 // Equivalent to float 1.0f due to byte packing.
+#define ENTSCALE_ENCODE(a)	((a) ? ((a) * ENTSCALE_DEFAULT) : ENTSCALE_DEFAULT) // Convert to byte
+#define ENTSCALE_DECODE(a)	((float)(a) / ENTSCALE_DEFAULT) // Convert to float for rendering
 
 // defaults for clientinfo messages
 #define	DEFAULT_VIEWHEIGHT	22

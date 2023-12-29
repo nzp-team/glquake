@@ -549,6 +549,11 @@ if (bits&(1<<i))
 	    ent->rendercolor[2] = 0;
 // Tomaz - QC Alpha Scale Glow End
 
+	if (bits & U_SCALE)
+		ent->scale = MSG_ReadByte();
+	else
+		ent->scale = ENTSCALE_DEFAULT;
+
 	if ( bits & U_NOLERP )
 		ent->forcelink = true;
 

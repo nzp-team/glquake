@@ -157,13 +157,18 @@ qboolean R_CullBox (vec3_t mins, vec3_t maxs)
 }
 
 
-void R_RotateForEntity (entity_t *e)
+void R_RotateForEntity (entity_t *e, unsigned char scale)
 {
     glTranslatef (e->origin[0],  e->origin[1],  e->origin[2]);
 
     glRotatef (e->angles[1],  0, 0, 1);
     glRotatef (-e->angles[0],  0, 1, 0);
     glRotatef (e->angles[2],  1, 0, 0);
+
+	if (scale != ENTSCALE_DEFAULT && scale != 0) {
+		float scalefactor = ENTSCALE_DECODE(scale);
+		glScalef(scalefactor, scalefactor, scalefactor);
+	}
 }
 
 /*
@@ -261,6 +266,8 @@ void R_DrawSpriteModel (entity_t *e)
 	float		*up, *right;
 	vec3_t		v_forward, v_right, v_up;
 	msprite_t		*psprite;
+	float 			scale = ENTSCALE_DECODE(e->scale);
+	if (scale == 0) scale = 1.0f;
 
 	// don't even bother culling, because it's just a single
 	// polygon without a surface cache
@@ -294,23 +301,23 @@ void R_DrawSpriteModel (entity_t *e)
 	glBegin (GL_QUADS);
 
 	glTexCoord2f (0, 1);
-	VectorMA (e->origin, frame->down, up, point);
-	VectorMA (point, frame->left, right, point);
+	VectorMA (e->origin, frame->down * scale, up, point);
+	VectorMA (point, frame->left * scale, right, point);
 	glVertex3fv (point);
 
 	glTexCoord2f (0, 0);
-	VectorMA (e->origin, frame->up, up, point);
-	VectorMA (point, frame->left, right, point);
+	VectorMA (e->origin, frame->up * scale, up, point);
+	VectorMA (point, frame->left * scale, right, point);
 	glVertex3fv (point);
 
 	glTexCoord2f (1, 0);
-	VectorMA (e->origin, frame->up, up, point);
-	VectorMA (point, frame->right, right, point);
+	VectorMA (e->origin, frame->up * scale, up, point);
+	VectorMA (point, frame->right * scale, right, point);
 	glVertex3fv (point);
 
 	glTexCoord2f (1, 1);
-	VectorMA (e->origin, frame->down, up, point);
-	VectorMA (point, frame->right, right, point);
+	VectorMA (e->origin, frame->down * scale, up, point);
+	VectorMA (point, frame->right * scale, right, point);
 	glVertex3fv (point);
 	
 	glEnd ();
@@ -697,7 +704,7 @@ void R_DrawZombieLimb (entity_t *e, int which)
 	}
 
 	glPushMatrix ();
-	R_RotateForEntity (e);
+	R_RotateForEntity (e, e->scale);
 
 	glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
 	glScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
@@ -814,7 +821,7 @@ void R_DrawTransparentAliasModel (entity_t *e)
 	lightcolor[0] = lightcolor[1] = lightcolor[2] = 256.0f;
 
     glPushMatrix ();
-	R_RotateForEntity (e);
+	R_RotateForEntity (e, e->scale);
 
 	glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
 	glScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
@@ -851,7 +858,7 @@ void R_DrawTransparentAliasModel (entity_t *e)
 	if (r_shadows.value)
 	{
 		glPushMatrix ();
-		R_RotateForEntity (e);
+		R_RotateForEntity (e, e->scale);
 		glDisable (GL_TEXTURE_2D);
 		glEnable (GL_BLEND);
 		glColor4f (0,0,0,0.5);
@@ -1005,7 +1012,7 @@ void R_DrawAliasModel (entity_t *e)
 	}
 
     glPushMatrix ();
-	R_RotateForEntity (e);
+	R_RotateForEntity (e, ENTSCALE_DEFAULT);
 
 	if (!strcmp (clmodel->name, "progs/eyes.mdl") && gl_doubleeyes.value) {
 		glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2] - (22 + 8));
@@ -1016,11 +1023,14 @@ void R_DrawAliasModel (entity_t *e)
 		// Special handling of view model to keep FOV from altering look.  Pretty good.  Not perfect but rather close.
 		if ((e == &cl.viewent || e == &cl.viewent2) && scr_fov_viewmodel.value) {
 			float scale = 1.0f / tan (DEG2RAD (scr_fov.value / 2.0f)) * scr_fov_viewmodel.value / 90.0f;
+			if (e->scale != ENTSCALE_DEFAULT && e->scale != 0) scale *= ENTSCALE_DECODE(e->scale);
 			glTranslatef (paliashdr->scale_origin[0] * scale, paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
 			glScalef (paliashdr->scale[0] * scale, paliashdr->scale[1], paliashdr->scale[2]);
 		} else {
-			glTranslatef (paliashdr->scale_origin[0], paliashdr->scale_origin[1], paliashdr->scale_origin[2]);
-			glScalef (paliashdr->scale[0], paliashdr->scale[1], paliashdr->scale[2]);
+			float scale = 1.0f;
+			if (e->scale != ENTSCALE_DEFAULT && e->scale != 0) scale *= ENTSCALE_DECODE(e->scale);
+			glTranslatef (paliashdr->scale_origin[0] * scale, paliashdr->scale_origin[1] * scale, paliashdr->scale_origin[2] * scale);
+			glScalef (paliashdr->scale[0] * scale, paliashdr->scale[1] * scale, paliashdr->scale[2] * scale);
 		}
 		
 	}
@@ -1095,7 +1105,7 @@ void R_DrawAliasModel (entity_t *e)
 	if (r_shadows.value)
 	{
 		glPushMatrix ();
-		R_RotateForEntity (e);
+		R_RotateForEntity (e, e->scale);
 		glDisable (GL_TEXTURE_2D);
 		glEnable (GL_BLEND);
 		glColor4f (0,0,0,0.5);
