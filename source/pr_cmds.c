@@ -1358,6 +1358,21 @@ void PF_strtolower(void)
 
 /*
 =================
+PF_crc16
+
+float crc16 (float, string)
+=================
+*/
+void PF_crc16(void)
+{
+	int insens = G_FLOAT(OFS_PARM0);
+	char *s = G_STRING(OFS_PARM1);
+
+	G_FLOAT(OFS_RETURN) = (unsigned short) ((insens ? CRC_Block_CaseInsensitive : CRC_Block) ((unsigned char *) s, strlen(s)));
+}
+
+/*
+=================
 PF_substring
 
 string substring (string, float, float)
@@ -3964,7 +3979,7 @@ PF_Fixme,
 PF_Fixme, 
 PF_Fixme, 
 PF_Fixme, 
-PF_Fixme, 
+PF_crc16, 
 PF_Fixme, 
 PF_Fixme, 
 PF_Fixme, 
