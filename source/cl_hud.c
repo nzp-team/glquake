@@ -1479,7 +1479,7 @@ void HUD_Screenflash (void)
 		} 
 		// Fade Out
 		else {
-			flash_alpha = invertfloat((float)percentage_complete)(2;
+			flash_alpha = invertfloat((float)percentage_complete)*2;
 		}
 	}
 
