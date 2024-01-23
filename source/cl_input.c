@@ -531,7 +531,7 @@ void CL_SendMove (usercmd_t *cmd)
 	}
 
 	//==== Sniper Scope Swaying ====
-	if(cl.stats[STAT_ZOOM] == 2)
+	if(cl.stats[STAT_ZOOM] == 2 && !(cl.perks & 64))
 	{
 		vec3_t vang;
 
