@@ -15,7 +15,7 @@ SOURCES		:=	source
 #DATA		:=	data
 INCLUDES	:=	include
 ICON		:= 	icon.png
-#ROMFS		:=	romfs
+#ROMFS		:=	romfs 
 
 APP_AUTHOR 		:= NZ:P Team
 APP_TITLE 		:= Nazi Zombies: Portable
