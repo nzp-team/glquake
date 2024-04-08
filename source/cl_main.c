@@ -574,8 +574,6 @@ void CL_RelinkEntities (void)
 		}
 	}
 	
-	bobjrotate = anglemod(100*cl.time);
-	
 // start on the entity after the world
 	for (i=1,ent=cl_entities+1 ; i<cl.num_entities ; i++,ent++)
 	{
