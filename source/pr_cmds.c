@@ -1476,7 +1476,7 @@ int closedset[MAX_WAYPOINTS]; // The set of nodes already evaluated.
 int openset[MAX_WAYPOINTS];//Actual sorted open list
 int opensetRef[MAX_WAYPOINTS];//Reference values of open list
 int opensetLength;//equivalent of javaScript's array[].length;
-#define MaxZombies 16
+#define MaxZombies 18
 
 zombie_ai zombie_list[MaxZombies];
 //Debug//
@@ -3423,7 +3423,7 @@ nzp_maxai()
 void PF_MaxZombies(void)
 {
 	if (new3ds_flag)
-		G_FLOAT(OFS_RETURN) = 18;
+		G_FLOAT(OFS_RETURN) = MaxZombies;
 	else
 		G_FLOAT(OFS_RETURN) = 12;
 }
