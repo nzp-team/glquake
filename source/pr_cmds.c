@@ -3320,6 +3320,33 @@ void PF_SetDoubleTapVersion(void)
 
 /*
 =================
+PF_LockViewmodel
+
+Server tells client to lock their
+viewmodel in place, if applicable.
+
+nzp_lockviewmodel()
+=================
+*/
+void PF_LockViewmodel(void)
+{
+	client_t	*client;
+	int			entnum;
+	int 		state;
+
+	entnum = G_EDICTNUM(OFS_PARM0);
+	state = G_FLOAT(OFS_PARM1);
+
+	if (entnum < 1 || entnum > svs.maxclients)
+		return;
+
+	client = &svs.clients[entnum-1];
+	MSG_WriteByte (&client->message, svc_lockviewmodel);
+	MSG_WriteByte (&client->message, state);
+}
+
+/*
+=================
 PF_ScreenFlash
 
 Server tells client to flash on screen
