@@ -1679,7 +1679,7 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 
 	// naievil -- why do we have this twice lol
 	gltextures[glt->texnum].checksum = lhcsum;
-	//gltextures[glt->texnum].lhcsum = lhcsum;
+	gltextures[glt->texnum].lhcsum = lhcsum;
 
 	gltextures[glt->texnum].width = width;
 	gltextures[glt->texnum].height = height;

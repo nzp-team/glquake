@@ -309,10 +309,7 @@ int main (int argc, char **argv)
 	
 	chdir("sdmc:/3ds/nzportable");
 
-	if (new3ds_flag == true)
-		parms.memsize = 64 * 1024 * 1024;
-	else
-		parms.memsize = 16 * 1024 * 1024;
+	parms.memsize = 64 * 1024 * 1024;
 	parms.membase = malloc (parms.memsize);
 	parms.basedir = ".";
 

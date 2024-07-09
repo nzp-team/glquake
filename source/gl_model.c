@@ -69,7 +69,7 @@ void *Mod_Extradata (model_t *mod)
 	Mod_LoadModel (mod, true);
 	
 	if (!mod->cache.data)
-		Sys_Error ("Mod_Extradata: caching failed");
+		Sys_Error ("cache fail (%s)", mod->name);
 	return mod->cache.data;
 }
 
@@ -383,7 +383,7 @@ void Mod_LoadTextures (lump_t *l)
 		if ( (mt->width & 15) || (mt->height & 15) )
 			Sys_Error ("Texture %s is not 16 aligned", mt->name);
 		pixels = mt->width*mt->height/64*85;
-		tx = Hunk_AllocName (sizeof(texture_t) +pixels, loadname );
+		tx = Hunk_AllocName (sizeof(texture_t), loadname );
 		loadmodel->textures[i] = tx;
 
 		memcpy (tx->name, mt->name, sizeof(tx->name));
@@ -391,13 +391,11 @@ void Mod_LoadTextures (lump_t *l)
 		tx->height = mt->height;
 		for (j=0 ; j<MIPLEVELS ; j++)
 			tx->offsets[j] = mt->offsets[j] + sizeof(texture_t) - sizeof(miptex_t);
-		// the pixels immediately follow the structures
-		memcpy ( tx+1, mt+1, pixels);
 		
 
 		if (loadmodel->bspversion != HL_BSPVERSION && !strncmp(mt->name,"sky",3))
 		{	
-			R_InitSky (tx);
+			R_InitSky (mt);
 		} 
 		else
 		{
@@ -1660,12 +1658,12 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 		pheader->gl_texturenum[0][0] = 
 		pheader->gl_texturenum[0][1] = 
 		pheader->gl_texturenum[0][2] = 
-		pheader->gl_texturenum[0][3] = loadtextureimage("models/weapons/m1911/v_biatch.mdl_0", 0, 0, qtrue, qtrue);
+		pheader->gl_texturenum[0][3] = loadtextureimage("models/weapons/m1911/v_biatch.mdl_0", 0, 0, qtrue, qfalse);
 		
 		pheader->gl_texturenum[1][0] = 
 		pheader->gl_texturenum[1][1] = 
 		pheader->gl_texturenum[1][2] = 
-		pheader->gl_texturenum[1][3] = loadtextureimage("models/weapons/m1911/v_biatch.mdl_0", 0, 0, qtrue, qtrue);
+		pheader->gl_texturenum[1][3] = loadtextureimage("models/weapons/m1911/v_biatch.mdl_0", 0, 0, qtrue, qfalse);
 
 		pskintype = (daliasskintype_t *)((byte *)(pskintype+1) + s);
 		return (void *)pskintype;
@@ -1686,7 +1684,7 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 			pheader->gl_texturenum[i][0] =
 			pheader->gl_texturenum[i][1] =
 			pheader->gl_texturenum[i][2] =
-			pheader->gl_texturenum[i][3] = loadtextureimage(model2, 0, 0, qtrue, qtrue);
+			pheader->gl_texturenum[i][3] = loadtextureimage(model2, 0, 0, qtrue, qfalse);
 
 			if (pheader->gl_texturenum[i][0] == 0) // did not find a matching TGA...
 			{
@@ -1906,8 +1904,8 @@ void Mod_LoadAliasModel (model_t *mod, void *buffer)
 	mod->type = mod_alias;
 
 // FIXME: do this right
-	mod->mins[0] = mod->mins[1] = mod->mins[2] = -16;
-	mod->maxs[0] = mod->maxs[1] = mod->maxs[2] = 16;
+	mod->mins[0] = mod->mins[1] = mod->mins[2] = -32;
+	mod->maxs[0] = mod->maxs[1] = mod->maxs[2] = 32;
 
 	//
 	// build the draw lists
@@ -1971,7 +1969,7 @@ void * Mod_LoadSpriteFrame (void * pin, mspriteframe_t **ppframe, int framenum)
 
 	COM_StripExtension(loadmodel->name, sprite);
 	sprintf(sprite2, "%s.spr_%i", sprite, framenum);
-	pspriteframe->gl_texturenum = loadtextureimage(sprite2, 0, 0, qtrue, qtrue);
+	pspriteframe->gl_texturenum = loadtextureimage(sprite2, 0, 0, qtrue, qfalse);
 
 	if (pspriteframe->gl_texturenum == 0) // did not find a matching TGA...
 	{
