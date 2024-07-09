@@ -198,8 +198,12 @@ void IN_Move (usercmd_t *cmd)
 	else
 		move_y = IN_CalcInput(input_y, cl_backspeed, deadZone, acceleration);
 
-	cmd->sidemove += move_x;
-	cmd->forwardmove += move_y;
+	// cypress -- explicitly setting instead of adding so we always prioritize
+	// analog movement over standard bindings if both are at play
+	if (move_x != 0 || move_y != 0) {
+		cmd->sidemove = move_x;
+		cmd->forwardmove = move_y;
+	} 
 
 	// crosshair stuff
 	if (input_x < 50 && input_x > -50 && input_y < 50 && input_y > -50) {
