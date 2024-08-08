@@ -1473,7 +1473,7 @@ This is where the magic happens
 */
 
 
-#define MaxZombies 12
+#define MaxZombies 18 // 18 for N3DS and 12 for O3DS
 
 
 #define WAYPOINT_SET_NONE 	0
